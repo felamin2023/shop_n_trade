@@ -1,0 +1,74 @@
+// This is your Prisma schema file.
+// Learn more about it in the docs: [Prisma Schema Docs](https://pris.ly/d/prisma-schema)
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: [Prisma Accelerate](https://pris.ly/cli/accelerate-init)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  userID       String         @id @default(uuid())
+  fullname     String
+  email        String         @unique
+  address      String
+  password     String
+  contact      Int
+  img          String
+  role         Role           @default(USER)
+  transactions Transaction[]
+  @@index([email], name: "idx_user_email")  // Added index for better performance on email queries
+}
+
+model Product {
+  productID    String         @id @default(uuid())
+  product      String
+  material     String
+  materialGoal Int
+  stock        Int
+  img          String         // Field for storing the product image URL
+  transactions Transaction[]  // One-to-many relationship with Transaction
+  @@index([product], name: "idx_product_name")  // Added index for frequently queried field
+}
+
+model Project {
+  projectID  String         @id @default(uuid())
+  school     String
+  location   String
+  itemgoal   Int
+  status     ProjectStatus  @default(PENDING)
+}
+
+model Transaction {
+  transacID String            @id @default(uuid())
+  status    TransactionStatus @default(PENDING)
+  productID String
+  userID    String
+
+  product   Product           @relation(fields: [productID], references: [productID])
+  user      User              @relation(fields: [userID], references: [userID])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ProjectStatus {
+  PENDING
+  DONE
+}
+
+enum TransactionStatus {
+  PENDING
+  REJECTED
+  ACCEPTED
+  DELIVERED
+}
