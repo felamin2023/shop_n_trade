@@ -20,9 +20,7 @@ const SigninPage = () => {
     try {
       const response = await fetch("/api/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
@@ -30,11 +28,8 @@ const SigninPage = () => {
 
       if (response.ok) {
         setNotification({ message: "Login successful!", type: "success" });
-        console.log("Login successful:", data.user);
-        // Store user data in localStorage or context if needed
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        // Delay redirect slightly to show success message
         setTimeout(() => {
           if (data.user.role === "ADMIN") {
             router.push("/admin/home");
@@ -49,7 +44,6 @@ const SigninPage = () => {
         });
       }
     } catch (err) {
-      console.error("Login error:", err);
       setNotification({
         message: "An error occurred. Please try again.",
         type: "error",
@@ -60,7 +54,13 @@ const SigninPage = () => {
   };
 
   return (
-    <div className="h-screen w-full flex justify-around px-32 items-center bg-[radial-gradient(ellipse_800px_800px_at_10%_-20%,_#588027_-10%,_#ffffff_90%)]">
+    <div
+      className="
+        h-screen w-full flex items-center justify-center px-10
+        bg-[url('/images/signin_upPage/backimage.jpg')]
+        bg-cover bg-center bg-no-repeat
+      "
+    >
       {loading && <Loading />}
       {notification && (
         <Notification
@@ -69,52 +69,83 @@ const SigninPage = () => {
           onClose={() => setNotification(null)}
         />
       )}
-      <div>
-        <img
-          height={200}
-          width={200}
-          src="/images/signin_upPage/shopNtradelogo.png"
-          alt="Shop & Trade Logo"
-        />
-      </div>
-      <div className="flex flex-col justify-around items-center border-[1px] border-black h-[53%] w-[40%] rounded-lg">
-        <h1 className="text-[30px] font-noto font-bold text-black drop-shadow-[2px_2px_4px_rgba(0,0,0,0.1)]">
-          Sign In
-        </h1>
-        <form
-          onSubmit={handleSignIn}
-          className="flex flex-col justify-between items-center  h-[60%] w-[85%]"
+
+      <div className="flex w-[85%] max-w-[1300px] items-center justify-center">
+
+        <div
+          className="
+            flex flex-col justify-center items-center
+            bg-white/40 backdrop-blur-md shadow-lg border border-white/50
+            w-[45%] max-w-[420px] rounded-2xl px-10 py-8
+          "
         >
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="bg-transparent w-[100%] placeholder-black py-1 px-5 rounded-md text-black border-[1px] border-black"
+          <img
+            height={250}
+            width={250}
+            src="/images/signin_upPage/shopNtradelogo.png"
+            alt="Shop & Trade Logo"
+            className="drop-shadow-xl mb-4"
           />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="bg-transparent w-[100%] placeholder-black py-1 px-5 rounded-md text-black border-[1px] border-black"
-          />
-          <p className="text-black text-[13px]">
-            Don't have an account?{" "}
-            <a href="/user/signup" className="text-blue-600">
-              Sign up
-            </a>
-          </p>
-          <div className="w-full flex flex-col justify-center items-center gap-1">
+
+          <h1 className="text-[32px] font-noto font-bold text-black">
+            Sign In
+          </h1>
+
+          <form
+            onSubmit={handleSignIn}
+            className="flex flex-col gap-4 items-center w-full mt-4"
+          >
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="
+                bg-white/60 w-full placeholder-gray-700 py-2 px-5 rounded-lg
+                text-black border border-gray-400 focus:ring-2
+                focus:ring-black outline-none
+              "
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="
+                bg-white/60 w-full placeholder-gray-700 py-2 px-5 rounded-lg
+                text-black border border-gray-400 focus:ring-2
+                focus:ring-black outline-none
+              "
+            />
+
+            <p className="text-black text-[14px] -mt-1">
+              Don't have an account?{" "}
+              <a
+                href="/user/signup"
+                className="text-blue-700 font-medium hover:underline"
+              >
+                Sign up
+              </a>
+            </p>
+
             <button
               type="submit"
-              className="bg-black text-white py-1 w-[50%] rounded-md"
+              className="
+                bg-black text-white py-2 w-[65%] rounded-lg
+                hover:bg-gray-900 transition mt-1
+              "
             >
               Sign In
             </button>
-            <p className="text-black text-[11px]">Forgot password?</p>
-          </div>
-        </form>
+
+            <p className="text-black text-[12px] mt-2 hover:underline cursor-pointer">
+              Forgot password?
+            </p>
+          </form>
+        </div>
       </div>
     </div>
   );
