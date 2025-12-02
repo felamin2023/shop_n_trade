@@ -72,7 +72,7 @@ const SignupPage = () => {
   }
 
   return (
-    <div className="h-screen w-full flex justify-around px-32 items-center bg-[radial-gradient(ellipse_800px_800px_at_90%_-20%,_#588027_-10%,_#ffffff_90%)]">
+    <div className="h-screen w-full flex justify-around px-32 items-center bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207]">
       {loading && <Loading />}
       {notification && (
         <Notification
@@ -81,8 +81,8 @@ const SignupPage = () => {
           onClose={() => setNotification(null)}
         />
       )}
-      <div className="flex flex-col justify-around items-center border-[1px] border-black h-[80%] w-[40%] rounded-lg">
-        <h1 className="text-[30px] font-noto font-bold text-black drop-shadow-md">
+      <div className="flex flex-col justify-around items-center border border-[#1a3d1a] bg-[#0d2818]/80 backdrop-blur-md h-[80%] w-[40%] rounded-lg">
+        <h1 className="text-[30px] font-noto font-bold text-white drop-shadow-md">
           Sign Up
         </h1>
         <form
@@ -96,7 +96,7 @@ const SignupPage = () => {
             value={userData.fullname}
             onChange={handleChange}
             required
-            className="bg-transparent w-[100%] placeholder-black py-1 px-5 rounded-md text-black border-[1px] border-black"
+            className="bg-[#0a1f0a] w-[100%] placeholder-green-500/50 py-1 px-5 rounded-md text-white border border-[#1a3d1a] focus:ring-2 focus:ring-green-500 outline-none"
           />
           <input
             type="email"
@@ -105,7 +105,7 @@ const SignupPage = () => {
             value={userData.email}
             onChange={handleChange}
             required
-            className="bg-transparent w-[100%] placeholder-black py-1 px-5 rounded-md text-black border-[1px] border-black"
+            className="bg-[#0a1f0a] w-[100%] placeholder-green-500/50 py-1 px-5 rounded-md text-white border border-[#1a3d1a] focus:ring-2 focus:ring-green-500 outline-none"
           />
           <input
             type="text"
@@ -114,7 +114,7 @@ const SignupPage = () => {
             value={userData.address}
             onChange={handleChange}
             required
-            className="bg-transparent w-[100%] placeholder-black py-1 px-5 rounded-md text-black border-[1px] border-black"
+            className="bg-[#0a1f0a] w-[100%] placeholder-green-500/50 py-1 px-5 rounded-md text-white border border-[#1a3d1a] focus:ring-2 focus:ring-green-500 outline-none"
           />
           <input
             type="password"
@@ -123,7 +123,7 @@ const SignupPage = () => {
             value={userData.password}
             onChange={handleChange}
             required
-            className="bg-transparent w-[100%] placeholder-black py-1 px-5 rounded-md text-black border-[1px] border-black"
+            className="bg-[#0a1f0a] w-[100%] placeholder-green-500/50 py-1 px-5 rounded-md text-white border border-[#1a3d1a] focus:ring-2 focus:ring-green-500 outline-none"
           />
           <input
             type="text"
@@ -132,25 +132,25 @@ const SignupPage = () => {
             value={userData.contact}
             onChange={handleChange}
             required
-            className="bg-transparent w-[100%] placeholder-black py-1 px-5 rounded-md text-black border-[1px] border-black"
+            className="bg-[#0a1f0a] w-[100%] placeholder-green-500/50 py-1 px-5 rounded-md text-white border border-[#1a3d1a] focus:ring-2 focus:ring-green-500 outline-none"
           />
 
           <button
             type="submit"
-            className="bg-black text-white py-1 w-[50%] rounded-md"
+            className="bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] text-white py-1 w-[50%] rounded-md hover:from-[#1a4d1a] hover:to-[#0d2d0d] transition"
           >
             Sign Up
           </button>
-          <p className="text-black text-[13px]">
+          <p className="text-green-300/80 text-[13px]">
             Already have an account?{" "}
-            <a href="/user/signin" className="text-blue-600">
+            <a href="/user/signin" className="text-green-400 hover:underline">
               Sign In
             </a>
           </p>
         </form>
       </div>
       <div className="flex flex-col justify-center items-center">
-        <h1 className="text-[30px] font-noto font-bold text-white drop-shadow-[2px_2px_4px_rgba(0,0,0,0.5)]">
+        <h1 className="text-[30px] font-noto font-bold text-green-300 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.5)]">
           Welcome to
         </h1>
 

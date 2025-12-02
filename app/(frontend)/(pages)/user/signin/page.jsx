@@ -56,8 +56,7 @@ const SigninPage = () => {
   return (
     <div
       className="h-screen w-full flex justify-center items-center px-8     
-      bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: "url('/images/signin_upPage/imagebackground.jpg')" }}
+      bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207]"
     >
       {loading && <Loading />}
       {notification && (
@@ -81,10 +80,10 @@ const SigninPage = () => {
         </div>
 
         <div className="flex flex-col justify-between items-center 
-            bg-white/40 backdrop-blur-md shadow-lg border border-white/50
+            bg-[#0d2818]/80 backdrop-blur-md shadow-lg border border-[#1a3d1a]
             h-[65%] w-[45%] min-w-[380px] rounded-2xl px-10 py-6">
 
-          <h1 className="text-[32px] font-noto font-bold text-black drop-shadow-sm">
+          <h1 className="text-[32px] font-noto font-bold text-white drop-shadow-sm">
             Sign In
           </h1>
 
@@ -98,8 +97,8 @@ const SigninPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-white/60 w-full placeholder-gray-700 py-2 px-5 rounded-lg 
-              text-black border border-gray-400 focus:ring-2 focus:ring-black outline-none"
+              className="bg-[#0a1f0a] w-full placeholder-green-500/50 py-2 px-5 rounded-lg 
+              text-white border border-[#1a3d1a] focus:ring-2 focus:ring-green-500 outline-none"
             />
 
             <input
@@ -108,25 +107,25 @@ const SigninPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="bg-white/60 w-full placeholder-gray-700 py-2 px-5 rounded-lg 
-              text-black border border-gray-400 focus:ring-2 focus:ring-black outline-none"
+              className="bg-[#0a1f0a] w-full placeholder-green-500/50 py-2 px-5 rounded-lg 
+              text-white border border-[#1a3d1a] focus:ring-2 focus:ring-green-500 outline-none"
             />
 
-            <p className="text-black text-[14px]">
+            <p className="text-green-300/80 text-[14px]">
               Don't have an account?{" "}
-              <a href="/user/signup" className="text-blue-700 font-medium hover:underline">
+              <a href="/user/signup" className="text-green-400 font-medium hover:underline">
                 Sign up
               </a>
             </p>
 
             <button
               type="submit"
-              className="bg-black text-white py-2 w-[60%] rounded-lg hover:bg-gray-900 transition"
+              className="bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] text-white py-2 w-[60%] rounded-lg hover:from-[#1a4d1a] hover:to-[#0d2d0d] transition"
             >
               Sign In
             </button>
 
-            <p className="text-black text-[12px] mt-2 hover:underline cursor-pointer">
+            <p className="text-green-400/60 text-[12px] mt-2 hover:underline cursor-pointer hover:text-green-400">
               Forgot password?
             </p>
           </form>

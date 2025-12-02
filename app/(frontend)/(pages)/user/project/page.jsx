@@ -254,29 +254,29 @@ const ProjectPage = () => {
   const quickAmounts = [50, 100, 200, 500, 1000];
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 pb-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-8">
       {/* Hero Section */}
-      <div className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 py-8 px-4 mb-6">
+      <div className="w-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] py-8 px-4 mb-6">
         <div className="max-w-6xl mx-auto text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <TreePine className="w-8 h-8 text-emerald-200" />
+            <TreePine className="w-8 h-8 text-green-300" />
             <h1 className="font-noto text-white text-3xl md:text-4xl font-bold">
               Charity School Projects
             </h1>
-            <School className="w-8 h-8 text-emerald-200" />
+            <School className="w-8 h-8 text-green-300" />
           </div>
-          <p className="text-emerald-100 text-lg max-w-2xl mx-auto">
+          <p className="text-green-200 text-lg max-w-2xl mx-auto">
             Support schools in need by donating recyclables. Every bottle counts towards 
             building a better future for students! 📚
           </p>
           
           {/* Stats */}
           <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
-            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
               <School className="w-5 h-5 text-white" />
               <span className="text-white text-sm font-medium">12 Schools Helped</span>
             </div>
-            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
               <Heart className="w-5 h-5 text-white" />
               <span className="text-white text-sm font-medium">4,200+ Donations</span>
             </div>
@@ -288,7 +288,7 @@ const ProjectPage = () => {
         {/* Tab Navigation & Search */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
           {/* Tabs */}
-          <div className="flex bg-white rounded-2xl p-1.5 shadow-md border border-emerald-100">
+          <div className="flex bg-[#0d2818] rounded-2xl p-1.5 shadow-md border border-[#1a3d1a]">
             {navlinks.map((link, i) => (
               <button
                 key={i}
@@ -298,8 +298,8 @@ const ProjectPage = () => {
                   transition-all duration-300
                   ${
                     activeTab === link.name
-                      ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md"
-                      : "text-emerald-700 hover:bg-emerald-50"
+                      ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] text-white shadow-md"
+                      : "text-green-400/70 hover:bg-[#132d13]"
                   }
                 `}
               >
@@ -316,12 +316,12 @@ const ProjectPage = () => {
               placeholder="Search schools..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full sm:w-72 bg-white text-emerald-800 placeholder-emerald-400 
-                px-5 py-2.5 pl-11 rounded-full border border-emerald-200 
-                focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent
+              className="w-full sm:w-72 bg-[#0d2818] text-white placeholder-green-500/50 
+                px-5 py-2.5 pl-11 rounded-full border border-[#1a3d1a] 
+                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
                 shadow-md transition-all duration-300"
             />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500/50" />
           </div>
         </div>
 
@@ -330,12 +330,12 @@ const ProjectPage = () => {
           <>
             {/* Section Title */}
             <div className="flex items-center gap-3 mb-6">
-              <div className="h-1 w-8 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full"></div>
-              <h2 className="font-noto text-emerald-800 text-xl font-semibold flex items-center gap-2">
-                <Sparkles size={20} className="text-amber-500" />
+              <div className="h-1 w-8 bg-gradient-to-r from-green-500 to-[#0d3d0d] rounded-full"></div>
+              <h2 className="font-noto text-white text-xl font-semibold flex items-center gap-2">
+                <Sparkles size={20} className="text-amber-400" />
                 Active Donation Posts
               </h2>
-              <div className="h-1 w-8 bg-gradient-to-r from-teal-400 to-emerald-400 rounded-full"></div>
+              <div className="h-1 w-8 bg-gradient-to-r from-[#0d3d0d] to-green-500 rounded-full"></div>
             </div>
 
             {/* Posts Grid */}
@@ -345,8 +345,8 @@ const ProjectPage = () => {
                 return (
                   <div
                     key={i}
-                    className="group bg-white rounded-2xl shadow-md hover:shadow-xl 
-                      border border-emerald-100 hover:border-emerald-300
+                    className="group bg-[#0d2818] rounded-2xl shadow-md hover:shadow-xl 
+                      border border-[#1a3d1a] hover:border-green-500/50
                       transition-all duration-300 overflow-hidden"
                   >
                     {/* Image Gallery */}
@@ -376,19 +376,19 @@ const ProjectPage = () => {
                       </div>
                       
                       {/* Progress Badge */}
-                      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm 
-                        rounded-full px-3 py-1 shadow-md flex items-center gap-1.5">
-                        <TrendingUp size={14} className="text-emerald-600" />
-                        <span className="text-emerald-800 text-xs font-bold">{progress}%</span>
+                      <div className="absolute top-4 left-4 bg-[#0d2818]/90 backdrop-blur-sm 
+                        rounded-full px-3 py-1 shadow-md flex items-center gap-1.5 border border-[#1a3d1a]">
+                        <TrendingUp size={14} className="text-green-400" />
+                        <span className="text-white text-xs font-bold">{progress}%</span>
                       </div>
                     </div>
 
                     {/* Content */}
                     <div className="p-4">
-                      <h3 className="font-noto text-emerald-900 font-semibold text-base mb-1">
+                      <h3 className="font-noto text-white font-semibold text-base mb-1">
                         {data.name}
                       </h3>
-                      <div className="flex items-center gap-1.5 text-emerald-600 mb-3">
+                      <div className="flex items-center gap-1.5 text-green-400/70 mb-3">
                         <MapPin size={14} />
                         <span className="text-sm">{data.location}</span>
                       </div>
@@ -396,16 +396,16 @@ const ProjectPage = () => {
                       {/* Progress Bar */}
                       <div className="mb-3">
                         <div className="flex justify-between text-xs mb-1">
-                          <span className="text-emerald-600 font-medium">
+                          <span className="text-green-400 font-medium">
                             {data.donated.toLocaleString()} bottles
                           </span>
-                          <span className="text-emerald-400">
+                          <span className="text-green-500/50">
                             Goal: {data.goal.toLocaleString()}
                           </span>
                         </div>
-                        <div className="h-2 bg-emerald-100 rounded-full overflow-hidden">
+                        <div className="h-2 bg-[#0a1f0a] rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full
+                            className="h-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] rounded-full
                               transition-all duration-500"
                             style={{ width: `${Math.min(progress, 100)}%` }}
                           ></div>
@@ -415,8 +415,8 @@ const ProjectPage = () => {
                       {/* Action Button */}
                       <button 
                         onClick={() => openDonateModal(data)}
-                        className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 
-                          hover:from-emerald-600 hover:to-teal-600
+                        className="w-full py-2.5 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
+                          hover:from-[#1a4d1a] hover:to-[#0d2d0d]
                           rounded-xl text-white text-sm font-semibold
                           transform transition-all duration-200 hover:scale-[1.02]
                           shadow-md hover:shadow-lg flex items-center justify-center gap-2"
@@ -432,8 +432,8 @@ const ProjectPage = () => {
 
             {filteredPosts.length === 0 && (
               <div className="text-center py-12">
-                <Search size={48} className="mx-auto text-emerald-300 mb-3" />
-                <p className="text-emerald-600">No projects found matching "{searchQuery}"</p>
+                <Search size={48} className="mx-auto text-green-500/30 mb-3" />
+                <p className="text-green-400/70">No projects found matching "{searchQuery}"</p>
               </div>
             )}
           </>
@@ -441,12 +441,12 @@ const ProjectPage = () => {
           <>
             {/* Section Title */}
             <div className="flex items-center gap-3 mb-6">
-              <div className="h-1 w-8 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full"></div>
-              <h2 className="font-noto text-emerald-800 text-xl font-semibold flex items-center gap-2">
-                <Target size={20} className="text-teal-500" />
+              <div className="h-1 w-8 bg-gradient-to-r from-green-500 to-[#0d3d0d] rounded-full"></div>
+              <h2 className="font-noto text-white text-xl font-semibold flex items-center gap-2">
+                <Target size={20} className="text-green-400" />
                 Upcoming Project Plans
               </h2>
-              <div className="h-1 w-8 bg-gradient-to-r from-teal-400 to-emerald-400 rounded-full"></div>
+              <div className="h-1 w-8 bg-gradient-to-r from-[#0d3d0d] to-green-500 rounded-full"></div>
             </div>
 
             {/* Plans List */}
@@ -454,23 +454,23 @@ const ProjectPage = () => {
               {filteredPlans.map((data, i) => (
                 <div
                   key={i}
-                  className="group bg-white rounded-2xl shadow-md hover:shadow-xl 
-                    border border-emerald-100 hover:border-emerald-300
+                  className="group bg-[#0d2818] rounded-2xl shadow-md hover:shadow-xl 
+                    border border-[#1a3d1a] hover:border-green-500/50
                     transition-all duration-300 p-5 flex flex-col sm:flex-row 
                     sm:items-center justify-between gap-4"
                 >
                   <div className="flex items-start gap-4">
                     {/* School Icon */}
-                    <div className="bg-gradient-to-br from-emerald-100 to-teal-100 
-                      p-3 rounded-xl border border-emerald-200">
-                      <School size={24} className="text-emerald-600" />
+                    <div className="bg-gradient-to-br from-[#132d13] to-[#0d2818] 
+                      p-3 rounded-xl border border-[#1a3d1a]">
+                      <School size={24} className="text-green-400" />
                     </div>
                     
                     <div>
-                      <h3 className="font-noto text-emerald-900 font-semibold text-lg">
+                      <h3 className="font-noto text-white font-semibold text-lg">
                         {data.schoolname}
                       </h3>
-                      <div className="flex items-center gap-1.5 text-emerald-600 mt-1">
+                      <div className="flex items-center gap-1.5 text-green-400/70 mt-1">
                         <MapPin size={14} />
                         <span className="text-sm">{data.location}</span>
                       </div>
@@ -479,11 +479,11 @@ const ProjectPage = () => {
 
                   <div className="flex items-center gap-4 sm:gap-6">
                     {/* Chairs Needed */}
-                    <div className="flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-xl">
-                      <Armchair size={18} className="text-emerald-600" />
+                    <div className="flex items-center gap-2 bg-[#132d13] px-4 py-2 rounded-xl border border-[#1a3d1a]">
+                      <Armchair size={18} className="text-green-400" />
                       <div>
-                        <p className="text-emerald-800 font-bold">{data.chairsneeded.toLocaleString()}</p>
-                        <p className="text-emerald-500 text-xs">chairs needed</p>
+                        <p className="text-white font-bold">{data.chairsneeded.toLocaleString()}</p>
+                        <p className="text-green-500/50 text-xs">chairs needed</p>
                       </div>
                     </div>
 
@@ -498,8 +498,8 @@ const ProjectPage = () => {
                     {/* Support Button */}
                     <button 
                       onClick={() => openSupportModal(data)}
-                      className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 
-                        hover:from-emerald-600 hover:to-teal-600
+                      className="px-5 py-2.5 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
+                        hover:from-[#1a4d1a] hover:to-[#0d2d0d]
                         rounded-xl text-white text-sm font-semibold
                         transform transition-all duration-200 hover:scale-105
                         shadow-md hover:shadow-lg flex items-center gap-2"
@@ -514,22 +514,22 @@ const ProjectPage = () => {
 
             {filteredPlans.length === 0 && (
               <div className="text-center py-12">
-                <Search size={48} className="mx-auto text-emerald-300 mb-3" />
-                <p className="text-emerald-600">No plans found matching "{searchQuery}"</p>
+                <Search size={48} className="mx-auto text-green-500/30 mb-3" />
+                <p className="text-green-400/70">No plans found matching "{searchQuery}"</p>
               </div>
             )}
 
             {/* Info Card */}
-            <div className="mt-6 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 text-white">
+            <div className="mt-6 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] rounded-2xl p-6 text-white border border-[#2a7c2a]">
               <div className="flex items-start gap-4">
-                <div className="bg-white/20 p-3 rounded-xl">
+                <div className="bg-white/10 p-3 rounded-xl">
                   <Leaf size={24} />
                 </div>
                 <div>
                   <h4 className="font-noto font-semibold text-lg mb-1">
                     How Your Donation Helps 💚
                   </h4>
-                  <p className="text-emerald-100 text-sm leading-relaxed">
+                  <p className="text-green-200 text-sm leading-relaxed">
                     Every 100 plastic bottles collected can be recycled into materials for 1 school chair. 
                     By donating your recyclables, you're not just helping the environment—you're giving 
                     students a comfortable place to learn and grow!
@@ -544,11 +544,11 @@ const ProjectPage = () => {
       {/* Donate Now Modal */}
       {isDonateModalOpen && selectedPost && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={closeDonateModal}
         >
           <div 
-            className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+            className="bg-[#0d2818] rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-[#1a3d1a]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -557,21 +557,21 @@ const ProjectPage = () => {
                 className="h-44 bg-cover bg-center rounded-t-3xl"
                 style={{ backgroundImage: `url(${selectedPost.imgs[0]})` }}
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-t-3xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0d2818] to-transparent rounded-t-3xl"></div>
               </div>
               
               {/* Close Button */}
               <button
                 onClick={closeDonateModal}
-                className="absolute top-4 right-4 p-2 bg-white/20 backdrop-blur-sm rounded-full
-                  hover:bg-white/40 transition-colors"
+                className="absolute top-4 right-4 p-2 bg-[#0d2818]/50 backdrop-blur-sm rounded-full
+                  hover:bg-[#0d2818]/80 transition-colors border border-[#1a3d1a]"
               >
                 <X size={20} className="text-white" />
               </button>
 
               {/* Title Overlay */}
               <div className="absolute bottom-4 left-4 right-4">
-                <div className="flex items-center gap-2 text-emerald-300 text-sm mb-1">
+                <div className="flex items-center gap-2 text-green-400 text-sm mb-1">
                   <Heart size={14} />
                   <span>Donate to this project</span>
                 </div>
@@ -586,47 +586,47 @@ const ProjectPage = () => {
               {/* Progress */}
               <div className="mb-6">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-emerald-700 font-semibold">
+                  <span className="text-green-400 font-semibold">
                     {selectedPost.donated.toLocaleString()} / {selectedPost.goal.toLocaleString()} bottles
                   </span>
-                  <span className="text-emerald-500">
+                  <span className="text-green-500/50">
                     {Math.round((selectedPost.donated / selectedPost.goal) * 100)}% funded
                   </span>
                 </div>
-                <div className="h-3 bg-emerald-100 rounded-full overflow-hidden">
+                <div className="h-3 bg-[#0a1f0a] rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
+                    className="h-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] rounded-full"
                     style={{ width: `${Math.min((selectedPost.donated / selectedPost.goal) * 100, 100)}%` }}
                   ></div>
                 </div>
               </div>
 
               {/* Description */}
-              <p className="text-emerald-700 text-sm mb-6 leading-relaxed">
+              <p className="text-green-300/80 text-sm mb-6 leading-relaxed">
                 {selectedPost.description}
               </p>
 
               {/* Info Cards */}
               <div className="grid grid-cols-2 gap-3 mb-6">
-                <div className="flex items-center gap-2 p-3 bg-amber-50 rounded-xl">
-                  <Calendar size={18} className="text-amber-600" />
+                <div className="flex items-center gap-2 p-3 bg-[#3d2d0d] rounded-xl border border-[#5c4a1a]">
+                  <Calendar size={18} className="text-amber-400" />
                   <div>
-                    <p className="text-amber-500 text-xs">Deadline</p>
-                    <p className="text-amber-800 font-semibold text-sm">{selectedPost.deadline}</p>
+                    <p className="text-amber-400/60 text-xs">Deadline</p>
+                    <p className="text-white font-semibold text-sm">{selectedPost.deadline}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-xl">
-                  <Users size={18} className="text-purple-600" />
+                <div className="flex items-center gap-2 p-3 bg-[#2d1a3d] rounded-xl border border-[#4a2d5c]">
+                  <Users size={18} className="text-purple-400" />
                   <div>
-                    <p className="text-purple-500 text-xs">Donors</p>
-                    <p className="text-purple-800 font-semibold text-sm">{selectedPost.donors} people</p>
+                    <p className="text-purple-400/60 text-xs">Donors</p>
+                    <p className="text-white font-semibold text-sm">{selectedPost.donors} people</p>
                   </div>
                 </div>
               </div>
 
               {/* Donation Amount */}
               <div className="mb-6">
-                <label className="block text-emerald-800 font-semibold mb-3">
+                <label className="block text-white font-semibold mb-3">
                   How many bottles will you donate?
                 </label>
                 
@@ -638,8 +638,8 @@ const ProjectPage = () => {
                       onClick={() => setDonationAmount(amount)}
                       className={`px-4 py-2 rounded-xl text-sm font-medium transition-all
                         ${donationAmount === amount 
-                          ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md" 
-                          : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                          ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] text-white shadow-md" 
+                          : "bg-[#132d13] text-green-400/70 hover:bg-[#1a3d1a] border border-[#1a3d1a]"
                         }`}
                     >
                       {amount}
@@ -651,41 +651,41 @@ const ProjectPage = () => {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setDonationAmount(Math.max(10, donationAmount - 10))}
-                    className="p-2 bg-emerald-100 rounded-xl hover:bg-emerald-200 transition-colors"
+                    className="p-2 bg-[#132d13] rounded-xl hover:bg-[#1a3d1a] transition-colors border border-[#1a3d1a]"
                   >
-                    <Minus size={20} className="text-emerald-700" />
+                    <Minus size={20} className="text-green-400" />
                   </button>
                   <div className="flex-1 relative">
                     <input
                       type="number"
                       value={donationAmount}
                       onChange={(e) => setDonationAmount(Math.max(1, parseInt(e.target.value) || 0))}
-                      className="w-full text-center text-2xl font-bold text-emerald-800 
-                        py-3 rounded-xl border-2 border-emerald-200 focus:border-emerald-400
-                        focus:outline-none"
+                      className="w-full text-center text-2xl font-bold text-white 
+                        py-3 rounded-xl border-2 border-[#1a3d1a] focus:border-green-500
+                        focus:outline-none bg-[#0a1f0a]"
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 text-sm">
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500/50 text-sm">
                       bottles
                     </span>
                   </div>
                   <button
                     onClick={() => setDonationAmount(donationAmount + 10)}
-                    className="p-2 bg-emerald-100 rounded-xl hover:bg-emerald-200 transition-colors"
+                    className="p-2 bg-[#132d13] rounded-xl hover:bg-[#1a3d1a] transition-colors border border-[#1a3d1a]"
                   >
-                    <Plus size={20} className="text-emerald-700" />
+                    <Plus size={20} className="text-green-400" />
                   </button>
                 </div>
               </div>
 
               {/* Impact Info */}
-              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 mb-6 border border-emerald-200">
-                <div className="flex items-center gap-2 text-emerald-700 mb-2">
+              <div className="bg-[#132d13] rounded-xl p-4 mb-6 border border-[#1a3d1a]">
+                <div className="flex items-center gap-2 text-green-400 mb-2">
                   <Gift size={18} />
                   <span className="font-semibold">Your Impact</span>
                 </div>
-                <p className="text-emerald-600 text-sm">
-                  Your donation of <strong>{donationAmount} bottles</strong> will contribute to making{" "}
-                  <strong>{Math.floor(donationAmount / 100)} chair{Math.floor(donationAmount / 100) !== 1 ? "s" : ""}</strong> for students!
+                <p className="text-green-300/80 text-sm">
+                  Your donation of <strong className="text-white">{donationAmount} bottles</strong> will contribute to making{" "}
+                  <strong className="text-white">{Math.floor(donationAmount / 100)} chair{Math.floor(donationAmount / 100) !== 1 ? "s" : ""}</strong> for students!
                 </p>
               </div>
 
@@ -693,14 +693,14 @@ const ProjectPage = () => {
               <div className="flex gap-3">
                 <button
                   onClick={closeDonateModal}
-                  className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200
-                    rounded-xl text-gray-700 font-semibold transition-colors"
+                  className="flex-1 py-3 px-4 bg-[#132d13] hover:bg-[#1a3d1a]
+                    rounded-xl text-green-400 font-semibold transition-colors border border-[#1a3d1a]"
                 >
                   Cancel
                 </button>
                 <button
-                  className="flex-1 py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 
-                    hover:from-emerald-600 hover:to-teal-600
+                  className="flex-1 py-3 px-4 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
+                    hover:from-[#1a4d1a] hover:to-[#0d2d0d]
                     rounded-xl text-white font-semibold shadow-md hover:shadow-lg
                     transition-all flex items-center justify-center gap-2"
                 >
@@ -716,37 +716,37 @@ const ProjectPage = () => {
       {/* Support Modal */}
       {isSupportModalOpen && selectedPlan && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={closeSupportModal}
         >
           <div 
-            className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+            className="bg-[#0d2818] rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-[#1a3d1a]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-6 rounded-t-3xl relative">
+            <div className="bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] p-6 rounded-t-3xl relative">
               {/* Close Button */}
               <button
                 onClick={closeSupportModal}
-                className="absolute top-4 right-4 p-2 bg-white/20 backdrop-blur-sm rounded-full
-                  hover:bg-white/40 transition-colors"
+                className="absolute top-4 right-4 p-2 bg-white/10 backdrop-blur-sm rounded-full
+                  hover:bg-white/20 transition-colors"
               >
                 <X size={20} className="text-white" />
               </button>
 
               <div className="flex items-center gap-4">
-                <div className="bg-white/20 p-4 rounded-2xl">
+                <div className="bg-white/10 p-4 rounded-2xl">
                   <School size={32} className="text-white" />
                 </div>
                 <div>
-                  <p className="text-emerald-100 text-sm flex items-center gap-1">
+                  <p className="text-green-200 text-sm flex items-center gap-1">
                     <Target size={14} />
                     Project Plan
                   </p>
                   <h2 className="font-noto text-white text-xl font-bold">
                     {selectedPlan.schoolname}
                   </h2>
-                  <div className="flex items-center gap-1.5 text-emerald-100 mt-1">
+                  <div className="flex items-center gap-1.5 text-green-200 mt-1">
                     <MapPin size={14} />
                     <span className="text-sm">{selectedPlan.location}</span>
                   </div>
@@ -765,72 +765,72 @@ const ProjectPage = () => {
               </div>
 
               {/* Description */}
-              <p className="text-emerald-700 text-sm mb-6 leading-relaxed">
+              <p className="text-green-300/80 text-sm mb-6 leading-relaxed">
                 {selectedPlan.description}
               </p>
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-3 mb-6">
-                <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
-                  <div className="p-2 bg-emerald-100 rounded-lg">
-                    <Armchair size={18} className="text-emerald-600" />
+                <div className="flex items-center gap-3 p-3 bg-[#132d13] rounded-xl border border-[#1a3d1a]">
+                  <div className="p-2 bg-[#1a3d1a] rounded-lg">
+                    <Armchair size={18} className="text-green-400" />
                   </div>
                   <div>
-                    <p className="text-emerald-500 text-xs">Chairs Needed</p>
-                    <p className="text-emerald-800 font-bold">{selectedPlan.chairsneeded.toLocaleString()}</p>
+                    <p className="text-green-500/50 text-xs">Chairs Needed</p>
+                    <p className="text-white font-bold">{selectedPlan.chairsneeded.toLocaleString()}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Recycle size={18} className="text-blue-600" />
+                <div className="flex items-center gap-3 p-3 bg-[#1a2d3d] rounded-xl border border-[#2a4d5c]">
+                  <div className="p-2 bg-[#2a4d5c] rounded-lg">
+                    <Recycle size={18} className="text-cyan-400" />
                   </div>
                   <div>
-                    <p className="text-blue-500 text-xs">Bottles Needed</p>
-                    <p className="text-blue-800 font-bold">
+                    <p className="text-cyan-500/50 text-xs">Bottles Needed</p>
+                    <p className="text-white font-bold">
                       {(selectedPlan.chairsneeded * selectedPlan.bottlesPerChair).toLocaleString()}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Calendar size={18} className="text-purple-600" />
+                <div className="flex items-center gap-3 p-3 bg-[#2d1a3d] rounded-xl border border-[#4a2d5c]">
+                  <div className="p-2 bg-[#4a2d5c] rounded-lg">
+                    <Calendar size={18} className="text-purple-400" />
                   </div>
                   <div>
-                    <p className="text-purple-500 text-xs">Target Date</p>
-                    <p className="text-purple-800 font-bold text-sm">{selectedPlan.targetDate}</p>
+                    <p className="text-purple-500/50 text-xs">Target Date</p>
+                    <p className="text-white font-bold text-sm">{selectedPlan.targetDate}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl">
-                  <div className="p-2 bg-amber-100 rounded-lg">
-                    <Info size={18} className="text-amber-600" />
+                <div className="flex items-center gap-3 p-3 bg-[#3d2d0d] rounded-xl border border-[#5c4a1a]">
+                  <div className="p-2 bg-[#5c4a1a] rounded-lg">
+                    <Info size={18} className="text-amber-400" />
                   </div>
                   <div>
-                    <p className="text-amber-500 text-xs">Per Chair</p>
-                    <p className="text-amber-800 font-bold text-sm">{selectedPlan.bottlesPerChair} bottles</p>
+                    <p className="text-amber-500/50 text-xs">Per Chair</p>
+                    <p className="text-white font-bold text-sm">{selectedPlan.bottlesPerChair} bottles</p>
                   </div>
                 </div>
               </div>
 
               {/* Contact Information */}
-              <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                <h4 className="text-emerald-800 font-semibold mb-3 flex items-center gap-2">
+              <div className="bg-[#0a1f0a] rounded-xl p-4 mb-6 border border-[#1a3d1a]">
+                <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
                   <Users size={16} />
                   Contact Information
                 </h4>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                      <span className="text-emerald-700 font-semibold text-sm">
+                  <div className="flex items-center gap-2 text-green-300/80">
+                    <div className="w-8 h-8 bg-[#132d13] rounded-full flex items-center justify-center border border-[#1a3d1a]">
+                      <span className="text-green-400 font-semibold text-sm">
                         {selectedPlan.contactPerson.charAt(0)}
                       </span>
                     </div>
                     <span className="text-sm font-medium">{selectedPlan.contactPerson}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-500 text-sm">
+                  <div className="flex items-center gap-2 text-green-400/60 text-sm">
                     <Mail size={14} />
                     <span>{selectedPlan.contactEmail}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-500 text-sm">
+                  <div className="flex items-center gap-2 text-green-400/60 text-sm">
                     <Phone size={14} />
                     <span>{selectedPlan.contactPhone}</span>
                   </div>
@@ -838,22 +838,22 @@ const ProjectPage = () => {
               </div>
 
               {/* How to Support */}
-              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 mb-6 border border-emerald-200">
-                <div className="flex items-center gap-2 text-emerald-700 mb-2">
+              <div className="bg-[#132d13] rounded-xl p-4 mb-6 border border-[#1a3d1a]">
+                <div className="flex items-center gap-2 text-green-400 mb-2">
                   <Leaf size={18} />
                   <span className="font-semibold">How to Support</span>
                 </div>
-                <ul className="text-emerald-600 text-sm space-y-2">
+                <ul className="text-green-300/80 text-sm space-y-2">
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0 text-green-500" />
                     <span>Collect plastic bottles and bring them to our collection center</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0 text-green-500" />
                     <span>Spread the word to friends and family</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0 text-green-500" />
                     <span>Volunteer at school events and collection drives</span>
                   </li>
                 </ul>
@@ -863,14 +863,14 @@ const ProjectPage = () => {
               <div className="flex gap-3">
                 <button
                   onClick={closeSupportModal}
-                  className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200
-                    rounded-xl text-gray-700 font-semibold transition-colors"
+                  className="flex-1 py-3 px-4 bg-[#132d13] hover:bg-[#1a3d1a]
+                    rounded-xl text-green-400 font-semibold transition-colors border border-[#1a3d1a]"
                 >
                   Close
                 </button>
                 <button
-                  className="flex-1 py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 
-                    hover:from-emerald-600 hover:to-teal-600
+                  className="flex-1 py-3 px-4 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
+                    hover:from-[#1a4d1a] hover:to-[#0d2d0d]
                     rounded-xl text-white font-semibold shadow-md hover:shadow-lg
                     transition-all flex items-center justify-center gap-2"
                 >

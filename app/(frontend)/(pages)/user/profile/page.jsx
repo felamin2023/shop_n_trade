@@ -75,18 +75,18 @@ const ProfilePage = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 pb-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-8">
       {/* Hero Section */}
-      <div className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 py-8 px-4 mb-6">
+      <div className="w-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] py-8 px-4 mb-6">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Leaf className="w-8 h-8 text-emerald-200" />
+            <Leaf className="w-8 h-8 text-green-300" />
             <h1 className="font-noto text-white text-3xl md:text-4xl font-bold">
               My Profile
             </h1>
-            <TreePine className="w-8 h-8 text-emerald-200" />
+            <TreePine className="w-8 h-8 text-green-300" />
           </div>
-          <p className="text-emerald-100 text-lg">
+          <p className="text-green-200/70 text-lg">
             Manage your account and track your eco journey 🌱
           </p>
         </div>
@@ -94,9 +94,9 @@ const ProfilePage = () => {
 
       <div className="max-w-4xl mx-auto px-4">
         {/* Profile Card */}
-        <div className="bg-white rounded-3xl shadow-xl border border-emerald-100 overflow-hidden mb-6">
+        <div className="bg-[#0d2818] rounded-3xl shadow-xl border border-[#1a3d1a] overflow-hidden mb-6">
           {/* Cover Image */}
-          <div className="h-32 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 relative">
+          <div className="h-32 bg-gradient-to-r from-[#1a5c1a] via-[#1a4d1a] to-[#0d3d0d] relative">
             <div className="absolute inset-0 opacity-30">
               <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <defs>
@@ -117,30 +117,30 @@ const ProfilePage = () => {
                 <img
                   src="/images/profilePage/profilepic.jpg"
                   alt="Profile Picture"
-                  className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                  className="w-32 h-32 rounded-full object-cover border-4 border-[#0d2818] shadow-lg"
                 />
                 {isEditing && (
-                  <button className="absolute bottom-0 right-0 p-2 bg-emerald-500 hover:bg-emerald-600 
+                  <button className="absolute bottom-0 right-0 p-2 bg-green-600 hover:bg-green-700 
                     rounded-full text-white shadow-md transition-colors">
                     <Camera size={18} />
                   </button>
                 )}
                 {/* Online Badge */}
-                <div className="absolute top-2 right-2 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                <div className="absolute top-2 right-2 w-4 h-4 bg-green-500 rounded-full border-2 border-[#0d2818]"></div>
               </div>
             </div>
 
             {/* Name & Actions */}
             <div className="pt-20 sm:pt-4 sm:pl-40 flex flex-col sm:flex-row sm:justify-between sm:items-start">
               <div className="text-center sm:text-left mb-4 sm:mb-0">
-                <h2 className="font-noto text-2xl font-bold text-emerald-900">
+                <h2 className="font-noto text-2xl font-bold text-white">
                   {formData.fullName}
                 </h2>
-                <p className="text-emerald-600 flex items-center justify-center sm:justify-start gap-1">
+                <p className="text-green-400 flex items-center justify-center sm:justify-start gap-1">
                   <span>@{formData.username}</span>
                 </p>
                 <div className="flex items-center justify-center sm:justify-start gap-2 mt-2">
-                  <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full flex items-center gap-1">
+                  <span className="px-3 py-1 bg-amber-500/20 text-amber-400 text-xs font-semibold rounded-full flex items-center gap-1">
                     <Award size={12} />
                     {userStats.ecoRank}
                   </span>
@@ -150,8 +150,8 @@ const ProfilePage = () => {
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 
-                    hover:from-emerald-600 hover:to-teal-600
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
+                    hover:from-[#1a4d1a] hover:to-[#0d2d0d]
                     rounded-xl text-white font-semibold shadow-md hover:shadow-lg
                     transition-all flex items-center justify-center gap-2 mx-auto sm:mx-0"
                 >
@@ -162,16 +162,16 @@ const ProfilePage = () => {
                 <div className="flex gap-2 mx-auto sm:mx-0">
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200
-                      rounded-xl text-gray-700 font-semibold transition-colors flex items-center gap-2"
+                    className="px-4 py-2.5 bg-[#132d13] hover:bg-[#1a3d1a]
+                      rounded-xl text-green-300/80 font-semibold transition-colors flex items-center gap-2"
                   >
                     <X size={18} />
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
-                    className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 
-                      hover:from-emerald-600 hover:to-teal-600
+                    className="px-5 py-2.5 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
+                      hover:from-[#1a4d1a] hover:to-[#0d2d0d]
                       rounded-xl text-white font-semibold shadow-md hover:shadow-lg
                       transition-all flex items-center gap-2"
                   >
@@ -183,34 +183,34 @@ const ProfilePage = () => {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-emerald-100">
+            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-[#1a3d1a]">
               <div className="text-center">
-                <div className="flex items-center justify-center gap-1 text-emerald-600 mb-1">
+                <div className="flex items-center justify-center gap-1 text-green-400 mb-1">
                   <Recycle size={16} />
                 </div>
-                <p className="text-2xl font-bold text-emerald-800">{userStats.bottlesDonated.toLocaleString()}</p>
-                <p className="text-emerald-500 text-xs">Bottles Donated</p>
+                <p className="text-2xl font-bold text-white">{userStats.bottlesDonated.toLocaleString()}</p>
+                <p className="text-green-400/50 text-xs">Bottles Donated</p>
               </div>
               <div className="text-center">
-                <div className="flex items-center justify-center gap-1 text-emerald-600 mb-1">
+                <div className="flex items-center justify-center gap-1 text-green-400 mb-1">
                   <Heart size={16} />
                 </div>
-                <p className="text-2xl font-bold text-emerald-800">{userStats.projectsSupported}</p>
-                <p className="text-emerald-500 text-xs">Projects Supported</p>
+                <p className="text-2xl font-bold text-white">{userStats.projectsSupported}</p>
+                <p className="text-green-400/50 text-xs">Projects Supported</p>
               </div>
               <div className="text-center">
-                <div className="flex items-center justify-center gap-1 text-emerald-600 mb-1">
+                <div className="flex items-center justify-center gap-1 text-green-400 mb-1">
                   <TreePine size={16} />
                 </div>
-                <p className="text-2xl font-bold text-emerald-800">{userStats.treesPlanted}</p>
-                <p className="text-emerald-500 text-xs">Trees Planted</p>
+                <p className="text-2xl font-bold text-white">{userStats.treesPlanted}</p>
+                <p className="text-green-400/50 text-xs">Trees Planted</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex bg-white rounded-2xl p-1.5 shadow-md border border-emerald-100 mb-6">
+        <div className="flex bg-[#0d2818] rounded-2xl p-1.5 shadow-md border border-[#1a3d1a] mb-6">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -220,8 +220,8 @@ const ProfilePage = () => {
                 font-medium text-sm transition-all duration-300
                 ${
                   activeTab === tab.id
-                    ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md"
-                    : "text-emerald-700 hover:bg-emerald-50"
+                    ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] text-white shadow-md"
+                    : "text-green-400/70 hover:bg-[#132d13]"
                 }
               `}
             >
@@ -233,20 +233,20 @@ const ProfilePage = () => {
 
         {/* Tab Content */}
         {activeTab === "profile" && (
-          <div className="bg-white rounded-3xl shadow-xl border border-emerald-100 p-6">
-            <h3 className="font-noto text-emerald-800 text-xl font-semibold mb-6 flex items-center gap-2">
-              <User size={20} className="text-emerald-600" />
+          <div className="bg-[#0d2818] rounded-3xl shadow-xl border border-[#1a3d1a] p-6">
+            <h3 className="font-noto text-white text-xl font-semibold mb-6 flex items-center gap-2">
+              <User size={20} className="text-green-400" />
               Personal Information
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Username */}
               <div className="space-y-2">
-                <label className="block text-emerald-700 font-medium text-sm">
+                <label className="block text-green-400/60 font-medium text-sm">
                   Username
                 </label>
                 <div className="relative">
-                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400" />
+                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
                   <input
                     type="text"
                     name="username"
@@ -255,21 +255,21 @@ const ProfilePage = () => {
                     disabled={!isEditing}
                     className={`w-full pl-11 pr-4 py-3 rounded-xl border-2 
                       ${isEditing 
-                        ? "border-emerald-200 focus:border-emerald-400 bg-white" 
-                        : "border-gray-100 bg-gray-50"
+                        ? "border-[#1a3d1a] focus:border-green-500 bg-[#0a1f0a]" 
+                        : "border-[#132d13] bg-[#132d13]"
                       }
-                      text-emerald-800 focus:outline-none transition-colors`}
+                      text-white focus:outline-none transition-colors`}
                   />
                 </div>
               </div>
 
               {/* Full Name */}
               <div className="space-y-2">
-                <label className="block text-emerald-700 font-medium text-sm">
+                <label className="block text-green-400/60 font-medium text-sm">
                   Full Name
                 </label>
                 <div className="relative">
-                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400" />
+                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
                   <input
                     type="text"
                     name="fullName"
@@ -278,21 +278,21 @@ const ProfilePage = () => {
                     disabled={!isEditing}
                     className={`w-full pl-11 pr-4 py-3 rounded-xl border-2 
                       ${isEditing 
-                        ? "border-emerald-200 focus:border-emerald-400 bg-white" 
-                        : "border-gray-100 bg-gray-50"
+                        ? "border-[#1a3d1a] focus:border-green-500 bg-[#0a1f0a]" 
+                        : "border-[#132d13] bg-[#132d13]"
                       }
-                      text-emerald-800 focus:outline-none transition-colors`}
+                      text-white focus:outline-none transition-colors`}
                   />
                 </div>
               </div>
 
               {/* Email */}
               <div className="space-y-2">
-                <label className="block text-emerald-700 font-medium text-sm">
+                <label className="block text-green-400/60 font-medium text-sm">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400" />
+                  <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
                   <input
                     type="email"
                     name="email"
@@ -301,21 +301,21 @@ const ProfilePage = () => {
                     disabled={!isEditing}
                     className={`w-full pl-11 pr-4 py-3 rounded-xl border-2 
                       ${isEditing 
-                        ? "border-emerald-200 focus:border-emerald-400 bg-white" 
-                        : "border-gray-100 bg-gray-50"
+                        ? "border-[#1a3d1a] focus:border-green-500 bg-[#0a1f0a]" 
+                        : "border-[#132d13] bg-[#132d13]"
                       }
-                      text-emerald-800 focus:outline-none transition-colors`}
+                      text-white focus:outline-none transition-colors`}
                   />
                 </div>
               </div>
 
               {/* Address */}
               <div className="space-y-2">
-                <label className="block text-emerald-700 font-medium text-sm">
+                <label className="block text-green-400/60 font-medium text-sm">
                   Address
                 </label>
                 <div className="relative">
-                  <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400" />
+                  <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
                   <input
                     type="text"
                     name="address"
@@ -324,24 +324,24 @@ const ProfilePage = () => {
                     disabled={!isEditing}
                     className={`w-full pl-11 pr-4 py-3 rounded-xl border-2 
                       ${isEditing 
-                        ? "border-emerald-200 focus:border-emerald-400 bg-white" 
-                        : "border-gray-100 bg-gray-50"
+                        ? "border-[#1a3d1a] focus:border-green-500 bg-[#0a1f0a]" 
+                        : "border-[#132d13] bg-[#132d13]"
                       }
-                      text-emerald-800 focus:outline-none transition-colors`}
+                      text-white focus:outline-none transition-colors`}
                   />
                 </div>
               </div>
             </div>
 
             {/* Member Since */}
-            <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
+            <div className="mt-6 p-4 bg-[#132d13]/50 rounded-xl border border-[#1a3d1a]">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-100 rounded-lg">
-                  <Calendar size={20} className="text-emerald-600" />
+                <div className="p-2 bg-[#1a5c1a]/30 rounded-lg">
+                  <Calendar size={20} className="text-green-400" />
                 </div>
                 <div>
-                  <p className="text-emerald-500 text-sm">Member Since</p>
-                  <p className="text-emerald-800 font-semibold">{userStats.memberSince}</p>
+                  <p className="text-green-400/50 text-sm">Member Since</p>
+                  <p className="text-white font-semibold">{userStats.memberSince}</p>
                 </div>
               </div>
             </div>
@@ -351,54 +351,54 @@ const ProfilePage = () => {
         {activeTab === "stats" && (
           <div className="space-y-6">
             {/* Eco Impact Card */}
-            <div className="bg-white rounded-3xl shadow-xl border border-emerald-100 p-6">
-              <h3 className="font-noto text-emerald-800 text-xl font-semibold mb-6 flex items-center gap-2">
-                <Recycle size={20} className="text-emerald-600" />
+            <div className="bg-[#0d2818] rounded-3xl shadow-xl border border-[#1a3d1a] p-6">
+              <h3 className="font-noto text-white text-xl font-semibold mb-6 flex items-center gap-2">
+                <Recycle size={20} className="text-green-400" />
                 Your Eco Impact
               </h3>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl p-4 text-white text-center">
+                <div className="bg-gradient-to-br from-[#1a5c1a] to-[#0d3d0d] rounded-2xl p-4 text-white text-center">
                   <Recycle size={28} className="mx-auto mb-2 opacity-90" />
                   <p className="text-3xl font-bold">{userStats.bottlesDonated.toLocaleString()}</p>
-                  <p className="text-emerald-100 text-sm">Bottles Recycled</p>
+                  <p className="text-green-300/80 text-sm">Bottles Recycled</p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl p-4 text-white text-center">
+                <div className="bg-gradient-to-br from-[#1a4d5c] to-[#0d3d4d] rounded-2xl p-4 text-white text-center">
                   <Heart size={28} className="mx-auto mb-2 opacity-90" />
                   <p className="text-3xl font-bold">{userStats.projectsSupported}</p>
-                  <p className="text-blue-100 text-sm">Schools Helped</p>
+                  <p className="text-cyan-300/80 text-sm">Schools Helped</p>
                 </div>
-                <div className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl p-4 text-white text-center">
+                <div className="bg-gradient-to-br from-[#1a4d1a] to-[#0d2d0d] rounded-2xl p-4 text-white text-center">
                   <TreePine size={28} className="mx-auto mb-2 opacity-90" />
                   <p className="text-3xl font-bold">{userStats.treesPlanted}</p>
-                  <p className="text-green-100 text-sm">Trees Equivalent</p>
+                  <p className="text-green-300/80 text-sm">Trees Equivalent</p>
                 </div>
-                <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-4 text-white text-center">
+                <div className="bg-gradient-to-br from-[#5c4a1a] to-[#3d2d0d] rounded-2xl p-4 text-white text-center">
                   <Award size={28} className="mx-auto mb-2 opacity-90" />
                   <p className="text-3xl font-bold">12</p>
-                  <p className="text-amber-100 text-sm">Chairs Made</p>
+                  <p className="text-amber-300/80 text-sm">Chairs Made</p>
                 </div>
               </div>
 
               {/* Progress to Next Rank */}
-              <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200">
+              <div className="mt-6 p-4 bg-[#1a3d1a]/50 rounded-xl border border-[#1a3d1a]">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <Award size={18} className="text-amber-600" />
-                    <span className="text-amber-800 font-semibold">Progress to Platinum Rank</span>
+                    <Award size={18} className="text-amber-400" />
+                    <span className="text-white font-semibold">Progress to Platinum Rank</span>
                   </div>
-                  <span className="text-amber-600 text-sm">750 bottles to go</span>
+                  <span className="text-amber-400/80 text-sm">750 bottles to go</span>
                 </div>
-                <div className="h-3 bg-amber-200 rounded-full overflow-hidden">
-                  <div className="h-full w-[62%] bg-gradient-to-r from-amber-400 to-yellow-400 rounded-full"></div>
+                <div className="h-3 bg-[#0a1f0a] rounded-full overflow-hidden">
+                  <div className="h-full w-[62%] bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full"></div>
                 </div>
               </div>
             </div>
 
             {/* Badges */}
-            <div className="bg-white rounded-3xl shadow-xl border border-emerald-100 p-6">
-              <h3 className="font-noto text-emerald-800 text-xl font-semibold mb-6 flex items-center gap-2">
-                <Award size={20} className="text-amber-500" />
+            <div className="bg-[#0d2818] rounded-3xl shadow-xl border border-[#1a3d1a] p-6">
+              <h3 className="font-noto text-white text-xl font-semibold mb-6 flex items-center gap-2">
+                <Award size={20} className="text-amber-400" />
                 Earned Badges
               </h3>
 
@@ -406,14 +406,14 @@ const ProfilePage = () => {
                 {userStats.badges.map((badge, i) => (
                   <div
                     key={i}
-                    className="flex flex-col items-center p-4 bg-gradient-to-br from-emerald-50 to-teal-50 
-                      rounded-2xl border border-emerald-200 hover:shadow-md transition-shadow"
+                    className="flex flex-col items-center p-4 bg-[#132d13] 
+                      rounded-2xl border border-[#1a3d1a] hover:shadow-md transition-shadow"
                   >
-                    <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-400 
+                    <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 
                       rounded-full flex items-center justify-center mb-2 shadow-md">
                       <Award size={28} className="text-white" />
                     </div>
-                    <p className="text-emerald-800 font-semibold text-sm text-center">{badge}</p>
+                    <p className="text-white font-semibold text-sm text-center">{badge}</p>
                   </div>
                 ))}
               </div>
@@ -422,34 +422,34 @@ const ProfilePage = () => {
         )}
 
         {activeTab === "security" && (
-          <div className="bg-white rounded-3xl shadow-xl border border-emerald-100 p-6">
-            <h3 className="font-noto text-emerald-800 text-xl font-semibold mb-6 flex items-center gap-2">
-              <Shield size={20} className="text-emerald-600" />
+          <div className="bg-[#0d2818] rounded-3xl shadow-xl border border-[#1a3d1a] p-6">
+            <h3 className="font-noto text-white text-xl font-semibold mb-6 flex items-center gap-2">
+              <Shield size={20} className="text-green-400" />
               Security Settings
             </h3>
 
             <div className="space-y-5">
               {/* Password */}
               <div className="space-y-2">
-                <label className="block text-emerald-700 font-medium text-sm">
+                <label className="block text-green-400/60 font-medium text-sm">
                   New Password
                 </label>
                 <div className="relative">
-                  <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400" />
+                  <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
                     placeholder="Enter new password"
-                    className="w-full pl-11 pr-12 py-3 rounded-xl border-2 border-emerald-200 
-                      focus:border-emerald-400 bg-white text-emerald-800 
-                      placeholder-emerald-300 focus:outline-none transition-colors"
+                    className="w-full pl-11 pr-12 py-3 rounded-xl border-2 border-[#1a3d1a] 
+                      focus:border-green-500 bg-[#0a1f0a] text-white 
+                      placeholder-green-600/50 focus:outline-none transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400 hover:text-emerald-600"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500/50 hover:text-green-400"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -458,25 +458,25 @@ const ProfilePage = () => {
 
               {/* Confirm Password */}
               <div className="space-y-2">
-                <label className="block text-emerald-700 font-medium text-sm">
+                <label className="block text-green-400/60 font-medium text-sm">
                   Confirm New Password
                 </label>
                 <div className="relative">
-                  <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400" />
+                  <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     placeholder="Confirm new password"
-                    className="w-full pl-11 pr-12 py-3 rounded-xl border-2 border-emerald-200 
-                      focus:border-emerald-400 bg-white text-emerald-800 
-                      placeholder-emerald-300 focus:outline-none transition-colors"
+                    className="w-full pl-11 pr-12 py-3 rounded-xl border-2 border-[#1a3d1a] 
+                      focus:border-green-500 bg-[#0a1f0a] text-white 
+                      placeholder-green-600/50 focus:outline-none transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400 hover:text-emerald-600"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500/50 hover:text-green-400"
                   >
                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -485,8 +485,8 @@ const ProfilePage = () => {
 
               {/* Update Password Button */}
               <button
-                className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 
-                  hover:from-emerald-600 hover:to-teal-600
+                className="w-full py-3 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
+                  hover:from-[#1a4d1a] hover:to-[#0d2d0d]
                   rounded-xl text-white font-semibold shadow-md hover:shadow-lg
                   transition-all flex items-center justify-center gap-2 mt-4"
               >
@@ -495,8 +495,8 @@ const ProfilePage = () => {
               </button>
 
               {/* Notification Settings */}
-              <div className="mt-8 pt-6 border-t border-emerald-100">
-                <h4 className="text-emerald-800 font-semibold mb-4 flex items-center gap-2">
+              <div className="mt-8 pt-6 border-t border-[#1a3d1a]">
+                <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
                   <Bell size={18} />
                   Notification Preferences
                 </h4>
@@ -508,12 +508,12 @@ const ProfilePage = () => {
                     { label: "Monthly eco-impact summary", checked: false },
                     { label: "Badge and achievement alerts", checked: true },
                   ].map((item, i) => (
-                    <label key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-emerald-50 transition-colors">
-                      <span className="text-emerald-700">{item.label}</span>
+                    <label key={i} className="flex items-center justify-between p-3 bg-[#0a1f0a] rounded-xl cursor-pointer hover:bg-[#132d13] transition-colors">
+                      <span className="text-green-300/80">{item.label}</span>
                       <input
                         type="checkbox"
                         defaultChecked={item.checked}
-                        className="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500"
+                        className="w-5 h-5 text-green-500 rounded focus:ring-green-500 bg-[#0a1f0a] border-[#1a3d1a]"
                       />
                     </label>
                   ))}
@@ -527,7 +527,7 @@ const ProfilePage = () => {
       {/* Success Notification */}
       {profileUpdated && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-bounce">
-          <div className="flex items-center gap-3 px-6 py-3 bg-emerald-500 text-white rounded-full shadow-lg">
+          <div className="flex items-center gap-3 px-6 py-3 bg-[#1a5c1a] text-white rounded-full shadow-lg border border-[#2a7c2a]">
             <CheckCircle2 size={20} />
             <span className="font-medium">Profile updated successfully!</span>
           </div>
