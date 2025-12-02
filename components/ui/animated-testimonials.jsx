@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 export const AnimatedTestimonials = ({ testimonials, autoplay = false }) => {
   const [active, setActive] = useState(0);
   const [rotations, setRotations] = useState([]);
+  const [isClient, setIsClient] = useState(false);
 
   const handleNext = () => {
     setActive((prev) => (prev + 1) % testimonials.length);
@@ -21,6 +22,10 @@ export const AnimatedTestimonials = ({ testimonials, autoplay = false }) => {
   };
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
     if (autoplay) {
       const interval = setInterval(handleNext, 5000);
       return () => clearInterval(interval);
@@ -32,11 +37,19 @@ export const AnimatedTestimonials = ({ testimonials, autoplay = false }) => {
     setRotations(testimonials.map(() => Math.floor(Math.random() * 21) - 10));
   }, [testimonials]);
 
+  if (!isClient) {
+    return (
+      <div className="w-full h-80 flex items-center justify-center">
+        <div className="animate-pulse bg-emerald-100 rounded-3xl w-full h-full"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full mx-auto flex flex-col gap-5 antialiased font-sans px-4 md:px-8 lg:px-12">
-      <div className="relative grid grid-cols-1  gap-20">
-        <div className="flex items-center justify-center w-full ">
-          <div className="relative h-80 w-full">
+    <div className="w-full mx-auto flex flex-col gap-5 antialiased font-sans">
+      <div className="relative">
+        <div className="flex items-center justify-center w-full">
+          <div className="relative h-72 w-full">
             <AnimatePresence>
               {testimonials.map((testimonial, index) => (
                 <motion.div
@@ -75,7 +88,7 @@ export const AnimatedTestimonials = ({ testimonials, autoplay = false }) => {
                     width={500}
                     height={500}
                     draggable={false}
-                    className="h-full w-full rounded-3xl object-cover object-center"
+                    className="h-full w-full rounded-2xl object-cover object-center shadow-lg border-2 border-emerald-100"
                   />
                 </motion.div>
               ))}
@@ -83,23 +96,27 @@ export const AnimatedTestimonials = ({ testimonials, autoplay = false }) => {
           </div>
         </div>
       </div>
-      <div className="flex justify-between items-center w-[90%]">
-        <div className="flex justify-between items-center w-[30%]">
+      <div className="flex justify-between items-center w-full px-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={handlePrev}
-            className="h-7 w-7 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center group/button"
+            className="h-9 w-9 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 
+              hover:from-emerald-600 hover:to-teal-600 flex items-center justify-center 
+              group/button shadow-md transition-all duration-200 hover:scale-110"
           >
-            <IconArrowLeft className="h-5 w-5 text-black dark:text-neutral-400 group-hover/button:rotate-12 transition-transform duration-300" />
+            <IconArrowLeft className="h-5 w-5 text-white group-hover/button:rotate-12 transition-transform duration-300" />
           </button>
           <button
             onClick={handleNext}
-            className="h-7 w-7 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center group/button"
+            className="h-9 w-9 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 
+              hover:from-emerald-600 hover:to-teal-600 flex items-center justify-center 
+              group/button shadow-md transition-all duration-200 hover:scale-110"
           >
-            <IconArrowRight className="h-5 w-5 text-black dark:text-neutral-400 group-hover/button:-rotate-12 transition-transform duration-300" />
+            <IconArrowRight className="h-5 w-5 text-white group-hover/button:-rotate-12 transition-transform duration-300" />
           </button>
         </div>
 
-        <p className="font-bold text-lg text-black">
+        <p className="font-noto font-semibold text-base text-emerald-800 truncate max-w-[60%]">
           {testimonials[active]?.name}
         </p>
       </div>
