@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Loading from "@/components/Loading";
 import Notification from "@/components/Notification";
+import { motion } from "framer-motion";
 
 const SignupPage = () => {
   const [userData, setUserData] = useState({
@@ -96,9 +97,14 @@ const SignupPage = () => {
       )}
       
       {/* Main Card */}
-      <div className="w-full max-w-[1000px] h-[85vh] flex bg-white rounded-[30px] shadow-2xl overflow-hidden m-4 z-10">
+      <div className="w-full max-w-[1000px] h-[90vh] flex bg-white rounded-[30px] shadow-2xl overflow-hidden m-4 z-10">
         {/* Left Side - Form */}
-        <div className="w-full md:w-1/2 h-full flex flex-col justify-center items-center p-8 md:p-12 overflow-y-auto scrollbar-hide">
+        <motion.div 
+          initial={{ x: "100%", opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 100, damping: 20 }}
+          className="w-full md:w-1/2 h-full flex flex-col justify-center items-center px-8 py-4 md:px-12 md:py-6 overflow-y-auto scrollbar-hide transform-gpu"
+        >
           <div className="flex flex-col items-center w-full max-w-sm gap-4">
             <img
               height={150}
@@ -230,10 +236,15 @@ const SignupPage = () => {
               </p>
             </form>
           </div>
-        </div>
+        </motion.div>
 
         {/* Right Side - Video/Illustration */}
-        <div className="hidden md:flex w-1/2 h-full flex-col justify-center items-center bg-gradient-to-b from-[#86efac] to-[#052e16] relative p-8">
+        <motion.div 
+          initial={{ x: "-100%", opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 100, damping: 20 }}
+          className="hidden md:flex w-1/2 h-full flex-col justify-center items-center bg-gradient-to-b from-[#86efac] to-[#052e16] relative p-8 transform-gpu"
+        >
           <video
             autoPlay
             loop
@@ -250,7 +261,7 @@ const SignupPage = () => {
               "Empowering a sustainable future through eco-friendly commerce. Trade responsibly, live sustainably."
             </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
