@@ -1,13 +1,29 @@
 "use client";
-import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { useState, useEffect } from "react";
+import {
+  Search,
+  Package,
+  Plus,
+  Edit,
+  Trash2,
+  X,
+  Upload,
+  Image as ImageIcon,
+  Recycle,
+  Target,
+  Boxes,
+  CheckCircle2,
+  AlertCircle,
+  Save,
+  RotateCcw,
+} from "lucide-react";
 
 const InventoryPage = () => {
   // State management
-  const [formVisible, setFormVisible] = useState("save"); // 'save' or 'update'
+  const [formMode, setFormMode] = useState("add"); // 'add' or 'edit'
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productData, setProductData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [inputData, setInputData] = useState({
     product: "",
     material: "",
@@ -15,111 +31,96 @@ const InventoryPage = () => {
     stock: "",
     img: "",
   });
-  const [selectedFile, setSelectedFile] = useState(null); // File selected by the user
-  const [previewURL, setPreviewURL] = useState(null); // URL to show the selected image
-  const [uploading, setUploading] = useState(false); // State to track the upload process
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewURL, setPreviewURL] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
-  const [isDeletedMessageVisible, setDeletedMessageVisible] = useState(false); // For record deleted message
-  const [isUpdatedMessageVisible, setUpdatedMessageVisible] = useState(false); // For record updated message
-  const [isAddedMessageVisible, setAddedMessageVisible] = useState(false);
+  const [notification, setNotification] = useState({ show: false, type: "", message: "" });
 
-  const showDeleteModal = (productID) => {
-    setProductToDelete(productID);
-    setIsModalVisible(true);
+  // Mock data for demo
+  const mockProducts = [
+    {
+      productID: "PDT001ABC",
+      product: "Nike T-Shirt",
+      material: "Water Bottles",
+      materialGoal: 500,
+      stock: 10,
+      img: "/images/productPage/product1.jpg",
+    },
+    {
+      productID: "PDT002DEF",
+      product: "Rolex Daytona",
+      material: "Water Bottles",
+      materialGoal: 10000,
+      stock: 1,
+      img: "/images/productPage/product2.jpg",
+    },
+    {
+      productID: "PDT003GHI",
+      product: "Jordan Nike Air",
+      material: "Water Bottles",
+      materialGoal: 5000,
+      stock: 1,
+      img: "/images/productPage/product3.jpg",
+    },
+    {
+      productID: "PDT004JKL",
+      product: "Adidas Cap",
+      material: "Water Bottles",
+      materialGoal: 200,
+      stock: 3,
+      img: "/images/productPage/product4.jpg",
+    },
+    {
+      productID: "PDT005MNO",
+      product: "Eco Water Bottle",
+      material: "Plastic Caps",
+      materialGoal: 100,
+      stock: 25,
+      img: "/images/productPage/product5.jpg",
+    },
+  ];
+
+  // Show notification
+  const showNotification = (type, message) => {
+    setNotification({ show: true, type, message });
+    setTimeout(() => setNotification({ show: false, type: "", message: "" }), 3000);
   };
-  const hideDeleteModal = () => {
-    setIsModalVisible(false);
-    setProductToDelete(null);
-  };
 
-  // Fetch Product Data
-  async function fetchProductData() {
-    try {
-      const res = await fetch("http://localhost:3000/api/product");
-      const data = await res.json();
-      setProductData(data.product);
-    } catch (error) {
-      console.log("Error fetching product data:", error);
-    }
-  }
-
-  const handleConfirmDelete = async () => {
-    if (!productToDelete) return;
-    try {
-      const res = await fetch("http://localhost:3000/api/product", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productID: productToDelete }),
-      });
-
-      if (res.ok) {
-        hideDeleteModal();
-        setDeletedMessageVisible(true);
-        fetchProductData();
-        setTimeout(() => {
-          setDeletedMessageVisible(false);
-        }, 3000);
-      } else {
-        alert("Failed to delete project");
-      }
-    } catch (error) {
-      console.log("Error:", error);
-    }
-  };
-
+  // Initialize with mock data (no backend needed for UI demo)
   useEffect(() => {
-    fetchProductData();
+    setProductData(mockProducts);
   }, []);
+
+  // Filter products
+  const filteredProducts = productData.filter(
+    (product) =>
+      product.product?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.material?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Handle file selection
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    setSelectedFile(file);
-    setPreviewURL(URL.createObjectURL(file)); // Create a preview URL for the image
-  };
-
-  // Handle file upload
-  const uploadFile = async () => {
-    if (!selectedFile) return;
-
-    setUploading(true); // Start the uploading process
-
-    const fileExt = selectedFile.name.split(".").pop(); // Extract file extension
-    const fileName = `${Math.random()}.${fileExt}`; // Create a unique filename
-    const filePath = `${fileName}`;
-
-    // Upload the file to the Supabase bucket
-    const { error } = await supabase.storage
-      .from("ShopTrade-products") // Replace with your actual bucket name
-      .upload(filePath, selectedFile);
-
-    if (error) {
-      console.error("Error uploading file:", error);
-      setUploading(false);
-      return;
+    if (file) {
+      setSelectedFile(file);
+      setPreviewURL(URL.createObjectURL(file));
     }
-
-    // Reset the preview and file once upload is complete
-    setSelectedFile(null);
-    setPreviewURL(null);
-    setUploading(false);
-
-    alert("File uploaded successfully!");
   };
 
-  // Handle row click for updating product
+  // Handle row click for editing
   const handleRowClick = (product) => {
-    setFormVisible("update");
+    setFormMode("edit");
     setSelectedProduct(product);
     setInputData({
       product: product.product,
       material: product.material,
       materialGoal: product.materialGoal.toString(),
       stock: product.stock.toString(),
-      img: product.img, // Populate img from the product for update
+      img: product.img,
     });
-    setPreviewURL(product.img); // Set preview to the product's image URL
+    setPreviewURL(product.img);
   };
 
   // Handle input change
@@ -131,74 +132,49 @@ const InventoryPage = () => {
     }));
   };
 
+  // Reset form
+  const resetForm = () => {
+    setFormMode("add");
+    setSelectedProduct(null);
+    setInputData({
+      product: "",
+      material: "",
+      materialGoal: "",
+      stock: "",
+      img: "",
+    });
+    setSelectedFile(null);
+    setPreviewURL(null);
+  };
+
   // Handle product save
   async function saveProduct(e) {
     e.preventDefault();
-    if (!selectedFile) {
-      alert("Please select an image.");
+    
+    if (!inputData.product || !inputData.material || !inputData.materialGoal || !inputData.stock) {
+      showNotification("error", "Please fill in all fields");
       return;
     }
 
     try {
       setUploading(true);
-      const fileExt = selectedFile.name.split(".").pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      let imageUrl = previewURL || "/images/productPage/default.jpg";
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("ShopTrade-products")
-        .upload(filePath, selectedFile);
-
-      if (uploadError) {
-        console.error("Error uploading file:", uploadError);
-        alert("Image upload failed.");
-        setUploading(false);
-        return;
-      }
-
-      const { data: publicUrlData } = supabase.storage
-        .from("ShopTrade-products")
-        .getPublicUrl(filePath);
-
-      const imageUrl = publicUrlData.publicUrl;
-
-      const res = await fetch("http://localhost:3000/api/product", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          product: inputData.product,
-          material: inputData.material,
-          materialGoal: parseInt(inputData.materialGoal),
-          stock: parseInt(inputData.stock),
-          img: imageUrl, // Include the image URL
-        }),
-      });
-
-      const data = await res.json();
-      console.log("API Response (Save):", data);
-
-      if (res.ok) {
-        setAddedMessageVisible(true);
-        setTimeout(() => {
-          setAddedMessageVisible(false);
-        }, 3000);
-        fetchProductData();
-        setInputData({
-          product: "",
-          material: "",
-          materialGoal: "",
-          stock: "",
-          img: "",
-        });
-        setSelectedFile(null);
-        setPreviewURL(null);
-      } else {
-        alert("Failed to save product.");
-        console.error("API Error (Save):", data);
-      }
+      // Mock success for demo (no backend needed)
+      showNotification("success", "Product added successfully!");
+      const newProduct = {
+        productID: `PDT${Date.now()}`,
+        product: inputData.product,
+        material: inputData.material,
+        materialGoal: parseInt(inputData.materialGoal),
+        stock: parseInt(inputData.stock),
+        img: imageUrl,
+      };
+      setProductData([...productData, newProduct]);
+      resetForm();
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred.");
+      showNotification("error", "Failed to add product");
     } finally {
       setUploading(false);
     }
@@ -209,350 +185,413 @@ const InventoryPage = () => {
     e.preventDefault();
 
     try {
-      let imageUrl = inputData.img;
+      setUploading(true);
+      let imageUrl = previewURL || inputData.img;
 
-      if (selectedFile) {
-        setUploading(true);
-        const fileExt = selectedFile.name.split(".").pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        const filePath = `${fileName}`;
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("ShopTrade-products")
-          .upload(filePath, selectedFile);
-
-        if (uploadError) {
-          console.error("Error uploading file:", uploadError);
-          alert("Image upload failed.");
-          setUploading(false);
-          return;
-        }
-
-        const { data: publicUrlData } = supabase.storage
-          .from("ShopTrade-products")
-          .getPublicUrl(filePath);
-
-        imageUrl = publicUrlData.publicUrl;
-      }
-
-      console.log("Updating product with ID:", selectedProduct.productID);
-      console.log("Sending data:", {
-        product: inputData.product,
-        material: inputData.material,
-        materialGoal: parseInt(inputData.materialGoal),
-        stock: parseInt(inputData.stock),
-        img: imageUrl,
-      });
-
-      const res = await fetch(
-        `http://localhost:3000/api/product?productID=${selectedProduct.productID}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            product: inputData.product,
-            material: inputData.material,
-            materialGoal: parseInt(inputData.materialGoal),
-            stock: parseInt(inputData.stock),
-            img: imageUrl,
-          }),
-        }
+      // Mock success for demo (no backend needed)
+      showNotification("success", "Product updated successfully!");
+      setProductData(
+        productData.map((p) =>
+          p.productID === selectedProduct.productID
+            ? {
+                ...p,
+                product: inputData.product,
+                material: inputData.material,
+                materialGoal: parseInt(inputData.materialGoal),
+                stock: parseInt(inputData.stock),
+                img: imageUrl,
+              }
+            : p
+        )
       );
-
-      const data = await res.json();
-      console.log("API Response (Update):", data);
-
-      if (res.ok) {
-        setUpdatedMessageVisible(true);
-        setTimeout(() => {
-          setUpdatedMessageVisible(false);
-        }, 3000);
-        fetchProductData();
-        setFormVisible("save");
-        setInputData({
-          product: "",
-          material: "",
-          materialGoal: "",
-          stock: "",
-          img: "",
-        });
-        setSelectedFile(null);
-        setPreviewURL(null);
-      } else {
-        alert("Failed to update product.");
-        console.error("API Error (Update):", data);
-      }
+      resetForm();
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred.");
+      showNotification("error", "Failed to update product");
     } finally {
       setUploading(false);
     }
   }
 
+  // Handle delete
+  const handleConfirmDelete = async () => {
+    if (!productToDelete) return;
+
+    // Mock success for demo (no backend needed)
+    showNotification("success", "Product deleted successfully!");
+    setProductData(productData.filter((p) => p.productID !== productToDelete));
+    setIsDeleteModalOpen(false);
+    setProductToDelete(null);
+  };
+
+  // Stats
+  const totalProducts = productData.length;
+  const totalStock = productData.reduce((acc, p) => acc + (p.stock || 0), 0);
+  const lowStockCount = productData.filter((p) => p.stock <= 3).length;
+
   return (
-    <div className="h-screen w-full flex justify-center items-center gap-7">
-      <div className="h-fit w-[60%]">
-        <div className="flex justify-left items-center gap-5 w-[100%]">
-          <h1 className="font-noto text-black text-[30px] font-medium">
-            Inventory
-          </h1>
-          <div className="flex justify-between w-[55%] ">
-            <div className="text-black flex justify-between items-center h-fit px-[10px] py-[5px] rounded-[30px] w-[65%] border-[1px] border-black">
-              <input
-                type="text"
-                placeholder="Search"
-                className="bg-transparent text-white placeholder-gray-500 border-none"
-              />
-              <Search color="black" />
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-8">
+      {/* Header */}
+      <div className="w-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] py-6 px-4 mb-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <Package className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="font-noto text-white text-2xl md:text-3xl font-bold">
+                  Inventory Management
+                </h1>
+                <p className="text-green-200/70 text-sm">
+                  Manage your eco-trade products 📦
+                </p>
+              </div>
             </div>
           </div>
         </div>
-        <table className="w-[100%]">
-          <thead>
-            <tr className="bg-[#808080] text-white">
-              <th className="text-center py-3">Product ID</th>
-              <th className="text-center py-3">Product</th>
-              <th className="text-center py-3">Material Item</th>
-              <th className="text-center py-3">Material goal</th>
-              <th className="text-center py-3">Stock</th>
-              <th className="text-center py-3">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productData.map((data, i) => (
-              <tr
-                key={i}
-                className="border-b-[1px] border-black cursor-pointer"
-                onClick={() => handleRowClick(data)}
-              >
-                <td className="text-center py-4 text-black">
-                  {data.productID}
-                </td>
-                <td className="text-center py-4 text-black">{data.product}</td>
-                <td className="text-center py-4 text-black">{data.material}</td>
-                <td className="text-center py-4 text-black">
-                  {data.materialGoal}
-                </td>
-                <td className="text-center py-4 text-black">{data.stock}</td>
-                <td className="text-center">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent triggering row click
-                      showDeleteModal(data.productID);
-                    }}
-                    className="bg-[#FF0000] text-white w-[80%] rounded-[5px]"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
 
-      {/* Show the update form when formVisible is 'update' */}
-      {formVisible === "update" && (
-        <form
-          onSubmit={updateProduct}
-          className="bg-[rgba(0,0,0,0.1)] rounded-2xl h-[62%] w-[25%] flex flex-col justify-around items-center"
-        >
-          <div className="flex w-full justify-around">
-            <div className="bg-[#808080] rounded-xl h-[270px] w-[200px] flex flex-col items-center justify-center">
-              {previewURL ? (
-                <img
-                  src={previewURL}
-                  alt="Preview"
-                  className="h-[170px] w-full object-cover rounded-xl"
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-gradient-to-br from-[#1a5c1a] to-[#0d3d0d] rounded-2xl p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/80 text-sm">Total Products</p>
+                <p className="text-white text-3xl font-bold">{totalProducts}</p>
+              </div>
+              <div className="p-3 bg-white/20 rounded-xl">
+                <Boxes className="w-8 h-8 text-white" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-[#1a4d1a] to-[#0d2d0d] rounded-2xl p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/80 text-sm">Total Stock</p>
+                <p className="text-white text-3xl font-bold">{totalStock}</p>
+              </div>
+              <div className="p-3 bg-white/20 rounded-xl">
+                <Package className="w-8 h-8 text-white" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-[#1a5c1a] to-[#1a4d1a] rounded-2xl p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/80 text-sm">Low Stock Alert</p>
+                <p className="text-white text-3xl font-bold">{lowStockCount}</p>
+              </div>
+              <div className="p-3 bg-white/20 rounded-xl">
+                <AlertCircle className="w-8 h-8 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Product Table */}
+          <div className="lg:col-span-2">
+            {/* Search */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-noto text-white text-xl font-semibold flex items-center gap-2">
+                <Package size={22} className="text-green-400" />
+                Product List
+              </h2>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-64 bg-[#0d2818] text-white placeholder-green-400/40 
+                    px-5 py-2.5 pl-11 rounded-xl border border-[#1a3d1a] 
+                    focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
-              ) : (
-                <div className="h-[170px] w-full bg-red-700 rounded-xl flex justify-center items-center">
-                  <p className="text-white mb-4">No picture selected</p>
-                </div>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="border-[1px] border-black w-full"
-              />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500/50" />
+              </div>
             </div>
-            <div className="flex flex-col items-center justify-between w-fit">
-              <h1 className="text-black font-medium text-[20px]">
-                Update Product
-              </h1>
-              <button
-                type="submit"
-                className="bg-[#588027] py-[2px] px-7 rounded-md"
-              >
-                Update
-              </button>
-            </div>
-          </div>
-          <div className="w-[90%] flex flex-col gap-3">
-            <div className="flex w-full justify-between">
-              <p className="text-black">Product:</p>
-              <input
-                name="product"
-                value={inputData.product}
-                onChange={handleChange}
-                className="bg-[#808080] rounded-sm text-white p-[2px]"
-                type="text"
-              />
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-black">Material:</p>
-              <input
-                name="material"
-                value={inputData.material}
-                onChange={handleChange}
-                className="bg-[#808080] rounded-sm text-white p-[2px]"
-                type="text"
-              />
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-black">Goal:</p>
-              <input
-                name="materialGoal"
-                value={inputData.materialGoal}
-                onChange={handleChange}
-                className="bg-[#808080] rounded-sm text-white p-[2px]"
-                type="number"
-              />
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-black">Stock:</p>
-              <input
-                name="stock"
-                value={inputData.stock}
-                onChange={handleChange}
-                className="bg-[#808080] rounded-sm text-white p-[2px]"
-                type="number"
-              />
-            </div>
-          </div>
-        </form>
-      )}
 
-      {/* Show the save form when formVisible is 'save' */}
-      {formVisible === "save" && (
-        <form
-          onSubmit={saveProduct}
-          className="bg-[rgba(0,0,0,0.1)] rounded-2xl h-[62%] w-[25%] flex flex-col justify-around items-center"
+            {/* Table */}
+            <div className="bg-[#0d2818]/80 backdrop-blur-sm rounded-2xl border border-[#1a3d1a] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-[#132d13]/80">
+                      <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">Product</th>
+                      <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">Material</th>
+                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">Goal</th>
+                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">Stock</th>
+                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredProducts.map((product, i) => (
+                      <tr
+                        key={i}
+                        onClick={() => handleRowClick(product)}
+                        className="border-t border-[#1a3d1a] hover:bg-[#132d13]/50 transition-colors cursor-pointer"
+                      >
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-xl bg-[#0a1f0a] overflow-hidden">
+                              {product.img ? (
+                                <img src={product.img} alt={product.product} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Package size={20} className="text-green-600" />
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-white font-medium">{product.product}</p>
+                              <p className="text-green-400/50 text-xs">ID: {product.productID?.slice(0, 8)}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-2 text-green-300/80">
+                            <Recycle size={14} className="text-green-500/60" />
+                            {product.material}
+                          </div>
+                        </td>
+                        <td className="py-4 px-6 text-center">
+                          <span className="text-white font-semibold">{product.materialGoal?.toLocaleString()}</span>
+                        </td>
+                        <td className="py-4 px-6 text-center">
+                          <span className={`px-3 py-1 rounded-full text-sm font-semibold
+                            ${product.stock > 5 ? "bg-green-600/20 text-green-400" : 
+                              product.stock > 0 ? "bg-yellow-500/20 text-yellow-400" : "bg-red-500/20 text-red-400"}`}>
+                            {product.stock}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRowClick(product);
+                              }}
+                              className="p-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setProductToDelete(product.productID);
+                                setIsDeleteModalOpen(true);
+                              }}
+                              className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {filteredProducts.length === 0 && (
+                  <div className="text-center py-12">
+                    <Package size={48} className="mx-auto text-[#1a3d1a] mb-3" />
+                    <p className="text-green-400/50">No products found</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Add/Edit Form */}
+          <div className="lg:col-span-1">
+            <div className="bg-[#0d2818]/80 backdrop-blur-sm rounded-2xl border border-[#1a3d1a] p-6 sticky top-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-white text-lg font-semibold flex items-center gap-2">
+                  {formMode === "add" ? (
+                    <>
+                      <Plus size={20} className="text-green-400" />
+                      Add New Product
+                    </>
+                  ) : (
+                    <>
+                      <Edit size={20} className="text-green-400" />
+                      Edit Product
+                    </>
+                  )}
+                </h3>
+                {formMode === "edit" && (
+                  <button
+                    onClick={resetForm}
+                    className="p-2 bg-[#132d13] rounded-lg hover:bg-[#1a3d1a] transition-colors"
+                  >
+                    <RotateCcw size={16} className="text-green-400/70" />
+                  </button>
+                )}
+              </div>
+
+              <form onSubmit={formMode === "add" ? saveProduct : updateProduct} className="space-y-4">
+                {/* Image Upload */}
+                <div className="relative">
+                  <div className="h-40 bg-[#0a1f0a] rounded-xl overflow-hidden flex items-center justify-center border-2 border-dashed border-[#1a3d1a]">
+                    {previewURL ? (
+                      <img src={previewURL} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-center">
+                        <ImageIcon size={32} className="mx-auto text-green-600 mb-2" />
+                        <p className="text-green-400/50 text-sm">No image selected</p>
+                      </div>
+                    )}
+                  </div>
+                  <label className="absolute bottom-3 right-3 p-2 bg-green-600 hover:bg-green-700 
+                    rounded-lg cursor-pointer transition-colors">
+                    <Upload size={16} className="text-white" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                {/* Product Name */}
+                <div>
+                  <label className="block text-green-400/60 text-sm mb-2">Product Name</label>
+                  <input
+                    type="text"
+                    name="product"
+                    value={inputData.product}
+                    onChange={handleChange}
+                    placeholder="Enter product name"
+                    className="w-full bg-[#0d2818] text-white placeholder-green-400/40 
+                      px-4 py-3 rounded-xl border border-[#1a3d1a] 
+                      focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+
+                {/* Material */}
+                <div>
+                  <label className="block text-green-400/60 text-sm mb-2">Material Type</label>
+                  <input
+                    type="text"
+                    name="material"
+                    value={inputData.material}
+                    onChange={handleChange}
+                    placeholder="e.g., Water Bottles"
+                    className="w-full bg-[#0d2818] text-white placeholder-green-400/40 
+                      px-4 py-3 rounded-xl border border-[#1a3d1a] 
+                      focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+
+                {/* Material Goal & Stock */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-green-400/60 text-sm mb-2">Material Goal</label>
+                    <input
+                      type="number"
+                      name="materialGoal"
+                      value={inputData.materialGoal}
+                      onChange={handleChange}
+                      placeholder="0"
+                      className="w-full bg-[#0d2818] text-white placeholder-green-400/40 
+                        px-4 py-3 rounded-xl border border-[#1a3d1a] 
+                        focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-green-400/60 text-sm mb-2">Stock</label>
+                    <input
+                      type="number"
+                      name="stock"
+                      value={inputData.stock}
+                      onChange={handleChange}
+                      placeholder="0"
+                      className="w-full bg-[#0d2818] text-white placeholder-green-400/40 
+                        px-4 py-3 rounded-xl border border-[#1a3d1a] 
+                        focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={uploading}
+                  className={`w-full py-3 rounded-xl text-white font-semibold 
+                    flex items-center justify-center gap-2 transition-all
+                    ${formMode === "add" 
+                      ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] hover:from-[#1a4d1a] hover:to-[#0d2d0d]" 
+                      : "bg-gradient-to-r from-[#1a4d1a] to-[#0d3d0d] hover:from-[#1a5c1a] hover:to-[#0d2d0d]"
+                    }
+                    ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  {uploading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Processing...
+                    </>
+                  ) : formMode === "add" ? (
+                    <>
+                      <Plus size={18} />
+                      Add Product
+                    </>
+                  ) : (
+                    <>
+                      <Save size={18} />
+                      Update Product
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={() => setIsDeleteModalOpen(false)}
         >
-          <div className="flex w-full justify-around">
-            <div className="bg-[#808080] rounded-xl h-[270px] w-[200px] flex flex-col items-center justify-center">
-              {previewURL ? (
-                <img
-                  src={previewURL}
-                  alt="Preview"
-                  className="h-[170px] w-full object-cover rounded-xl"
-                />
-              ) : (
-                <div className="h-[170px] w-full bg-red-700 rounded-xl flex justify-center items-center">
-                  <p className="text-white mb-4">No picture selected</p>
-                </div>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="border-[1px] border-black w-full"
-              />
-            </div>
-            <div className="flex flex-col items-center justify-between w-fit">
-              <h1 className="text-black font-medium text-[20px]">Add New</h1>
-              <button
-                type="submit"
-                className="bg-[#588027] py-[2px] px-7 rounded-md"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-          <div className="w-[90%] flex flex-col gap-3">
-            <div className="flex w-full justify-between">
-              <p className="text-black">Product:</p>
-              <input
-                name="product"
-                value={inputData.product}
-                onChange={handleChange}
-                className="bg-[#808080] rounded-sm text-white p-[2px]"
-                type="text"
-              />
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-black">Material:</p>
-              <input
-                name="material"
-                value={inputData.material}
-                onChange={handleChange}
-                className="bg-[#808080] rounded-sm text-white p-[2px]"
-                type="text"
-              />
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-black">Goal:</p>
-              <input
-                name="materialGoal"
-                value={inputData.materialGoal}
-                onChange={handleChange}
-                className="bg-[#808080] rounded-sm text-white p-[2px]"
-                type="number"
-              />
-            </div>
-            <div className="flex w-full justify-between">
-              <p className="text-black">Stock:</p>
-              <input
-                name="stock"
-                value={inputData.stock}
-                onChange={handleChange}
-                className="bg-[#808080] rounded-sm text-white p-[2px]"
-                type="number"
-              />
-            </div>
-          </div>
-        </form>
-      )}
-      {isModalVisible && (
-        <div className="fixed inset-0 flex items-center h-screen w-full backdrop-blur-sm justify-center z-50">
-          <div className="bg-white p-5 rounded shadow-md">
-            <h2 className="text-lg font-bold">Delete Confirmation</h2>
-            <p>Are you sure you want to delete this project?</p>
-            <div className="flex justify-around mt-4">
-              <button
-                onClick={handleConfirmDelete}
-                className="bg-red-500 text-white px-4 py-2 rounded"
-              >
-                Yes, Delete
-              </button>
-              <button
-                onClick={hideDeleteModal}
-                className="bg-gray-300 text-black px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
+          <div 
+            className="bg-[#0d2818] rounded-2xl shadow-2xl w-full max-w-sm border border-[#1a3d1a]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center">
+                <AlertCircle size={32} className="text-red-400" />
+              </div>
+              <h3 className="text-white text-lg font-semibold mb-2">Delete Product</h3>
+              <p className="text-green-400/60 mb-6">Are you sure you want to delete this product? This action cannot be undone.</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="flex-1 py-2.5 bg-[#132d13] hover:bg-[#1a3d1a] text-white rounded-xl font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {isDeletedMessageVisible && (
-        <div className="fixed top-0 left-1/2 transform -translate-x-1/2 p-4 bg-red-500 text-white rounded shadow-md">
-          Record Deleted!
-        </div>
-      )}
-
-      {isUpdatedMessageVisible && (
-        <div className="fixed top-0 left-1/2 transform -translate-x-1/2 p-4 bg-[#0078D4] text-white rounded shadow-md">
-          Record updated!
-        </div>
-      )}
-
-      {isAddedMessageVisible && (
-        <div className="fixed top-0 left-1/2 transform -translate-x-1/2 p-4 bg-[#588027] text-white rounded shadow-md">
-          Added new record!
+      {/* Notification */}
+      {notification.show && (
+        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg
+          flex items-center gap-2 animate-bounce
+          ${notification.type === "success" ? "bg-emerald-500" : "bg-red-500"} text-white`}>
+          {notification.type === "success" ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+          {notification.message}
         </div>
       )}
     </div>
