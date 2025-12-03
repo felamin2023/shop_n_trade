@@ -11,6 +11,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [selectedStation, setSelectedStation] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -162,7 +163,7 @@ export default function Home() {
         console.log("Transaction created successfully:", data.transaction);
         closeConfirmModal();
         closeRequestModal();
-        alert("Request submitted successfully! You will be notified once it's reviewed.");
+        setIsSuccessModalOpen(true);
       } else {
         console.error("Failed to create transaction:", data.message);
         alert("Failed to submit request. Please try again.");
@@ -455,7 +456,7 @@ export default function Home() {
       {/* Confirmation Modal */}
       {isConfirmModalOpen && selectedProduct && (
         <div 
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
           onClick={closeConfirmModal}
         >
           <div 
@@ -709,6 +710,61 @@ export default function Home() {
                   )}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {isSuccessModalOpen && (
+        <div 
+          className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={() => setIsSuccessModalOpen(false)}
+        >
+          <div 
+            className="bg-[#0d2818] rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden border border-[#1a3d1a] animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-8 text-center">
+              {/* Success Icon */}
+              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <CheckCircle2 size={40} className="text-white" />
+              </div>
+
+              {/* Success Message */}
+              <h2 className="font-noto text-white text-2xl font-bold mb-3">
+                Request Submitted!
+              </h2>
+              <p className="text-green-400/80 text-sm mb-6 leading-relaxed">
+                Your request has been submitted successfully. You will be notified once it's reviewed by our team.
+              </p>
+
+              {/* Info Box */}
+              <div className="bg-[#132d13] rounded-xl p-4 mb-6 border border-[#1a3d1a] text-left">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#1a3d1a] rounded-lg flex-shrink-0">
+                    <Calendar size={16} className="text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-green-400/60 text-xs">What's next?</p>
+                    <p className="text-green-300 text-sm">
+                      Please bring your items to the collection center on your scheduled date.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setIsSuccessModalOpen(false)}
+                className="w-full py-3 px-4 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
+                  hover:from-[#1a4d1a] hover:to-[#0d2d0d]
+                  rounded-xl text-white font-semibold shadow-md hover:shadow-lg
+                  transition-all flex items-center justify-center gap-2"
+              >
+                <Leaf size={18} />
+                Got it, thanks!
+              </button>
             </div>
           </div>
         </div>
