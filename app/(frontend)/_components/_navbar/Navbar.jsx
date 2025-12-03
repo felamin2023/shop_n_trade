@@ -12,9 +12,11 @@ import {
   LogOut,
 } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 const Navbar = () => {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   const navlinks = [
     {
@@ -137,8 +139,8 @@ const Navbar = () => {
                   })}
                   
                   {/* Logout Button */}
-                  <Link
-                    href={isUserRoute ? "/user/signin" : "/admin/signin"}
+                  <button
+                    onClick={logout}
                     className="relative flex flex-col items-center gap-1 px-4 py-2 rounded-2xl
                       text-red-400/70 hover:text-red-400 transition-all duration-300 min-w-[70px]"
                   >
@@ -148,7 +150,7 @@ const Navbar = () => {
                     <span className="text-[10px] font-semibold tracking-wide">
                       Logout
                     </span>
-                  </Link>
+                  </button>
                 </nav>
               </div>
               

@@ -2,20 +2,24 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Loading from "@/components/Loading";
+import { Eye, EyeOff } from "lucide-react";
 import Notification from "@/components/Notification";
+import { useAuth } from "@/context/AuthContext";
 
 const SigninPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notification, setNotification] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleSignIn = async (e) => {
     e.preventDefault();
     setNotification(null);
-    setLoading(true);
+    setIsSubmitting(true);
 
     try {
       const response = await fetch("/api/login", {
@@ -28,7 +32,8 @@ const SigninPage = () => {
 
       if (response.ok) {
         setNotification({ message: "Login successful!", type: "success" });
-        localStorage.setItem("user", JSON.stringify(data.user));
+        login(data.user); // Use auth context login
+        setIsNavigating(true); // Show loading screen
 
         setTimeout(() => {
           if (data.user.role === "ADMIN") {
@@ -49,16 +54,39 @@ const SigninPage = () => {
         type: "error",
       });
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
+
+  // Loading screen for navigation
+  if (isNavigating) {
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207]">
+        <div className="flex flex-col items-center gap-6">
+          {/* Logo */}
+          <img
+            src="/images/signin_upPage/shopNtradelogo.png"
+            alt="Shop & Trade"
+            className="w-24 h-24 animate-pulse"
+          />
+          
+          {/* Spinner */}
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 border-4 border-green-900 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-transparent border-t-green-400 border-r-green-400 rounded-full animate-spin"></div>
+          </div>
+          
+          <p className="text-green-400 text-sm">Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       className="h-screen w-full flex justify-center items-center px-8     
       bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207]"
     >
-      {loading && <Loading />}
       {notification && (
         <Notification
           message={notification.message}
@@ -97,35 +125,71 @@ const SigninPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-[#0a1f0a] w-full placeholder-green-500/50 py-2 px-5 rounded-lg 
+              className="bg-[#0a1f0a] w-full placeholder-[#f5f5f0]/70 py-2 px-5 rounded-lg 
               text-white border border-[#1a3d1a] focus:ring-2 focus:ring-green-500 outline-none"
             />
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="bg-[#0a1f0a] w-full placeholder-green-500/50 py-2 px-5 rounded-lg 
-              text-white border border-[#1a3d1a] focus:ring-2 focus:ring-green-500 outline-none"
-            />
+            <div className="w-full relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="bg-[#0a1f0a] w-full placeholder-[#f5f5f0]/70 py-2 px-5 pr-10 rounded-lg 
+                text-white border border-[#1a3d1a] focus:ring-2 focus:ring-green-500 outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#1a5c1a] hover:text-[#2a7c2a]"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
 
-            <p className="text-green-300/80 text-[14px]">
+            <p className="text-[#f5f5f0]/80 text-[14px]">
               Don't have an account?{" "}
-              <a href="/user/signup" className="text-green-400 font-medium hover:underline">
+              <a href="/user/signup" className="text-[#f5f5f0] font-medium hover:underline hover:text-white">
                 Sign up
               </a>
             </p>
 
             <button
               type="submit"
-              className="bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] text-white py-2 w-[60%] rounded-lg hover:from-[#1a4d1a] hover:to-[#0d2d0d] transition"
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] text-white py-2 w-[60%] rounded-lg hover:from-[#1a4d1a] hover:to-[#0d2d0d] transition flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Sign In
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  <span>Signing In...</span>
+                </>
+              ) : (
+                "Sign In"
+              )}
             </button>
 
-            <p className="text-green-400/60 text-[12px] mt-2 hover:underline cursor-pointer hover:text-green-400">
+            <p className="text-[#f5f5f0]/70 text-[12px] mt-2 hover:underline cursor-pointer hover:text-white">
               Forgot password?
             </p>
           </form>
