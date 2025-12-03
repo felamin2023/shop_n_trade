@@ -22,14 +22,15 @@ import {
   XCircle,
   Loader2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 const RequestPage = () => {
   const { user } = useAuth();
-  const [recordFilter, setRecordFilter] = useState("pending");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,7 +39,16 @@ const RequestPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const ITEMS_PER_PAGE = 8;
+
+  const statusOptions = [
+    { value: "ALL", label: "All Status", icon: Filter },
+    { value: "PENDING", label: "Pending", icon: CircleDashed },
+    { value: "ACCEPTED", label: "Accepted", icon: CheckCircle2 },
+    { value: "REJECTED", label: "Rejected", icon: XCircle },
+    { value: "DELIVERED", label: "Delivered", icon: PackageCheck },
+  ];
 
   // Fetch transactions from database
   useEffect(() => {
@@ -64,17 +74,14 @@ const RequestPage = () => {
   }, [user]);
 
   // Filter transactions by status
-  const pendingTransactions = transactions.filter(t => t.status === "PENDING");
-  const acceptedTransactions = transactions.filter(t => 
-    t.status === "ACCEPTED" || t.status === "DELIVERED" || t.status === "REJECTED"
-  );
-
-  const currentList = recordFilter === "pending" ? pendingTransactions : acceptedTransactions;
+  const filteredByStatus = statusFilter === "ALL" 
+    ? transactions 
+    : transactions.filter(t => t.status === statusFilter);
   
-  const filteredList = currentList.filter(
+  const filteredList = filteredByStatus.filter(
     (item) =>
-      item.product.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.product.material.toLowerCase().includes(searchQuery.toLowerCase())
+      item.product?.product?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.product?.material?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Pagination logic
@@ -86,7 +93,7 @@ const RequestPage = () => {
   // Reset to page 1 when filter or search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [recordFilter, searchQuery]);
+  }, [statusFilter, searchQuery]);
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {
@@ -184,9 +191,14 @@ const RequestPage = () => {
     closeCancelModal();
   };
 
-  const pendingCount = pendingTransactions.length;
-  const acceptedCount = acceptedTransactions.length;
+  const pendingCount = transactions.filter(t => t.status === "PENDING").length;
+  const acceptedCount = transactions.filter(t => t.status === "ACCEPTED").length;
   const deliveredCount = transactions.filter(t => t.status === "DELIVERED").length;
+  const rejectedCount = transactions.filter(t => t.status === "REJECTED").length;
+
+  const getSelectedStatusOption = () => {
+    return statusOptions.find(opt => opt.value === statusFilter) || statusOptions[0];
+  };
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-24">
@@ -218,6 +230,10 @@ const RequestPage = () => {
               <Truck className="w-5 h-5 text-white" />
               <span className="text-white text-sm font-medium">{deliveredCount} Delivered</span>
             </div>
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+              <XCircle className="w-5 h-5 text-white" />
+              <span className="text-white text-sm font-medium">{rejectedCount} Rejected</span>
+            </div>
           </div>
         </div>
       </div>
@@ -225,46 +241,57 @@ const RequestPage = () => {
       <div className="max-w-5xl mx-auto px-4">
         {/* Filter & Search Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-          {/* Filter Tabs */}
-          <div className="flex bg-[#0d2818] rounded-2xl p-1.5 shadow-md border border-[#1a3d1a]">
+          {/* Status Filter Dropdown */}
+          <div className="relative">
             <button
-              onClick={() => setRecordFilter("pending")}
-              className={`
-                flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm
-                transition-all duration-300
-                ${
-                  recordFilter === "pending"
-                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
-                    : "text-green-400/70 hover:bg-[#132d13]"
-                }
-              `}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center gap-3 px-5 py-2.5 bg-[#0d2818] rounded-xl 
+                border border-[#1a3d1a] shadow-md hover:border-green-500/50 transition-all min-w-[180px]"
             >
-              <Clock size={18} />
-              Pending
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold
-                ${recordFilter === "pending" ? "bg-white/30" : "bg-[#3d2d0d] text-amber-400"}`}>
-                {pendingCount}
-              </span>
+              {(() => {
+                const selected = getSelectedStatusOption();
+                const Icon = selected.icon;
+                return (
+                  <>
+                    <Icon size={18} className="text-green-400" />
+                    <span className="text-white font-medium text-sm flex-1 text-left">
+                      {selected.label}
+                    </span>
+                    <ChevronDown 
+                      size={18} 
+                      className={`text-green-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                    />
+                  </>
+                );
+              })()}
             </button>
-            <button
-              onClick={() => setRecordFilter("accepted")}
-              className={`
-                flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm
-                transition-all duration-300
-                ${
-                  recordFilter === "accepted"
-                    ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] text-white shadow-md"
-                    : "text-green-400/70 hover:bg-[#132d13]"
-                }
-              `}
-            >
-              <CheckCircle2 size={18} />
-              Accepted
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold
-                ${recordFilter === "accepted" ? "bg-white/30" : "bg-[#132d13] text-green-400"}`}>
-                {acceptedCount}
-              </span>
-            </button>
+
+            {/* Dropdown Menu */}
+            {isDropdownOpen && (
+              <div className="absolute top-full left-0 mt-2 w-full bg-[#0d2818] rounded-xl border border-[#1a3d1a] 
+                shadow-xl z-50 overflow-hidden">
+                {statusOptions.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setStatusFilter(option.value);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors
+                        ${statusFilter === option.value 
+                          ? 'bg-[#1a3d1a] text-white' 
+                          : 'text-green-400/80 hover:bg-[#132d13]'
+                        }`}
+                    >
+                      <Icon size={16} />
+                      <span className="text-sm font-medium">{option.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Search Bar */}
@@ -287,98 +314,128 @@ const RequestPage = () => {
         <div className="flex items-center gap-3 mb-4">
           <div className="h-1 w-8 bg-gradient-to-r from-green-500 to-[#0d3d0d] rounded-full"></div>
           <h2 className="font-noto text-white text-xl font-semibold flex items-center gap-2">
-            {recordFilter === "pending" ? (
-              <>
-                <Clock size={20} className="text-amber-400" />
-                Pending Requests
-              </>
-            ) : (
-              <>
-                <CheckCircle2 size={20} className="text-green-400" />
-                Accepted Requests
-              </>
-            )}
+            <Package size={20} className="text-green-400" />
+            Transaction History
+            <span className="text-green-400/60 text-sm font-normal ml-2">
+              ({filteredList.length} {filteredList.length === 1 ? 'request' : 'requests'})
+            </span>
           </h2>
           <div className="h-1 w-8 bg-gradient-to-r from-[#0d3d0d] to-green-500 rounded-full"></div>
         </div>
 
-        {/* Request Cards - Fixed height container for consistent pagination position */}
-        <div className="min-h-[880px]">
-          <div className="space-y-4">
+        {/* Table Container */}
+        <div className="bg-[#0d2818] rounded-2xl border border-[#1a3d1a] overflow-hidden shadow-lg mb-6">
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-[#132d13] border-b border-[#1a3d1a]">
+            <div className="col-span-4 text-green-400 font-semibold text-sm flex items-center gap-2">
+              <Package size={16} />
+              Product
+            </div>
+            <div className="col-span-2 text-green-400 font-semibold text-sm flex items-center gap-2">
+              <Recycle size={16} />
+              Material
+            </div>
+            <div className="col-span-2 text-green-400 font-semibold text-sm flex items-center gap-2">
+              <Calendar size={16} />
+              Schedule
+            </div>
+            <div className="col-span-2 text-green-400 font-semibold text-sm flex items-center gap-2">
+              <CircleDashed size={16} />
+              Status
+            </div>
+            <div className="col-span-2 text-green-400 font-semibold text-sm text-center">
+              Actions
+            </div>
+          </div>
+
+          {/* Table Body */}
+          <div className="min-h-[500px]">
             {isLoading ? (
               <div className="flex justify-center items-center py-12">
                 <Loader2 className="w-8 h-8 text-green-400 animate-spin" />
               </div>
-            ) : paginatedList.map((request, i) => {
-            const statusStyle = getStatusStyle(request.status);
-            const StatusIcon = statusStyle.icon;
-            
-            return (
-              <div
-                key={request.transacID}
-                className="group bg-[#092b09] rounded-2xl shadow-md hover:shadow-xl 
-                  border border-[#1a3d1a] hover:border-green-500/50
-                  transition-all duration-300 p-4 flex flex-col sm:flex-row items-center gap-4"
-              >
-                {/* Product Image */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 border-2 border-[#1a3d1a]">
-                  <div 
-                    className="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-300"
-                    style={{ backgroundImage: `url(${request.product.img})` }}
-                  ></div>
-                </div>
-
-                {/* Request Details */}
-                <div className="flex-1 text-center sm:text-left">
-                  <h3 className="font-noto text-white font-semibold text-lg">
-                    {request.product.product}
-                  </h3>
-                  <div className="flex items-center justify-center sm:justify-start gap-2 text-green-400/70 mt-1">
-                    <Recycle size={14} />
-                    <span className="text-sm">{request.product.materialGoal} {request.product.material}</span>
-                  </div>
-                  <p className="text-green-500/50 text-xs mt-1">Request ID: {request.transacID.slice(0, 8)}...</p>
-                </div>
-
-                {/* Status Badge */}
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-full border
-                  ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}>
-                  <StatusIcon size={16} />
-                  <span className="text-sm font-medium">{statusStyle.label}</span>
-                </div>
-
-                {/* Action Button (only for accepted) */}
-                {recordFilter === "accepted" && (
-                  <button 
-                    onClick={() => openModal(request)}
-                    className="flex items-center gap-2 px-5 py-2.5 
-                      bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
-                      hover:from-[#1a4d1a] hover:to-[#0d2d0d]
-                      rounded-xl text-white text-sm font-semibold
-                      transform transition-all duration-200 hover:scale-105
-                      shadow-md hover:shadow-lg"
-                  >
-                    <Eye size={16} />
-                    View Details
-                  </button>
-                )}
-
-                {/* Cancel Button (only for pending) */}
-                {recordFilter === "pending" && (
-                  <button 
-                    onClick={() => openCancelModal(request)}
-                    className="flex items-center gap-2 px-5 py-2.5 
-                    bg-[#0d2818] border-2 border-red-500/50 
-                    hover:bg-red-500 hover:border-red-500 hover:text-white
-                    rounded-xl text-red-400 text-sm font-semibold
-                    transform transition-all duration-200 hover:scale-105
-                    shadow-md hover:shadow-lg">
-                    Cancel
-                  </button>
-                )}
+            ) : paginatedList.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-green-400/60">
+                <Package size={48} className="mb-4 opacity-50" />
+                <p className="text-lg font-medium">No requests found</p>
+                <p className="text-sm mt-1">Try adjusting your filters or search query</p>
               </div>
-            );
-          })}
+            ) : (
+              paginatedList.map((request) => {
+                const statusStyle = getStatusStyle(request.status);
+                const StatusIcon = statusStyle.icon;
+                
+                return (
+                  <div
+                    key={request.transacID}
+                    className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-[#1a3d1a]/50 
+                      hover:bg-[#132d13]/50 transition-colors items-center"
+                  >
+                    {/* Product */}
+                    <div className="col-span-4 flex items-center gap-3">
+                      <div 
+                        className="w-12 h-12 rounded-lg bg-cover bg-center border border-[#1a3d1a] flex-shrink-0"
+                        style={{ backgroundImage: `url(${request.product?.img})` }}
+                      />
+                      <div className="min-w-0">
+                        <p className="text-white font-medium text-sm truncate">
+                          {request.product?.product}
+                        </p>
+                        <p className="text-green-400/60 text-xs">
+                          ID: {request.transacID?.slice(0, 8)}...
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Material */}
+                    <div className="col-span-2">
+                      <div className="flex items-center gap-1 text-green-400">
+                        <Recycle size={14} />
+                        <span className="text-sm">{request.product?.materialGoal?.toLocaleString()}</span>
+                      </div>
+                      <p className="text-green-400/60 text-xs">{request.product?.material}</p>
+                    </div>
+
+                    {/* Schedule */}
+                    <div className="col-span-2">
+                      <p className="text-white text-sm">{request.scheduledDate || 'Not set'}</p>
+                      <p className="text-green-400/60 text-xs">{request.scheduledTime || ''}</p>
+                    </div>
+
+                    {/* Status */}
+                    <div className="col-span-2">
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
+                        ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border} border`}>
+                        <StatusIcon size={12} />
+                        {statusStyle.label}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="col-span-2 flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => openModal(request)}
+                        className="p-2 bg-[#1a3d1a] hover:bg-[#1a5c1a] rounded-lg transition-colors
+                          text-green-400 hover:text-white"
+                        title="View Details"
+                      >
+                        <Eye size={16} />
+                      </button>
+                      {request.status === "PENDING" && (
+                        <button
+                          onClick={() => openCancelModal(request)}
+                          className="p-2 bg-red-900/30 hover:bg-red-900/50 rounded-lg transition-colors
+                            text-red-400 hover:text-red-300"
+                          title="Cancel Request"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -424,17 +481,6 @@ const RequestPage = () => {
           </div>
         )}
 
-        {/* Empty State */}
-        {!isLoading && filteredList.length === 0 && (
-          <div className="text-center py-12 bg-[#0d2818] rounded-2xl shadow-md border border-[#1a3d1a]">
-            <Package size={48} className="mx-auto text-green-500/30 mb-3" />
-            <p className="text-green-400 font-medium">No requests found</p>
-            <p className="text-green-500/50 text-sm mt-1">
-              {searchQuery ? `No results for "${searchQuery}"` : "You haven't made any requests yet"}
-            </p>
-          </div>
-        )}
-
         {/* Info Card */}
         <div className="mt-6 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] rounded-2xl p-6 text-white border border-[#2a7c2a]">
           <div className="flex items-start gap-4">
@@ -458,137 +504,144 @@ const RequestPage = () => {
       {/* Modal/Dialog for View Details */}
       {isModalOpen && selectedRequest && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div 
-            className="bg-[#0d2818] rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto
+            className="bg-[#0d2818] rounded-2xl shadow-2xl w-full max-w-md max-h-[70vh] overflow-y-auto
               transform transition-all duration-300 animate-in fade-in zoom-in-95 border border-[#1a3d1a]"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
+            {/* Modal Header - Compact */}
             <div className="relative">
               <div 
-                className="h-40 bg-cover bg-center rounded-t-3xl"
-                style={{ backgroundImage: `url(${selectedRequest.product.img})` }}
+                className="h-24 bg-cover bg-center rounded-t-2xl"
+                style={{ backgroundImage: `url(${selectedRequest.product?.img})` }}
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0d2818] to-transparent rounded-t-3xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0d2818] to-transparent rounded-t-2xl"></div>
               </div>
               
               {/* Close Button */}
               <button
                 onClick={closeModal}
-                className="absolute top-4 right-4 p-2 bg-[#0d2818]/50 backdrop-blur-sm rounded-full
+                className="absolute top-2 right-2 p-1.5 bg-[#0d2818]/50 backdrop-blur-sm rounded-full
                   hover:bg-[#0d2818]/80 transition-colors border border-[#1a3d1a]"
               >
-                <X size={20} className="text-white" />
+                <X size={16} className="text-white" />
               </button>
 
               {/* Product Title Overlay */}
-              <div className="absolute bottom-4 left-4 right-4">
-                <h2 className="font-noto text-white text-2xl font-bold">
-                  {selectedRequest.product.product}
+              <div className="absolute bottom-2 left-3 right-3">
+                <h2 className="font-noto text-white text-lg font-bold">
+                  {selectedRequest.product?.product}
                 </h2>
-                <div className="flex items-center gap-2 text-green-300/80 mt-1">
-                  <Recycle size={14} />
-                  <span className="text-sm">{selectedRequest.product.materialGoal} {selectedRequest.product.material}</span>
+                <div className="flex items-center gap-2 text-green-300/80">
+                  <Recycle size={12} />
+                  <span className="text-xs">{selectedRequest.product?.materialGoal} {selectedRequest.product?.material}</span>
                 </div>
               </div>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-6">
+            {/* Modal Body - Compact */}
+            <div className="p-4">
               {/* Status Badge */}
               {(() => {
                 const statusStyle = getStatusStyle(selectedRequest.status);
                 const StatusIcon = statusStyle.icon;
                 return (
-                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-6
+                  <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border mb-3
                     ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}>
-                    <StatusIcon size={18} />
-                    <span className="font-semibold">{statusStyle.label}</span>
+                    <StatusIcon size={14} />
+                    <span className="font-semibold text-sm">{statusStyle.label}</span>
                   </div>
                 );
               })()}
 
-              {/* Details Grid */}
-              <div className="space-y-4">
-                {/* Request ID */}
-                <div className="flex items-center gap-3 p-3 bg-[#132d13] rounded-xl border border-[#1a3d1a]">
-                  <div className="p-2 bg-[#1a3d1a] rounded-lg">
-                    <Hash size={18} className="text-green-400" />
+              {/* Details Grid - Compact */}
+              <div className="space-y-2">
+                {/* Row 1: Transaction ID & Schedule */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex items-center gap-2 p-2 bg-[#132d13] rounded-lg border border-[#1a3d1a]">
+                    <Hash size={14} className="text-green-400 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-green-500/50 text-[10px]">ID</p>
+                      <p className="text-white text-xs truncate">{selectedRequest.transacID?.slice(0, 8)}...</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-green-500/50 text-xs font-medium">Transaction ID</p>
-                    <p className="text-white font-semibold text-sm">{selectedRequest.transacID}</p>
-                  </div>
-                </div>
-
-                {/* Product ID */}
-                <div className="flex items-center gap-3 p-3 bg-[#1a2d3d] rounded-xl border border-[#2a4d5c]">
-                  <div className="p-2 bg-[#2a4d5c] rounded-lg">
-                    <Package size={18} className="text-cyan-400" />
-                  </div>
-                  <div>
-                    <p className="text-cyan-500/50 text-xs font-medium">Product ID</p>
-                    <p className="text-white font-semibold text-sm">{selectedRequest.productID}</p>
+                  <div className="flex items-center gap-2 p-2 bg-[#1a2d3d] rounded-lg border border-[#2a4d5c]">
+                    <Calendar size={14} className="text-cyan-400 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-cyan-500/50 text-[10px]">Schedule</p>
+                      <p className="text-white text-xs truncate">{selectedRequest.scheduledDate || 'Not set'}</p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Stock Info */}
-                <div className="flex items-center gap-3 p-3 bg-[#3d2d0d] rounded-xl border border-[#5c4a1a]">
-                  <div className="p-2 bg-[#5c4a1a] rounded-lg">
-                    <ShoppingBag size={18} className="text-amber-400" />
+                {/* Row 2: Created & Stock */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex items-center gap-2 p-2 bg-[#2d1a3d] rounded-lg border border-[#4a2a5c]">
+                    <Clock size={14} className="text-purple-400 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-purple-500/50 text-[10px]">Created</p>
+                      <p className="text-white text-xs truncate">
+                        {selectedRequest.createdAt 
+                          ? new Date(selectedRequest.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                          : 'N/A'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-amber-500/50 text-xs font-medium">Stock Available</p>
-                    <p className="text-white font-semibold text-sm">{selectedRequest.product.stock} units</p>
+                  <div className="flex items-center gap-2 p-2 bg-[#3d2d0d] rounded-lg border border-[#5c4a1a]">
+                    <ShoppingBag size={14} className="text-amber-400 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-amber-500/50 text-[10px]">Stock</p>
+                      <p className="text-white text-xs">{selectedRequest.product?.stock} units</p>
+                    </div>
                   </div>
                 </div>
 
-                {/* User Address */}
-                <div className="flex items-start gap-3 p-3 bg-[#3d1a1a] rounded-xl border border-[#5c2a2a]">
-                  <div className="p-2 bg-[#5c2a2a] rounded-lg">
-                    <MapPin size={18} className="text-rose-400" />
-                  </div>
-                  <div>
-                    <p className="text-rose-500/50 text-xs font-medium">Delivery Address</p>
-                    <p className="text-white font-semibold">{selectedRequest.user.address}</p>
+                {/* Address */}
+                <div className="flex items-center gap-2 p-2 bg-[#3d1a1a] rounded-lg border border-[#5c2a2a]">
+                  <MapPin size={14} className="text-rose-400 flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-rose-500/50 text-[10px]">Address</p>
+                    <p className="text-white text-xs truncate">{selectedRequest.user?.address || user?.address || 'N/A'}</p>
                   </div>
                 </div>
 
-                {/* Contact Number */}
-                <div className="flex items-center gap-3 p-3 bg-[#1a2d3d] rounded-xl border border-[#2a4d5c]">
-                  <div className="p-2 bg-[#2a4d5c] rounded-lg">
-                    <Phone size={18} className="text-cyan-400" />
-                  </div>
-                  <div>
-                    <p className="text-cyan-500/50 text-xs font-medium">Contact Number</p>
-                    <p className="text-white font-semibold">{selectedRequest.user.contact}</p>
+                {/* Contact */}
+                <div className="flex items-center gap-2 p-2 bg-[#1a2d3d] rounded-lg border border-[#2a4d5c]">
+                  <Phone size={14} className="text-cyan-400 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-cyan-500/50 text-[10px]">Contact</p>
+                    <p className="text-white text-xs">{selectedRequest.user?.contact || user?.contact || 'N/A'}</p>
                   </div>
                 </div>
+
+                {/* Uploaded Images - Compact */}
+                {selectedRequest.images && selectedRequest.images.length > 0 && (
+                  <div className="p-2 bg-[#132d13] rounded-lg border border-[#1a3d1a]">
+                    <p className="text-green-500/50 text-[10px] mb-2">Proof ({selectedRequest.images.length} images)</p>
+                    <div className="grid grid-cols-4 gap-1">
+                      {selectedRequest.images.slice(0, 4).map((img, idx) => (
+                        <div 
+                          key={idx}
+                          className="aspect-square rounded bg-cover bg-center border border-[#1a3d1a]"
+                          style={{ backgroundImage: `url(${img})` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 mt-6">
-                {selectedRequest.status !== "DELIVERED" && (
-                  <button className="flex-1 flex items-center justify-center gap-2 py-3
-                    bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
-                    hover:from-[#1a4d1a] hover:to-[#0d2d0d]
-                    rounded-xl text-white font-semibold
-                    transform transition-all duration-200 hover:scale-[1.02]
-                    shadow-md hover:shadow-lg">
-                    <Truck size={18} />
-                    Track Delivery
-                  </button>
-                )}
+              {/* Action Buttons - Compact */}
+              <div className="flex gap-2 mt-4">
                 <button 
                   onClick={closeModal}
-                  className={`${selectedRequest.status !== "DELIVERED" ? "" : "flex-1"} 
-                    flex items-center justify-center gap-2 py-3 px-6
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-4
                     bg-[#132d13] hover:bg-[#1a3d1a]
-                    rounded-xl text-green-400 font-semibold
-                    transform transition-all duration-200 border border-[#1a3d1a]`}
+                    rounded-lg text-green-400 font-medium text-sm
+                    transition-all duration-200 border border-[#1a3d1a]"
                 >
                   Close
                 </button>
@@ -601,7 +654,7 @@ const RequestPage = () => {
       {/* Cancel Confirmation Modal */}
       {isCancelModalOpen && requestToCancel && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={closeCancelModal}
         >
           <div 
@@ -641,20 +694,20 @@ const RequestPage = () => {
                 <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-[#1a3d1a]">
                   <div 
                     className="w-full h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${requestToCancel.product.img})` }}
+                    style={{ backgroundImage: `url(${requestToCancel.product?.img})` }}
                   ></div>
                 </div>
                 
                 {/* Product Info */}
                 <div className="flex-1">
                   <h3 className="font-noto text-white font-semibold">
-                    {requestToCancel.product.product}
+                    {requestToCancel.product?.product}
                   </h3>
                   <div className="flex items-center gap-2 text-green-400/70 mt-1">
                     <Recycle size={12} />
-                    <span className="text-xs">{requestToCancel.product.materialGoal} {requestToCancel.product.material}</span>
+                    <span className="text-xs">{requestToCancel.product?.materialGoal} {requestToCancel.product?.material}</span>
                   </div>
-                  <p className="text-green-500/50 text-xs mt-1">ID: {requestToCancel.transacID.slice(0, 8)}...</p>
+                  <p className="text-green-500/50 text-xs mt-1">ID: {requestToCancel.transacID?.slice(0, 8)}...</p>
                 </div>
               </div>
 

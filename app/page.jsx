@@ -22,11 +22,12 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 8;
 
-  // Pagination logic
-  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+  // Pagination logic - filter out products with 0 stock
+  const availableProducts = products.filter(product => product.stock > 0);
+  const totalPages = Math.ceil(availableProducts.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedProducts = products.slice(startIndex, endIndex);
+  const paginatedProducts = availableProducts.slice(startIndex, endIndex);
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {
@@ -225,7 +226,7 @@ export default function Home() {
                 <div className="col-span-full flex justify-center items-center py-12">
                   <Loader2 className="w-8 h-8 text-green-400 animate-spin" />
                 </div>
-              ) : products.length === 0 ? (
+              ) : availableProducts.length === 0 ? (
                 <div className="col-span-full text-center py-12 text-green-400">
                   No products available at the moment.
                 </div>
@@ -280,8 +281,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Pagination Controls - Always visible when there are products */}
-          {!isLoadingProducts && products.length > 0 && (
+          {/* Pagination Controls - Always visible when there are available products */}
+          {!isLoadingProducts && availableProducts.length > 0 && (
             <div className="flex items-center justify-center gap-3 mt-6 w-full">
               <button
                 onClick={goToPrevPage}
