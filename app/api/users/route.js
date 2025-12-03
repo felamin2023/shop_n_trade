@@ -3,13 +3,25 @@ import db from "@/lib/db";
 import bcrypt from "bcryptjs";
 
 export async function GET(request) {
-  const users = await db.user.findMany({});
+  try {
+    const users = await db.user.findMany({});
 
-  if (!users) {
-    return NextResponse.json({ status: 400 });
+    if (!users) {
+      return NextResponse.json({ status: 400 });
+    }
+
+    return NextResponse.json({ status: 200, users });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return NextResponse.json(
+      {
+        status: 500,
+        error: "Failed to fetch users",
+        message: error.message,
+      },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json({ status: 200, users });
 }
 
 export async function POST(request) {

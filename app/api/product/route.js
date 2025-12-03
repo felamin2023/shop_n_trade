@@ -12,10 +12,14 @@ export async function GET() {
     return NextResponse.json({ status: 200, product });
   } catch (error) {
     console.error("Error fetching products:", error);
-    return NextResponse.json({
-      status: 500,
-      error: "Failed to fetch products",
-    });
+    return NextResponse.json(
+      {
+        status: 500,
+        error: "Failed to fetch products",
+        message: error.message,
+      },
+      { status: 500 }
+    );
   }
 }
 
