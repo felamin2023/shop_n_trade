@@ -21,6 +21,8 @@ import {
   ShoppingBag,
   Check,
   XCircle,
+  Truck,
+  Ban,
 } from "lucide-react";
 
 const TransactionPage = () => {
@@ -42,6 +44,7 @@ const TransactionPage = () => {
     message: "",
   });
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
 
   // Show notification
   const showNotification = (type, message) => {
@@ -112,10 +115,9 @@ const TransactionPage = () => {
   const acceptedCount = transactions.filter(
     (t) => t.status === "ACCEPTED"
   ).length;
-  const totalBottles = transactions.reduce(
-    (acc, t) => acc + (t.product?.materialGoal || 0),
-    0
-  );
+  const totalBottles = transactions
+    .filter((t) => t.status === "DELIVERED")
+    .reduce((acc, t) => acc + (t.product?.materialGoal || 0), 0);
 
   // Open confirmation modal
   const openConfirmModal = (transacID, status) => {
@@ -135,6 +137,7 @@ const TransactionPage = () => {
   // Handle status update
   const handleStatusUpdate = async (transacID, newStatus) => {
     try {
+      setUpdating(true);
       const res = await fetch("/api/transaction", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -156,6 +159,8 @@ const TransactionPage = () => {
     } catch (error) {
       console.error("Error updating transaction:", error);
       showNotification("error", "Failed to update transaction");
+    } finally {
+      setUpdating(false);
     }
     setIsViewModalOpen(false);
   };
@@ -170,6 +175,8 @@ const TransactionPage = () => {
         return "bg-red-500/20 text-red-400 border-red-500/30";
       case "DELIVERED":
         return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+      case "CANCELED":
+        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
       default:
         return "bg-gray-500/20 text-gray-400 border-gray-500/30";
     }
@@ -290,7 +297,14 @@ const TransactionPage = () => {
                   className="absolute top-full mt-2 right-0 w-36 bg-[#0d2818] rounded-xl 
                   border border-[#1a3d1a] shadow-xl z-20 overflow-hidden"
                 >
-                  {["All", "Pending", "Accepted", "Rejected"].map((filter) => (
+                  {[
+                    "All",
+                    "Pending",
+                    "Accepted",
+                    "Rejected",
+                    "Delivered",
+                    "Canceled",
+                  ].map((filter) => (
                     <button
                       key={filter}
                       onClick={() => {
@@ -468,7 +482,10 @@ const TransactionPage = () => {
                             <XCircle size={12} className="inline mr-1" />
                           )}
                           {transaction.status === "DELIVERED" && (
-                            <CheckCircle2 size={12} className="inline mr-1" />
+                            <Truck size={12} className="inline mr-1" />
+                          )}
+                          {transaction.status === "CANCELED" && (
+                            <Ban size={12} className="inline mr-1" />
                           )}
                           {transaction.status}
                         </span>
@@ -494,6 +511,7 @@ const TransactionPage = () => {
                                   )
                                 }
                                 className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+                                title="Accept"
                               >
                                 <Check size={16} />
                               </button>
@@ -505,8 +523,37 @@ const TransactionPage = () => {
                                   )
                                 }
                                 className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                                title="Reject"
                               >
                                 <XCircle size={16} />
+                              </button>
+                            </>
+                          )}
+                          {transaction.status === "ACCEPTED" && (
+                            <>
+                              <button
+                                onClick={() =>
+                                  openConfirmModal(
+                                    transaction.transacID,
+                                    "DELIVERED"
+                                  )
+                                }
+                                className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
+                                title="Mark as Delivered"
+                              >
+                                <Truck size={16} />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  openConfirmModal(
+                                    transaction.transacID,
+                                    "CANCELED"
+                                  )
+                                }
+                                className="p-2 bg-gray-500/20 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-colors"
+                                title="Cancel"
+                              >
+                                <Ban size={16} />
                               </button>
                             </>
                           )}
@@ -572,7 +619,10 @@ const TransactionPage = () => {
                     <XCircle size={14} className="inline mr-1" />
                   )}
                   {selectedTransaction.status === "DELIVERED" && (
-                    <CheckCircle2 size={14} className="inline mr-1" />
+                    <Truck size={14} className="inline mr-1" />
+                  )}
+                  {selectedTransaction.status === "CANCELED" && (
+                    <Ban size={14} className="inline mr-1" />
                   )}
                   {selectedTransaction.status}
                 </span>
@@ -717,6 +767,38 @@ const TransactionPage = () => {
                   </button>
                 </div>
               )}
+              {selectedTransaction.status === "ACCEPTED" && (
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => {
+                      setIsViewModalOpen(false);
+                      openConfirmModal(
+                        selectedTransaction.transacID,
+                        "DELIVERED"
+                      );
+                    }}
+                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl 
+                      font-semibold flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <Truck size={18} />
+                    Delivered
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsViewModalOpen(false);
+                      openConfirmModal(
+                        selectedTransaction.transacID,
+                        "CANCELED"
+                      );
+                    }}
+                    className="flex-1 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-xl 
+                      font-semibold flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <Ban size={18} />
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -737,24 +819,41 @@ const TransactionPage = () => {
                 className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
                   confirmAction.status === "ACCEPTED"
                     ? "bg-green-500/20"
+                    : confirmAction.status === "DELIVERED"
+                    ? "bg-blue-500/20"
+                    : confirmAction.status === "CANCELED"
+                    ? "bg-gray-500/20"
                     : "bg-red-500/20"
                 }`}
               >
-                {confirmAction.status === "ACCEPTED" ? (
+                {confirmAction.status === "ACCEPTED" && (
                   <CheckCircle2 size={32} className="text-green-400" />
-                ) : (
+                )}
+                {confirmAction.status === "REJECTED" && (
                   <XCircle size={32} className="text-red-400" />
+                )}
+                {confirmAction.status === "DELIVERED" && (
+                  <Truck size={32} className="text-blue-400" />
+                )}
+                {confirmAction.status === "CANCELED" && (
+                  <Ban size={32} className="text-gray-400" />
                 )}
               </div>
               <h3 className="text-white text-lg font-semibold mb-2">
-                {confirmAction.status === "ACCEPTED"
-                  ? "Accept Transaction?"
-                  : "Reject Transaction?"}
+                {confirmAction.status === "ACCEPTED" && "Accept Transaction?"}
+                {confirmAction.status === "REJECTED" && "Reject Transaction?"}
+                {confirmAction.status === "DELIVERED" && "Mark as Delivered?"}
+                {confirmAction.status === "CANCELED" && "Cancel Transaction?"}
               </h3>
               <p className="text-green-400/60 mb-6">
-                {confirmAction.status === "ACCEPTED"
-                  ? "Are you sure you want to accept this transaction? The user will be notified."
-                  : "Are you sure you want to reject this transaction? This action cannot be undone."}
+                {confirmAction.status === "ACCEPTED" &&
+                  "Are you sure you want to accept this transaction? The user will be notified."}
+                {confirmAction.status === "REJECTED" &&
+                  "Are you sure you want to reject this transaction? This action cannot be undone."}
+                {confirmAction.status === "DELIVERED" &&
+                  "Mark this transaction as delivered? The bottles will be added to the total count."}
+                {confirmAction.status === "CANCELED" &&
+                  "Are you sure you want to cancel this transaction? This action cannot be undone."}
               </p>
               <div className="flex gap-3">
                 <button
@@ -762,19 +861,37 @@ const TransactionPage = () => {
                     setIsConfirmModalOpen(false);
                     setConfirmAction({ transacID: null, status: null });
                   }}
-                  className="flex-1 py-2.5 bg-[#132d13] hover:bg-[#1a3d1a] text-white rounded-xl font-medium transition-colors"
+                  disabled={updating}
+                  className="flex-1 py-2.5 bg-[#132d13] hover:bg-[#1a3d1a] text-white rounded-xl font-medium transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmedStatusUpdate}
-                  className={`flex-1 py-2.5 text-white rounded-xl font-medium transition-colors ${
+                  disabled={updating}
+                  className={`flex-1 py-2.5 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 ${
                     confirmAction.status === "ACCEPTED"
                       ? "bg-green-600 hover:bg-green-700"
+                      : confirmAction.status === "DELIVERED"
+                      ? "bg-blue-600 hover:bg-blue-700"
+                      : confirmAction.status === "CANCELED"
+                      ? "bg-gray-500 hover:bg-gray-600"
                       : "bg-red-500 hover:bg-red-600"
                   }`}
                 >
-                  {confirmAction.status === "ACCEPTED" ? "Accept" : "Reject"}
+                  {updating ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      {confirmAction.status === "ACCEPTED" && "Accept"}
+                      {confirmAction.status === "REJECTED" && "Reject"}
+                      {confirmAction.status === "DELIVERED" && "Confirm"}
+                      {confirmAction.status === "CANCELED" && "Cancel"}
+                    </>
+                  )}
                 </button>
               </div>
             </div>

@@ -70,4 +70,5 @@ enum TransactionStatus {
   REJECTED
   ACCEPTED
   DELIVERED
+  CANCELED
 }

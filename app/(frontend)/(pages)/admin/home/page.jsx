@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Users,
@@ -28,9 +29,11 @@ import {
 } from "lucide-react";
 
 const AdminHomepage = () => {
+  const router = useRouter();
   const [productData, setProductData] = useState([]);
   const [allDataProject, setAllDataProject] = useState([]);
   const [allUser, setAllUser] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [dashboardFilter, setDashboardFilter] = useState("user");
   const [searchQuery, setSearchQuery] = useState("");
   const [recordFilter, setRecordFilter] = useState("All");
@@ -40,6 +43,21 @@ const AdminHomepage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [notification, setNotification] = useState({
+    show: false,
+    type: "",
+    message: "",
+  });
+
+  // Show notification
+  const showNotification = (type, message) => {
+    setNotification({ show: true, type, message });
+    setTimeout(
+      () => setNotification({ show: false, type: "", message: "" }),
+      3000
+    );
+  };
 
   // Mock data for demo (will be replaced by API calls)
   const mockUsers = [
@@ -200,6 +218,21 @@ const AdminHomepage = () => {
     }
   }
 
+  async function fetchTransactions() {
+    try {
+      const res = await fetch("/api/transaction");
+      const data = await res.json();
+      if (data.status === 200 && data.transactions) {
+        setTransactions(data.transactions);
+      } else {
+        setTransactions([]);
+      }
+    } catch (error) {
+      console.log(error);
+      setTransactions([]);
+    }
+  }
+
   useEffect(() => {
     async function fetchAll() {
       setLoading(true);
@@ -207,6 +240,7 @@ const AdminHomepage = () => {
         fetchProductData(),
         fetchAllDataProject(),
         fetchAllUsers(),
+        fetchTransactions(),
       ]);
       setLoading(false);
     }
@@ -223,10 +257,10 @@ const AdminHomepage = () => {
   const doneProjectCount = allDataProject.filter(
     (project) => project.status === "DONE"
   ).length;
-  const totalBottles = allUser.reduce(
-    (acc, user) => acc + (user.bottlesDonated || 0),
-    0
-  );
+  // Total bottles from delivered transactions only
+  const totalBottles = transactions
+    .filter((t) => t.status === "DELIVERED")
+    .reduce((acc, t) => acc + (t.product?.materialGoal || 0), 0);
 
   // Filter functions
   const filteredUsers = allUser.filter(
@@ -271,11 +305,60 @@ const AdminHomepage = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const handleDelete = () => {
-    // Mock delete - would call API in real implementation
-    console.log("Deleting:", itemToDelete);
-    setIsDeleteModalOpen(false);
-    setItemToDelete(null);
+  const handleDelete = async () => {
+    if (!itemToDelete) return;
+
+    setDeleteLoading(true);
+    try {
+      let endpoint = "";
+      let idField = "";
+      let bodyData = {};
+
+      // Determine which type of item we're deleting
+      if (itemToDelete.userID) {
+        endpoint = `/api/users`;
+        idField = "user";
+        bodyData = { userID: itemToDelete.userID };
+      } else if (itemToDelete.projectID) {
+        endpoint = `/api/project`;
+        idField = "project";
+        bodyData = { projectID: itemToDelete.projectID };
+      } else if (itemToDelete.productID) {
+        endpoint = `/api/product`;
+        idField = "product";
+        bodyData = { productID: itemToDelete.productID };
+      }
+
+      const res = await fetch(endpoint, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bodyData),
+      });
+
+      const data = await res.json();
+
+      if (data.status === 200) {
+        showNotification(
+          "success",
+          `${
+            idField.charAt(0).toUpperCase() + idField.slice(1)
+          } deleted successfully!`
+        );
+        // Refresh data based on type
+        if (idField === "user") await fetchAllUsers();
+        else if (idField === "project") await fetchAllDataProject();
+        else if (idField === "product") await fetchProductData();
+      } else {
+        showNotification("error", data.message || "Failed to delete");
+      }
+    } catch (error) {
+      console.error("Error deleting:", error);
+      showNotification("error", "Failed to delete item");
+    } finally {
+      setDeleteLoading(false);
+      setIsDeleteModalOpen(false);
+      setItemToDelete(null);
+    }
   };
 
   const dashboardTabs = [
@@ -303,7 +386,7 @@ const AdminHomepage = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-28">
       {/* Header */}
       <div className="w-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] py-6 px-4 mb-6">
         <div className="max-w-7xl mx-auto">
@@ -596,9 +679,6 @@ const AdminHomepage = () => {
                       Chairs Needed
                     </th>
                     <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
-                      Progress
-                    </th>
-                    <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
                       Status
                     </th>
                     <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
@@ -609,7 +689,7 @@ const AdminHomepage = () => {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="6" className="text-center py-16">
+                      <td colSpan="5" className="text-center py-16">
                         <div className="flex flex-col items-center gap-3">
                           <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
                           <p className="text-green-400/60">
@@ -620,7 +700,7 @@ const AdminHomepage = () => {
                     </tr>
                   ) : filteredProjects.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="text-center py-16">
+                      <td colSpan="5" className="text-center py-16">
                         <FolderKanban
                           size={48}
                           className="mx-auto text-[#1a3d1a] mb-3"
@@ -663,21 +743,6 @@ const AdminHomepage = () => {
                             </span>
                           </div>
                         </td>
-                        <td className="py-4 px-6">
-                          <div className="w-full max-w-[120px] mx-auto">
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="text-green-400/50">
-                                {project.progress || 0}%
-                              </span>
-                            </div>
-                            <div className="h-2 bg-[#0a1f0a] rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-gradient-to-r from-green-600 to-green-400 rounded-full"
-                                style={{ width: `${project.progress || 0}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </td>
                         <td className="py-4 px-6 text-center">
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(
@@ -702,7 +767,14 @@ const AdminHomepage = () => {
                               <Eye size={16} />
                             </button>
                             {project.status === "PENDING" && (
-                              <button className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors">
+                              <button
+                                onClick={() =>
+                                  router.push(
+                                    `/admin/project?edit=${project.projectID}`
+                                  )
+                                }
+                                className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+                              >
                                 <Edit size={16} />
                               </button>
                             )}
@@ -837,7 +909,14 @@ const AdminHomepage = () => {
                             >
                               <Eye size={16} />
                             </button>
-                            <button className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors">
+                            <button
+                              onClick={() =>
+                                router.push(
+                                  `/admin/inventory?edit=${product.productID}`
+                                )
+                              }
+                              className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+                            >
                               <Edit size={16} />
                             </button>
                             <button
@@ -861,15 +940,21 @@ const AdminHomepage = () => {
       {/* View Modal */}
       {isViewModalOpen && selectedItem && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 pb-24 bg-black/70 backdrop-blur-sm"
           onClick={() => setIsViewModalOpen(false)}
         >
           <div
-            className="bg-[#0d2818] rounded-2xl shadow-2xl w-full max-w-md border border-[#1a3d1a]"
+            className="bg-[#0d2818] rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-y-auto border border-[#1a3d1a]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 border-b border-[#1a3d1a] flex items-center justify-between">
-              <h3 className="text-white text-lg font-semibold">Details</h3>
+              <h3 className="text-white text-lg font-semibold">
+                {selectedItem.productID
+                  ? "Product Details"
+                  : selectedItem.projectID
+                  ? "Project Details"
+                  : "User Details"}
+              </h3>
               <button
                 onClick={() => setIsViewModalOpen(false)}
                 className="p-2 hover:bg-[#132d13] rounded-lg transition-colors"
@@ -878,18 +963,93 @@ const AdminHomepage = () => {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              {Object.entries(selectedItem)
-                .filter(([key]) => !["password", "userID", "img"].includes(key))
-                .map(([key, value]) => (
-                  <div key={key} className="flex justify-between">
-                    <span className="text-green-300/70 capitalize">
-                      {key.replace(/([A-Z])/g, " $1")}
-                    </span>
-                    <span className="text-white font-medium">
-                      {String(value)}
-                    </span>
+              {/* Product View with Image */}
+              {selectedItem.productID && (
+                <>
+                  {/* Product Image */}
+                  <div className="flex justify-center mb-4">
+                    <div className="w-32 h-32 rounded-2xl bg-[#0a1f0a] overflow-hidden border-2 border-[#1a3d1a]">
+                      {selectedItem.img ? (
+                        <img
+                          src={selectedItem.img}
+                          alt={selectedItem.product}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package size={40} className="text-green-600" />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                ))}
+                  {/* Product Name */}
+                  <div className="text-center mb-4">
+                    <h4 className="text-white text-xl font-bold">
+                      {selectedItem.product}
+                    </h4>
+                    <p className="text-green-400/60 text-sm">
+                      ID: {selectedItem.productID?.slice(0, 8)}
+                    </p>
+                  </div>
+                  {/* Product Details */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between bg-[#132d13]/50 rounded-xl p-3">
+                      <span className="text-green-300/70 flex items-center gap-2">
+                        <Recycle size={16} /> Material
+                      </span>
+                      <span className="text-white font-medium">
+                        {selectedItem.material}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between bg-[#132d13]/50 rounded-xl p-3">
+                      <span className="text-green-300/70">Material Goal</span>
+                      <span className="text-white font-medium">
+                        {selectedItem.materialGoal?.toLocaleString()} bottles
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between bg-[#132d13]/50 rounded-xl p-3">
+                      <span className="text-green-300/70">Stock</span>
+                      <span
+                        className={`font-semibold px-3 py-1 rounded-full text-sm ${
+                          selectedItem.stock > 5
+                            ? "bg-green-600/20 text-green-400"
+                            : selectedItem.stock > 0
+                            ? "bg-yellow-500/20 text-yellow-400"
+                            : "bg-red-500/20 text-red-400"
+                        }`}
+                      >
+                        {selectedItem.stock} in stock
+                      </span>
+                    </div>
+                  </div>
+                </>
+              )}
+              {/* Non-Product View (Users & Projects) */}
+              {!selectedItem.productID &&
+                Object.entries(selectedItem)
+                  .filter(
+                    ([key]) =>
+                      ![
+                        "password",
+                        "userID",
+                        "img",
+                        "productID",
+                        "projectID",
+                      ].includes(key)
+                  )
+                  .map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="flex justify-between bg-[#132d13]/50 rounded-xl p-3"
+                    >
+                      <span className="text-green-300/70 capitalize">
+                        {key.replace(/([A-Z])/g, " $1")}
+                      </span>
+                      <span className="text-white font-medium">
+                        {String(value)}
+                      </span>
+                    </div>
+                  ))}
             </div>
           </div>
         </div>
@@ -919,19 +1079,46 @@ const AdminHomepage = () => {
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsDeleteModalOpen(false)}
-                  className="flex-1 py-2.5 bg-[#132d13] hover:bg-[#1a3d1a] text-white rounded-xl font-medium transition-colors"
+                  disabled={deleteLoading}
+                  className="flex-1 py-2.5 bg-[#132d13] hover:bg-[#1a3d1a] text-white rounded-xl font-medium transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors"
+                  disabled={deleteLoading}
+                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Delete
+                  {deleteLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
                 </button>
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Notification */}
+      {notification.show && (
+        <div
+          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg
+          flex items-center gap-2 animate-bounce
+          ${
+            notification.type === "success" ? "bg-emerald-500" : "bg-red-500"
+          } text-white`}
+        >
+          {notification.type === "success" ? (
+            <CheckCircle2 size={20} />
+          ) : (
+            <AlertCircle size={20} />
+          )}
+          {notification.message}
         </div>
       )}
     </div>

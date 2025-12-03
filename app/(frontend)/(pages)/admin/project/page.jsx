@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Search,
   FolderKanban,
@@ -23,6 +24,9 @@ import {
 } from "lucide-react";
 
 const ProjectPage = () => {
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("edit");
+
   const [allDataProject, setAllDataProject] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -43,6 +47,8 @@ const ProjectPage = () => {
     message: "",
   });
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Show notification
   const showNotification = (type, message) => {
@@ -73,6 +79,16 @@ const ProjectPage = () => {
   useEffect(() => {
     fetchAllDataProject();
   }, []);
+
+  // Handle edit query parameter from home page
+  useEffect(() => {
+    if (editId && allDataProject.length > 0) {
+      const projectToEdit = allDataProject.find((p) => p.projectID === editId);
+      if (projectToEdit) {
+        handleRowClick(projectToEdit);
+      }
+    }
+  }, [editId, allDataProject]);
 
   // Filter projects
   const filteredProjects = allDataProject.filter((project) => {
@@ -140,6 +156,7 @@ const ProjectPage = () => {
     }
 
     try {
+      setSaving(true);
       const res = await fetch("/api/project", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -163,6 +180,8 @@ const ProjectPage = () => {
     } catch (error) {
       console.error("Error:", error);
       showNotification("error", "Failed to add project");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -176,6 +195,7 @@ const ProjectPage = () => {
     }
 
     try {
+      setSaving(true);
       const res = await fetch("/api/project", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -200,6 +220,8 @@ const ProjectPage = () => {
     } catch (error) {
       console.error("Error:", error);
       showNotification("error", "Failed to update project");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -208,6 +230,7 @@ const ProjectPage = () => {
     if (!projectToDelete) return;
 
     try {
+      setDeleting(true);
       const res = await fetch("/api/project", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -226,6 +249,7 @@ const ProjectPage = () => {
       console.error("Error:", error);
       showNotification("error", "Failed to delete project");
     } finally {
+      setDeleting(false);
       setIsDeleteModalOpen(false);
       setProjectToDelete(null);
     }
@@ -636,15 +660,22 @@ const ProjectPage = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
+                  disabled={saving}
                   className={`w-full py-3 rounded-xl text-white font-semibold 
                     flex items-center justify-center gap-2 transition-all
                     ${
                       formMode === "add"
                         ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] hover:from-[#1a4d1a] hover:to-[#0d2d0d]"
                         : "bg-gradient-to-r from-[#1a4d1a] to-[#0d3d0d] hover:from-[#1a5c1a] hover:to-[#0d2d0d]"
-                    }`}
+                    }
+                    ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  {formMode === "add" ? (
+                  {saving ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Processing...
+                    </>
+                  ) : formMode === "add" ? (
                     <>
                       <Plus size={18} />
                       Add Project
@@ -698,15 +729,24 @@ const ProjectPage = () => {
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsDeleteModalOpen(false)}
-                  className="flex-1 py-2.5 bg-[#132d13] hover:bg-[#1a3d1a] text-white rounded-xl font-medium transition-colors"
+                  disabled={deleting}
+                  className="flex-1 py-2.5 bg-[#132d13] hover:bg-[#1a3d1a] text-white rounded-xl font-medium transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmDelete}
-                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors"
+                  disabled={deleting}
+                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Delete
+                  {deleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
                 </button>
               </div>
             </div>
