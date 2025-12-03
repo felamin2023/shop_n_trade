@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
 import {
   Shirt,
   FolderOpenDot,
@@ -10,18 +9,12 @@ import {
   House,
   LibraryBig,
   FileChartColumnIncreasing,
-  Leaf,
   LogOut,
-  Recycle,
-  Menu,
-  X,
 } from "lucide-react";
 import Link from "next/link";
 
 const Navbar = () => {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-  const menuRef = useRef(null);
 
   const navlinks = [
     {
@@ -77,131 +70,90 @@ const Navbar = () => {
       ? navlinks
       : navLinkAdmin;
 
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Close menu when route changes
-  useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
+  const isUserRoute = pathname === "/" ||
+    pathname === "/user/project" ||
+    pathname === "/user/profile" ||
+    pathname === "/user/request";
 
   return (
     <>
       {pathname !== "/user/signin" &&
         pathname !== "/user/signup" &&
         pathname !== "/admin/signin" && (
-          <div ref={menuRef} className="fixed top-4 right-4 z-50">
-            {/* Hamburger Button */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className={`
-                relative flex items-center justify-center w-12 h-12 rounded-2xl
-                bg-white/80 backdrop-blur-lg shadow-lg border border-emerald-100
-                hover:shadow-xl transition-all duration-300
-                ${isOpen ? "bg-gradient-to-r from-emerald-500 to-teal-500 border-transparent" : "hover:border-emerald-300"}
-              `}
-            >
-              {isOpen ? (
-                <X size={22} className="text-white" />
-              ) : (
-                <Menu size={22} className="text-emerald-700" />
-              )}
+          <div className="fixed bottom-0 left-0 right-0 z-50">
+            {/* Bottom Navigation Container */}
+            <div className="bg-[#0d2818]/95 backdrop-blur-xl border-t border-[#1a3d1a] shadow-2xl">
+              {/* Decorative top line */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent rounded-full"></div>
               
-              {/* Notification dot */}
-              {!isOpen && (
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                </span>
-              )}
-            </button>
-
-            {/* Dropdown Menu */}
-            <div
-              className={`
-                absolute top-16 right-0 w-64 
-                bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-emerald-100
-                transform transition-all duration-300 origin-top-right
-                ${isOpen ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none"}
-              `}
-            >
-              {/* Header */}
-              <div className="p-4 border-b border-emerald-100">
-                <div className="flex items-center gap-3">
-                  <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-2.5 rounded-xl shadow-md">
-                    <Recycle size={20} className="text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-noto text-emerald-800 font-bold text-base">
-                      Shop & Trade
-                    </h3>
-                    <p className="text-emerald-600 text-xs">Recycle. Reward. Repeat.</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Navigation Links */}
-              <div className="p-2">
-                <p className="px-3 py-2 text-xs font-semibold text-emerald-500 uppercase tracking-wider">
-                  Navigation
-                </p>
-                <ul className="space-y-1">
+              <div className="max-w-lg mx-auto px-2 py-2">
+                <nav className="flex items-center justify-around">
                   {currentLinks.map((link, i) => {
                     const isActive = pathname === link.href;
                     return (
-                      <li key={i}>
-                        <Link
-                          href={link.href}
-                          className={`
-                            flex items-center gap-3 px-3 py-2.5 rounded-xl
-                            font-medium text-sm transition-all duration-200
-                            ${
-                              isActive
-                                ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md"
-                                : "text-emerald-700 hover:bg-emerald-50"
-                            }
-                          `}
-                        >
-                          <link.icon size={18} />
-                          <span>{link.name}</span>
+                      <Link
+                        key={i}
+                        href={link.href}
+                        className={`
+                          relative flex flex-col items-center gap-1 px-4 py-2 rounded-2xl
+                          transition-all duration-300 min-w-[70px]
+                          ${
+                            isActive
+                              ? "text-white"
+                              : "text-green-500/60 hover:text-green-400"
+                          }
+                        `}
+                      >
+                        {/* Active indicator background */}
+                        {isActive && (
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#1a5c1a]/50 to-[#1a5c1a]/20 rounded-2xl"></div>
+                        )}
+                        
+                        {/* Icon container */}
+                        <div className={`
+                          relative p-2 rounded-xl transition-all duration-300
+                          ${isActive 
+                            ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] shadow-lg shadow-green-900/50" 
+                            : "hover:bg-[#132d13]"
+                          }
+                        `}>
+                          <link.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                          
+                          {/* Active dot indicator */}
                           {isActive && (
-                            <Leaf size={14} className="ml-auto" />
+                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                           )}
-                        </Link>
-                      </li>
+                        </div>
+                        
+                        {/* Label */}
+                        <span className={`
+                          relative text-[10px] font-semibold tracking-wide
+                          ${isActive ? "text-green-400" : ""}
+                        `}>
+                          {link.name}
+                        </span>
+                      </Link>
                     );
                   })}
-                </ul>
+                  
+                  {/* Logout Button */}
+                  <Link
+                    href={isUserRoute ? "/user/signin" : "/admin/signin"}
+                    className="relative flex flex-col items-center gap-1 px-4 py-2 rounded-2xl
+                      text-red-400/70 hover:text-red-400 transition-all duration-300 min-w-[70px]"
+                  >
+                    <div className="p-2 rounded-xl hover:bg-red-500/10 transition-all duration-300">
+                      <LogOut size={20} strokeWidth={2} />
+                    </div>
+                    <span className="text-[10px] font-semibold tracking-wide">
+                      Logout
+                    </span>
+                  </Link>
+                </nav>
               </div>
-
-              {/* Logout Section */}
-              <div className="p-2 border-t border-emerald-100">
-                <Link
-                  href="/user/signin"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl
-                    text-red-600 hover:bg-red-50 font-medium text-sm
-                    transition-all duration-200 group"
-                >
-                  <LogOut size={18} className="group-hover:rotate-12 transition-transform" />
-                  <span>Log out</span>
-                </Link>
-              </div>
-
-              {/* Footer */}
-              <div className="p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-b-3xl">
-                <p className="text-center text-xs text-emerald-600">
-                  🌱 Making the world greener!
-                </p>
-              </div>
+              
+              {/* Safe area for mobile devices */}
+              <div className="h-safe-area-inset-bottom bg-[#0d2818]"></div>
             </div>
           </div>
         )}

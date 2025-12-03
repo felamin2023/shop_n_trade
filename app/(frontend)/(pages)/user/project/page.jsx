@@ -15,11 +15,7 @@ import {
   X,
   Recycle,
   Calendar,
-  Clock,
   CheckCircle2,
-  Gift,
-  Minus,
-  Plus,
   Info,
   Phone,
   Mail
@@ -28,10 +24,7 @@ import {
 const ProjectPage = () => {
   const [activeTab, setActiveTab] = useState("Post");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPost, setSelectedPost] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [donationAmount, setDonationAmount] = useState(100);
-  const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
 
   const navlinks = [
@@ -230,17 +223,6 @@ const ProjectPage = () => {
     }
   };
 
-  const openDonateModal = (post) => {
-    setSelectedPost(post);
-    setDonationAmount(100);
-    setIsDonateModalOpen(true);
-  };
-
-  const closeDonateModal = () => {
-    setIsDonateModalOpen(false);
-    setSelectedPost(null);
-  };
-
   const openSupportModal = (plan) => {
     setSelectedPlan(plan);
     setIsSupportModalOpen(true);
@@ -250,8 +232,6 @@ const ProjectPage = () => {
     setIsSupportModalOpen(false);
     setSelectedPlan(null);
   };
-
-  const quickAmounts = [50, 100, 200, 500, 1000];
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-8">
@@ -345,8 +325,8 @@ const ProjectPage = () => {
                 return (
                   <div
                     key={i}
-                    className="group bg-[#0d2818] rounded-2xl shadow-md hover:shadow-xl 
-                      border border-[#1a3d1a] hover:border-green-500/50
+                    className="group bg-gray-50 rounded-2xl shadow-md hover:shadow-xl 
+                      border border-gray-100 hover:border-green-400
                       transition-all duration-300 overflow-hidden"
                   >
                     {/* Image Gallery */}
@@ -376,19 +356,19 @@ const ProjectPage = () => {
                       </div>
                       
                       {/* Progress Badge */}
-                      <div className="absolute top-4 left-4 bg-[#0d2818]/90 backdrop-blur-sm 
-                        rounded-full px-3 py-1 shadow-md flex items-center gap-1.5 border border-[#1a3d1a]">
-                        <TrendingUp size={14} className="text-green-400" />
-                        <span className="text-white text-xs font-bold">{progress}%</span>
+                      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm 
+                        rounded-full px-3 py-1 shadow-md flex items-center gap-1.5 border border-gray-200">
+                        <TrendingUp size={14} className="text-green-600" />
+                        <span className="text-gray-800 text-xs font-bold">{progress}%</span>
                       </div>
                     </div>
 
                     {/* Content */}
                     <div className="p-4">
-                      <h3 className="font-noto text-white font-semibold text-base mb-1">
+                      <h3 className="font-noto text-gray-800 font-semibold text-base mb-1">
                         {data.name}
                       </h3>
-                      <div className="flex items-center gap-1.5 text-green-400/70 mb-3">
+                      <div className="flex items-center gap-1.5 text-green-600 mb-3">
                         <MapPin size={14} />
                         <span className="text-sm">{data.location}</span>
                       </div>
@@ -396,14 +376,14 @@ const ProjectPage = () => {
                       {/* Progress Bar */}
                       <div className="mb-3">
                         <div className="flex justify-between text-xs mb-1">
-                          <span className="text-green-400 font-medium">
+                          <span className="text-green-600 font-medium">
                             {data.donated.toLocaleString()} bottles
                           </span>
-                          <span className="text-green-500/50">
+                          <span className="text-gray-500">
                             Goal: {data.goal.toLocaleString()}
                           </span>
                         </div>
-                        <div className="h-2 bg-[#0a1f0a] rounded-full overflow-hidden">
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] rounded-full
                               transition-all duration-500"
@@ -411,19 +391,6 @@ const ProjectPage = () => {
                           ></div>
                         </div>
                       </div>
-
-                      {/* Action Button */}
-                      <button 
-                        onClick={() => openDonateModal(data)}
-                        className="w-full py-2.5 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
-                          hover:from-[#1a4d1a] hover:to-[#0d2d0d]
-                          rounded-xl text-white text-sm font-semibold
-                          transform transition-all duration-200 hover:scale-[1.02]
-                          shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-                      >
-                        <Heart size={16} />
-                        Donate Now
-                      </button>
                     </div>
                   </div>
                 );
@@ -431,9 +398,9 @@ const ProjectPage = () => {
             </div>
 
             {filteredPosts.length === 0 && (
-              <div className="text-center py-12">
-                <Search size={48} className="mx-auto text-green-500/30 mb-3" />
-                <p className="text-green-400/70">No projects found matching "{searchQuery}"</p>
+              <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100">
+                <Search size={48} className="mx-auto text-gray-400 mb-3" />
+                <p className="text-gray-600">No projects found matching "{searchQuery}"</p>
               </div>
             )}
           </>
@@ -454,23 +421,23 @@ const ProjectPage = () => {
               {filteredPlans.map((data, i) => (
                 <div
                   key={i}
-                  className="group bg-[#0d2818] rounded-2xl shadow-md hover:shadow-xl 
-                    border border-[#1a3d1a] hover:border-green-500/50
+                  className="group bg-gray-50 rounded-2xl shadow-md hover:shadow-xl 
+                    border border-gray-100 hover:border-green-400
                     transition-all duration-300 p-5 flex flex-col sm:flex-row 
                     sm:items-center justify-between gap-4"
                 >
                   <div className="flex items-start gap-4">
                     {/* School Icon */}
-                    <div className="bg-gradient-to-br from-[#132d13] to-[#0d2818] 
-                      p-3 rounded-xl border border-[#1a3d1a]">
-                      <School size={24} className="text-green-400" />
+                    <div className="bg-gradient-to-br from-green-100 to-green-50 
+                      p-3 rounded-xl border border-green-200">
+                      <School size={24} className="text-green-600" />
                     </div>
                     
                     <div>
-                      <h3 className="font-noto text-white font-semibold text-lg">
+                      <h3 className="font-noto text-gray-800 font-semibold text-lg">
                         {data.schoolname}
                       </h3>
-                      <div className="flex items-center gap-1.5 text-green-400/70 mt-1">
+                      <div className="flex items-center gap-1.5 text-green-600 mt-1">
                         <MapPin size={14} />
                         <span className="text-sm">{data.location}</span>
                       </div>
@@ -479,11 +446,11 @@ const ProjectPage = () => {
 
                   <div className="flex items-center gap-4 sm:gap-6">
                     {/* Chairs Needed */}
-                    <div className="flex items-center gap-2 bg-[#132d13] px-4 py-2 rounded-xl border border-[#1a3d1a]">
-                      <Armchair size={18} className="text-green-400" />
+                    <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-xl border border-green-200">
+                      <Armchair size={18} className="text-green-600" />
                       <div>
-                        <p className="text-white font-bold">{data.chairsneeded.toLocaleString()}</p>
-                        <p className="text-green-500/50 text-xs">chairs needed</p>
+                        <p className="text-gray-800 font-bold">{data.chairsneeded.toLocaleString()}</p>
+                        <p className="text-gray-500 text-xs">chairs needed</p>
                       </div>
                     </div>
 
@@ -513,9 +480,9 @@ const ProjectPage = () => {
             </div>
 
             {filteredPlans.length === 0 && (
-              <div className="text-center py-12">
-                <Search size={48} className="mx-auto text-green-500/30 mb-3" />
-                <p className="text-green-400/70">No plans found matching "{searchQuery}"</p>
+              <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100">
+                <Search size={48} className="mx-auto text-gray-400 mb-3" />
+                <p className="text-gray-600">No plans found matching "{searchQuery}"</p>
               </div>
             )}
 
@@ -540,178 +507,6 @@ const ProjectPage = () => {
           </>
         )}
       </div>
-
-      {/* Donate Now Modal */}
-      {isDonateModalOpen && selectedPost && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          onClick={closeDonateModal}
-        >
-          <div 
-            className="bg-[#0d2818] rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-[#1a3d1a]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="relative">
-              <div 
-                className="h-44 bg-cover bg-center rounded-t-3xl"
-                style={{ backgroundImage: `url(${selectedPost.imgs[0]})` }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0d2818] to-transparent rounded-t-3xl"></div>
-              </div>
-              
-              {/* Close Button */}
-              <button
-                onClick={closeDonateModal}
-                className="absolute top-4 right-4 p-2 bg-[#0d2818]/50 backdrop-blur-sm rounded-full
-                  hover:bg-[#0d2818]/80 transition-colors border border-[#1a3d1a]"
-              >
-                <X size={20} className="text-white" />
-              </button>
-
-              {/* Title Overlay */}
-              <div className="absolute bottom-4 left-4 right-4">
-                <div className="flex items-center gap-2 text-green-400 text-sm mb-1">
-                  <Heart size={14} />
-                  <span>Donate to this project</span>
-                </div>
-                <h2 className="font-noto text-white text-2xl font-bold">
-                  {selectedPost.name}
-                </h2>
-              </div>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6">
-              {/* Progress */}
-              <div className="mb-6">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-green-400 font-semibold">
-                    {selectedPost.donated.toLocaleString()} / {selectedPost.goal.toLocaleString()} bottles
-                  </span>
-                  <span className="text-green-500/50">
-                    {Math.round((selectedPost.donated / selectedPost.goal) * 100)}% funded
-                  </span>
-                </div>
-                <div className="h-3 bg-[#0a1f0a] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] rounded-full"
-                    style={{ width: `${Math.min((selectedPost.donated / selectedPost.goal) * 100, 100)}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Description */}
-              <p className="text-green-300/80 text-sm mb-6 leading-relaxed">
-                {selectedPost.description}
-              </p>
-
-              {/* Info Cards */}
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                <div className="flex items-center gap-2 p-3 bg-[#3d2d0d] rounded-xl border border-[#5c4a1a]">
-                  <Calendar size={18} className="text-amber-400" />
-                  <div>
-                    <p className="text-amber-400/60 text-xs">Deadline</p>
-                    <p className="text-white font-semibold text-sm">{selectedPost.deadline}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 p-3 bg-[#2d1a3d] rounded-xl border border-[#4a2d5c]">
-                  <Users size={18} className="text-purple-400" />
-                  <div>
-                    <p className="text-purple-400/60 text-xs">Donors</p>
-                    <p className="text-white font-semibold text-sm">{selectedPost.donors} people</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Donation Amount */}
-              <div className="mb-6">
-                <label className="block text-white font-semibold mb-3">
-                  How many bottles will you donate?
-                </label>
-                
-                {/* Quick Select */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {quickAmounts.map((amount) => (
-                    <button
-                      key={amount}
-                      onClick={() => setDonationAmount(amount)}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all
-                        ${donationAmount === amount 
-                          ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] text-white shadow-md" 
-                          : "bg-[#132d13] text-green-400/70 hover:bg-[#1a3d1a] border border-[#1a3d1a]"
-                        }`}
-                    >
-                      {amount}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Custom Amount */}
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setDonationAmount(Math.max(10, donationAmount - 10))}
-                    className="p-2 bg-[#132d13] rounded-xl hover:bg-[#1a3d1a] transition-colors border border-[#1a3d1a]"
-                  >
-                    <Minus size={20} className="text-green-400" />
-                  </button>
-                  <div className="flex-1 relative">
-                    <input
-                      type="number"
-                      value={donationAmount}
-                      onChange={(e) => setDonationAmount(Math.max(1, parseInt(e.target.value) || 0))}
-                      className="w-full text-center text-2xl font-bold text-white 
-                        py-3 rounded-xl border-2 border-[#1a3d1a] focus:border-green-500
-                        focus:outline-none bg-[#0a1f0a]"
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500/50 text-sm">
-                      bottles
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setDonationAmount(donationAmount + 10)}
-                    className="p-2 bg-[#132d13] rounded-xl hover:bg-[#1a3d1a] transition-colors border border-[#1a3d1a]"
-                  >
-                    <Plus size={20} className="text-green-400" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Impact Info */}
-              <div className="bg-[#132d13] rounded-xl p-4 mb-6 border border-[#1a3d1a]">
-                <div className="flex items-center gap-2 text-green-400 mb-2">
-                  <Gift size={18} />
-                  <span className="font-semibold">Your Impact</span>
-                </div>
-                <p className="text-green-300/80 text-sm">
-                  Your donation of <strong className="text-white">{donationAmount} bottles</strong> will contribute to making{" "}
-                  <strong className="text-white">{Math.floor(donationAmount / 100)} chair{Math.floor(donationAmount / 100) !== 1 ? "s" : ""}</strong> for students!
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3">
-                <button
-                  onClick={closeDonateModal}
-                  className="flex-1 py-3 px-4 bg-[#132d13] hover:bg-[#1a3d1a]
-                    rounded-xl text-green-400 font-semibold transition-colors border border-[#1a3d1a]"
-                >
-                  Cancel
-                </button>
-                <button
-                  className="flex-1 py-3 px-4 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
-                    hover:from-[#1a4d1a] hover:to-[#0d2d0d]
-                    rounded-xl text-white font-semibold shadow-md hover:shadow-lg
-                    transition-all flex items-center justify-center gap-2"
-                >
-                  <Heart size={18} />
-                  Confirm Donation
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Support Modal */}
       {isSupportModalOpen && selectedPlan && (
