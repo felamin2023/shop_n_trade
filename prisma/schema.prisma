@@ -47,10 +47,14 @@ model Project {
 }
 
 model Transaction {
-  transacID String            @id @default(uuid())
-  status    TransactionStatus @default(PENDING)
-  productID String
-  userID    String
+  transacID     String            @id @default(uuid())
+  status        TransactionStatus @default(PENDING)
+  productID     String
+  userID        String
+  images        String[]          // Array of image URLs from Supabase storage
+  scheduledDate String?           // Date for drop-off
+  scheduledTime String?           // Time for drop-off
+  createdAt     DateTime          @default(now())
 
   product   Product           @relation(fields: [productID], references: [productID])
   user      User              @relation(fields: [userID], references: [userID])
