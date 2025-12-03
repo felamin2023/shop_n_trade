@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
-import { Leaf, Recycle, Droplets, X, Package, CheckCircle2, MapPin, Calendar, Clock, Upload, Plus, Loader2 } from "lucide-react";
+import { Leaf, Recycle, Droplets, X, Package, CheckCircle2, MapPin, Calendar, Clock, Upload, Plus, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -11,6 +11,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [selectedStation, setSelectedStation] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -18,6 +19,26 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [products, setProducts] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
+
+  // Pagination logic
+  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedProducts = products.slice(startIndex, endIndex);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
 
   // Fetch products from database
   useEffect(() => {
@@ -142,7 +163,7 @@ export default function Home() {
         console.log("Transaction created successfully:", data.transaction);
         closeConfirmModal();
         closeRequestModal();
-        alert("Request submitted successfully! You will be notified once it's reviewed.");
+        setIsSuccessModalOpen(true);
       } else {
         console.error("Failed to create transaction:", data.message);
         alert("Failed to submit request. Please try again.");
@@ -155,43 +176,14 @@ export default function Home() {
     }
   };
 
-  const testimonials = [
-    {
-      name: "Nike T Shirt",
-      src: "/images/productPage/NikeTShirt.jpg",
-    },
-    {
-      name: "Rolex Daytona",
-      src: "/images/productPage/rolexdaytona.jpg",
-    },
-    {
-      name: "Jordan Nike Air",
-      src: "/images/productPage/jordansneakers.jpg",
-    },
-    {
-      name: "Addidas Cap",
-      src: "/images/productPage/addidascap.jpg",
-    },
-    {
-      name: "ROG laptop",
-      src: "/images/productPage/roglaptop.jpg",
-    },
-    {
-      name: "Nike bag",
-      src: "/images/productPage/nikebag.jpg",
-    },
-    {
-      name: "Rash guard",
-      src: "/images/productPage/rashguards.jpg",
-    },
-    {
-      name: "Iphone 14 Pro",
-      src: "/images/productPage/iphone14pro.jpg",
-    },
-  ];
+  // Convert products to testimonials format for AnimatedTestimonials component
+  const testimonials = products.map(product => ({
+    name: product.product,
+    src: product.img,
+  }));
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-16">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-24">
       {/* Hero Section */}
       <div className="w-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] py-8 px-4 mb-8">
         <div className="max-w-6xl mx-auto text-center">
@@ -215,7 +207,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row justify-center items-start gap-8">
+      <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row justify-center items-stretch gap-8">
         {/* Products Section */}
         <div className="flex flex-col items-center w-full lg:w-[60%]">
           <div className="flex items-center gap-3 mb-6">
@@ -226,18 +218,20 @@ export default function Home() {
             <div className="h-1 w-12 bg-gradient-to-r from-[#0d3d0d] to-green-500 rounded-full"></div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
-            {isLoadingProducts ? (
-              <div className="col-span-full flex justify-center items-center py-12">
-                <Loader2 className="w-8 h-8 text-green-400 animate-spin" />
-              </div>
-            ) : products.length === 0 ? (
-              <div className="col-span-full text-center py-12 text-green-400">
-                No products available at the moment.
-              </div>
-            ) : (
-              products.map((product) => (
-              <div
+          {/* Fixed height container for consistent pagination position (8 cards = 2 rows of 4) */}
+          <div className="min-h-[520px] w-full">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
+              {isLoadingProducts ? (
+                <div className="col-span-full flex justify-center items-center py-12">
+                  <Loader2 className="w-8 h-8 text-green-400 animate-spin" />
+                </div>
+              ) : products.length === 0 ? (
+                <div className="col-span-full text-center py-12 text-green-400">
+                  No products available at the moment.
+                </div>
+              ) : (
+                paginatedProducts.map((product) => (
+                <div
                 key={product.productID}
                 className="group relative flex flex-col justify-between items-center p-4 
                   bg-white rounded-2xl shadow-md hover:shadow-xl 
@@ -283,24 +277,70 @@ export default function Home() {
               </div>
             ))
             )}
+            </div>
           </div>
+
+          {/* Pagination Controls - Always visible when there are products */}
+          {!isLoadingProducts && products.length > 0 && (
+            <div className="flex items-center justify-center gap-3 mt-6 w-full">
+              <button
+                onClick={goToPrevPage}
+                disabled={currentPage === 1 || totalPages <= 1}
+                className={`flex items-center gap-1 px-4 py-2 rounded-xl font-medium text-sm
+                  transition-all duration-300 border
+                  ${currentPage === 1 || totalPages <= 1
+                    ? "bg-white/50 border-gray-200 text-gray-300 cursor-not-allowed"
+                    : "bg-white border-gray-200 text-gray-700 hover:bg-green-50 hover:border-green-400 hover:text-green-600"
+                  }`}
+              >
+                <ChevronLeft size={16} />
+                Prev
+              </button>
+              
+              <div className="flex items-center gap-1 px-3 py-2 bg-white rounded-xl border border-gray-200">
+                <span className="text-gray-700 font-medium text-sm">
+                  {currentPage} / {totalPages || 1}
+                </span>
+              </div>
+              
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages || totalPages <= 1}
+                className={`flex items-center gap-1 px-4 py-2 rounded-xl font-medium text-sm
+                  transition-all duration-300 border
+                  ${currentPage === totalPages || totalPages <= 1
+                    ? "bg-white/50 border-gray-200 text-gray-300 cursor-not-allowed"
+                    : "bg-white border-gray-200 text-gray-700 hover:bg-green-50 hover:border-green-400 hover:text-green-600"
+                  }`}
+              >
+                Next
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Sidebar - Featured Section */}
-        <div className="flex flex-col items-center w-full lg:w-[35%] sticky top-4">
-          <div className="bg-white rounded-3xl shadow-lg p-6 w-full border border-gray-100">
+        <div className="flex flex-col items-center w-full lg:w-[35%] relative z-10">
+          <div className="bg-white rounded-3xl shadow-lg p-6 w-full border border-gray-100 flex flex-col">
             <div className="flex items-center gap-2 justify-center mb-4">
               <span className="text-2xl">✨</span>
               <h3 className="font-noto text-gray-800 text-xl font-semibold">
                 Featured Items
               </h3>
             </div>
-            <div className="w-full min-h-[400px]">
-              <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
+            <div className="w-full h-[380px]">
+              {isLoadingProducts || testimonials.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="w-8 h-8 text-green-500 animate-spin" />
+                </div>
+              ) : (
+                <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
+              )}
             </div>
             
             {/* Eco Tips Card */}
-            <div className="mt-6 bg-green-50 rounded-2xl p-4 border border-green-100">
+            <div className="mt-4 bg-green-50 rounded-2xl p-4 border border-green-100">
               <h4 className="font-noto text-green-700 font-semibold text-sm mb-2 flex items-center gap-2">
                 <span>🌱</span> Eco Tip of the Day
               </h4>
@@ -310,27 +350,13 @@ export default function Home() {
               </p>
             </div>
           </div>
-
-          {/* Impact Stats */}
-          <div className="grid grid-cols-2 gap-3 mt-4 w-full">
-            <div className="bg-white rounded-2xl p-4 text-center shadow-md border border-gray-100">
-              <div className="text-2xl mb-1">🌊</div>
-              <p className="text-gray-800 font-bold text-lg">1,234</p>
-              <p className="text-green-600/80 text-xs">Bottles Saved Today</p>
-            </div>
-            <div className="bg-white rounded-2xl p-4 text-center shadow-md border border-gray-100">
-              <div className="text-2xl mb-1">🌳</div>
-              <p className="text-gray-800 font-bold text-lg">89</p>
-              <p className="text-green-600/80 text-xs">Active Traders</p>
-            </div>
-          </div>
         </div>
       </div>
 
       {/* Request Modal */}
       {isModalOpen && selectedProduct && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={closeRequestModal}
         >
           <div 
@@ -430,7 +456,7 @@ export default function Home() {
       {/* Confirmation Modal */}
       {isConfirmModalOpen && selectedProduct && (
         <div 
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
           onClick={closeConfirmModal}
         >
           <div 
@@ -684,6 +710,61 @@ export default function Home() {
                   )}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {isSuccessModalOpen && (
+        <div 
+          className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={() => setIsSuccessModalOpen(false)}
+        >
+          <div 
+            className="bg-[#0d2818] rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden border border-[#1a3d1a] animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-8 text-center">
+              {/* Success Icon */}
+              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <CheckCircle2 size={40} className="text-white" />
+              </div>
+
+              {/* Success Message */}
+              <h2 className="font-noto text-white text-2xl font-bold mb-3">
+                Request Submitted!
+              </h2>
+              <p className="text-green-400/80 text-sm mb-6 leading-relaxed">
+                Your request has been submitted successfully. You will be notified once it's reviewed by our team.
+              </p>
+
+              {/* Info Box */}
+              <div className="bg-[#132d13] rounded-xl p-4 mb-6 border border-[#1a3d1a] text-left">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#1a3d1a] rounded-lg flex-shrink-0">
+                    <Calendar size={16} className="text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-green-400/60 text-xs">What's next?</p>
+                    <p className="text-green-300 text-sm">
+                      Please bring your items to the collection center on your scheduled date.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setIsSuccessModalOpen(false)}
+                className="w-full py-3 px-4 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
+                  hover:from-[#1a4d1a] hover:to-[#0d2d0d]
+                  rounded-xl text-white font-semibold shadow-md hover:shadow-lg
+                  transition-all flex items-center justify-center gap-2"
+              >
+                <Leaf size={18} />
+                Got it, thanks!
+              </button>
             </div>
           </div>
         </div>

@@ -20,33 +20,55 @@ import {
   Bell,
   Eye,
   EyeOff,
+  Phone,
+  Loader2,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const ProfilePage = () => {
+  const { user, loading: authLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [profileUpdated, setProfileUpdated] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Form state
+  // Form state - initialized from user data
   const [formData, setFormData] = useState({
-    username: "eco_warrior_kim",
-    fullName: "Kimberly Faith Ytac",
-    email: "kimberly@example.com",
-    address: "Cebu City, Philippines",
+    fullName: "",
+    email: "",
+    address: "",
+    contact: "",
     password: "",
     confirmPassword: "",
   });
 
-  // User stats (mock data)
+  // Initialize form data when user data is available
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        fullName: user.fullname || "",
+        email: user.email || "",
+        address: user.address || "",
+        contact: user.contact || "",
+        password: "",
+        confirmPassword: "",
+      });
+      setIsLoading(false);
+    } else if (!authLoading) {
+      setIsLoading(false);
+    }
+  }, [user, authLoading]);
+
+  // User stats (can be fetched from API later)
   const userStats = {
-    bottlesDonated: 1250,
-    projectsSupported: 8,
-    treesPlanted: 12,
-    memberSince: "January 2024",
-    ecoRank: "Gold Recycler",
-    badges: ["Early Adopter", "Top Donor", "Eco Champion"],
+    bottlesDonated: 0,
+    projectsSupported: 0,
+    treesPlanted: 0,
+    memberSince: "2024",
+    ecoRank: "Member",
+    badges: ["New Member"],
   };
 
   useEffect(() => {
@@ -74,8 +96,32 @@ const ProfilePage = () => {
     { id: "security", name: "Security", icon: Shield },
   ];
 
+  // Loading state
+  if (isLoading || authLoading) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-24 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 size={48} className="text-green-500 animate-spin" />
+          <p className="text-green-400">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not logged in state
+  if (!user) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-24 flex items-center justify-center">
+        <div className="text-center">
+          <User size={48} className="text-green-500/50 mx-auto mb-4" />
+          <p className="text-green-400">Please sign in to view your profile</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-24">
       {/* Hero Section */}
       <div className="w-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] py-8 px-4 mb-6">
         <div className="max-w-4xl mx-auto text-center">
@@ -114,11 +160,17 @@ const ProfilePage = () => {
             {/* Avatar */}
             <div className="absolute -top-16 left-1/2 -translate-x-1/2 sm:left-8 sm:translate-x-0">
               <div className="relative">
-                <img
-                  src="/images/profilePage/profilepic.jpg"
-                  alt="Profile Picture"
-                  className="w-32 h-32 rounded-full object-cover border-4 border-[#0d2818] shadow-lg"
-                />
+                {user?.img ? (
+                  <img
+                    src={user.img}
+                    alt="Profile Picture"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-[#0d2818] shadow-lg"
+                  />
+                ) : (
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#1a5c1a] to-[#0d3d0d] border-4 border-[#0d2818] shadow-lg flex items-center justify-center">
+                    <User size={48} className="text-green-300/60" />
+                  </div>
+                )}
                 {isEditing && (
                   <button className="absolute bottom-0 right-0 p-2 bg-green-600 hover:bg-green-700 
                     rounded-full text-white shadow-md transition-colors">
@@ -134,10 +186,10 @@ const ProfilePage = () => {
             <div className="pt-20 sm:pt-4 sm:pl-40 flex flex-col sm:flex-row sm:justify-between sm:items-start">
               <div className="text-center sm:text-left mb-4 sm:mb-0">
                 <h2 className="font-noto text-2xl font-bold text-white">
-                  {formData.fullName}
+                  {formData.fullName || "User"}
                 </h2>
                 <p className="text-green-400 flex items-center justify-center sm:justify-start gap-1">
-                  <span>@{formData.username}</span>
+                  <span>{formData.email}</span>
                 </p>
                 <div className="flex items-center justify-center sm:justify-start gap-2 mt-2">
                   <span className="px-3 py-1 bg-amber-500/20 text-amber-400 text-xs font-semibold rounded-full flex items-center gap-1">
@@ -240,29 +292,6 @@ const ProfilePage = () => {
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Username */}
-              <div className="space-y-2">
-                <label className="block text-green-400/60 font-medium text-sm">
-                  Username
-                </label>
-                <div className="relative">
-                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
-                  <input
-                    type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className={`w-full pl-11 pr-4 py-3 rounded-xl border-2 
-                      ${isEditing 
-                        ? "border-[#1a3d1a] focus:border-green-500 bg-[#0a1f0a]" 
-                        : "border-[#132d13] bg-[#132d13]"
-                      }
-                      text-white focus:outline-none transition-colors`}
-                  />
-                </div>
-              </div>
-
               {/* Full Name */}
               <div className="space-y-2">
                 <label className="block text-green-400/60 font-medium text-sm">
@@ -297,6 +326,29 @@ const ProfilePage = () => {
                     type="email"
                     name="email"
                     value={formData.email}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className={`w-full pl-11 pr-4 py-3 rounded-xl border-2 
+                      ${isEditing 
+                        ? "border-[#1a3d1a] focus:border-green-500 bg-[#0a1f0a]" 
+                        : "border-[#132d13] bg-[#132d13]"
+                      }
+                      text-white focus:outline-none transition-colors`}
+                  />
+                </div>
+              </div>
+
+              {/* Contact */}
+              <div className="space-y-2">
+                <label className="block text-green-400/60 font-medium text-sm">
+                  Contact Number
+                </label>
+                <div className="relative">
+                  <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
+                  <input
+                    type="text"
+                    name="contact"
+                    value={formData.contact}
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     className={`w-full pl-11 pr-4 py-3 rounded-xl border-2 

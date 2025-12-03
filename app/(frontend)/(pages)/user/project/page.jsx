@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Search, 
   MapPin, 
@@ -18,7 +18,8 @@ import {
   CheckCircle2,
   Info,
   Phone,
-  Mail
+  Mail,
+  Loader2,
 } from "lucide-react";
 
 const ProjectPage = () => {
@@ -26,177 +27,65 @@ const ProjectPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const navlinks = [
     { name: "Post", icon: Sparkles },
     { name: "Plans", icon: Target },
   ];
 
-  const postData = [
-    {
-      id: "PRJ-001",
-      name: "Bug ot Elementary School",
-      location: "Lower Bug ot",
-      donated: 1500,
-      goal: 2000,
-      description: "Help us provide comfortable seating for students at Bug ot Elementary. Many students currently sit on old, broken chairs that affect their learning experience.",
-      deadline: "Dec 31, 2025",
-      donors: 45,
-      contactPerson: "Maria Santos",
-      contactEmail: "maria.santos@bugot.edu.ph",
-      contactPhone: "+63 912 345 6789",
-      imgs: [
-        "/images/projectPage/post1.png",
-        "/images/projectPage/post2.jpg",
-        "/images/projectPage/post3.jpg",
-      ],
-    },
-    {
-      id: "PRJ-002",
-      name: "CTU Argao Campus",
-      location: "Argao",
-      donated: 300,
-      goal: 1000,
-      description: "CTU Argao needs additional chairs for their expanding student population. Your recyclables can help provide quality education facilities.",
-      deadline: "Jan 15, 2026",
-      donors: 12,
-      contactPerson: "Juan Dela Cruz",
-      contactEmail: "juan.delacruz@ctu.edu.ph",
-      contactPhone: "+63 917 654 3210",
-      imgs: [
-        "/images/projectPage/post1.png",
-        "/images/projectPage/post2.jpg",
-        "/images/projectPage/post3.jpg",
-      ],
-    },
-    {
-      id: "PRJ-003",
-      name: "Pool Bankal Elementary School",
-      location: "Pool Bankal, Lapu Lapu City",
-      donated: 400,
-      goal: 800,
-      description: "Pool Bankal Elementary serves underprivileged communities. Help us give their students proper furniture for a better learning environment.",
-      deadline: "Jan 30, 2026",
-      donors: 23,
-      contactPerson: "Ana Reyes",
-      contactEmail: "ana.reyes@poolbankal.edu.ph",
-      contactPhone: "+63 918 111 2222",
-      imgs: [
-        "/images/projectPage/post1.png",
-        "/images/projectPage/post2.jpg",
-        "/images/projectPage/post3.jpg",
-      ],
-    },
-    {
-      id: "PRJ-004",
-      name: "Sibonga National High School",
-      location: "Sibonga",
-      donated: 100,
-      goal: 500,
-      description: "Sibonga NHS is in urgent need of chairs for their Grade 7 classrooms. Support education in rural communities!",
-      deadline: "Feb 14, 2026",
-      donors: 8,
-      contactPerson: "Pedro Garcia",
-      contactEmail: "pedro.garcia@sibonga.edu.ph",
-      contactPhone: "+63 919 333 4444",
-      imgs: [
-        "/images/projectPage/post1.png",
-        "/images/projectPage/post2.jpg",
-        "/images/projectPage/post3.jpg",
-      ],
-    },
-    {
-      id: "PRJ-005",
-      name: "Greenhills Elementary School",
-      location: "Greenhills",
-      donated: 900,
-      goal: 1200,
-      description: "We're almost there! Help Greenhills Elementary reach their goal of providing new chairs for all classrooms.",
-      deadline: "Dec 20, 2025",
-      donors: 67,
-      contactPerson: "Lisa Tan",
-      contactEmail: "lisa.tan@greenhills.edu.ph",
-      contactPhone: "+63 920 555 6666",
-      imgs: [
-        "/images/projectPage/post1.png",
-        "/images/projectPage/post2.jpg",
-        "/images/projectPage/post3.jpg",
-      ],
-    },
-    {
-      id: "PRJ-006",
-      name: "Sangat National High School",
-      location: "Sangat",
-      donated: 500,
-      goal: 600,
-      description: "Just 100 more bottles to go! Help Sangat NHS complete their classroom furniture project.",
-      deadline: "Dec 15, 2025",
-      donors: 34,
-      contactPerson: "Mark Lim",
-      contactEmail: "mark.lim@sangat.edu.ph",
-      contactPhone: "+63 921 777 8888",
-      imgs: [
-        "/images/projectPage/post1.png",
-        "/images/projectPage/post2.jpg",
-        "/images/projectPage/post3.jpg",
-      ],
-    },
-  ];
+  // Fetch projects from API
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/project");
+        const data = await response.json();
+        if (data.status === 200 && data.project) {
+          setProjects(data.project);
+        }
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const projectData = [
-    {
-      id: "PLAN-001",
-      schoolname: "Bug ot Elementary School",
-      location: "Lower Bug ot",
-      chairsneeded: 500,
-      urgency: "high",
-      description: "New building expansion requires additional 500 chairs for 10 new classrooms opening next school year.",
-      targetDate: "March 2026",
-      contactPerson: "Maria Santos",
-      contactEmail: "maria.santos@bugot.edu.ph",
-      contactPhone: "+63 912 345 6789",
-      bottlesPerChair: 100,
-    },
-    {
-      id: "PLAN-002",
-      schoolname: "Pool Bankal Elementary School",
-      location: "Pool Bankal, Lapu Lapu City",
-      chairsneeded: 1000,
-      urgency: "medium",
-      description: "Replacement program for old wooden chairs that are beyond repair. Will benefit over 1,000 students.",
-      targetDate: "June 2026",
-      contactPerson: "Ana Reyes",
-      contactEmail: "ana.reyes@poolbankal.edu.ph",
-      contactPhone: "+63 918 111 2222",
-      bottlesPerChair: 100,
-    },
-    {
-      id: "PLAN-003",
-      schoolname: "CTU Argao Campus",
-      location: "Argao Kintanar",
-      chairsneeded: 1500,
-      urgency: "low",
-      description: "Long-term project to upgrade all classroom furniture to eco-friendly recycled materials.",
-      targetDate: "December 2026",
-      contactPerson: "Juan Dela Cruz",
-      contactEmail: "juan.delacruz@ctu.edu.ph",
-      contactPhone: "+63 917 654 3210",
-      bottlesPerChair: 100,
-    },
-    {
-      id: "PLAN-004",
-      schoolname: "Greenhills Elementary School",
-      location: "Greenhills",
-      chairsneeded: 200,
-      urgency: "high",
-      description: "Emergency request for kindergarten section. Current chairs are unsafe for young children.",
-      targetDate: "February 2026",
-      contactPerson: "Lisa Tan",
-      contactEmail: "lisa.tan@greenhills.edu.ph",
-      contactPhone: "+63 920 555 6666",
-      bottlesPerChair: 100,
-    },
-  ];
+    fetchProjects();
+  }, []);
+
+  // Transform projects for Post tab (pending projects)
+  const postData = projects
+    .filter((p) => p.status === "PENDING")
+    .map((project) => ({
+      id: project.projectID,
+      name: project.school,
+      location: project.location,
+      donated: 0,
+      goal: project.itemgoal,
+      description: `Help us provide chairs for students at ${project.school}. Your recyclables can make a difference!`,
+      deadline: "Ongoing",
+      donors: 0,
+      imgs: [
+        "/images/projectPage/post1.png",
+        "/images/projectPage/post2.jpg",
+        "/images/projectPage/post3.jpg",
+      ],
+    }));
+
+  // Transform projects for Plans tab
+  const projectData = projects.map((project) => ({
+    id: project.projectID,
+    schoolname: project.school,
+    location: project.location,
+    chairsneeded: project.itemgoal,
+    urgency: project.itemgoal > 1000 ? "high" : project.itemgoal > 500 ? "medium" : "low",
+    description: `Project to provide ${project.itemgoal} chairs for ${project.school}.`,
+    targetDate: "2026",
+    status: project.status,
+    bottlesPerChair: 100,
+  }));
 
   const filteredPosts = postData.filter(
     (data) =>
@@ -233,8 +122,20 @@ const ProjectPage = () => {
     setSelectedPlan(null);
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-24 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 size={48} className="text-green-500 animate-spin" />
+          <p className="text-green-400">Loading projects...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-24">
       {/* Hero Section */}
       <div className="w-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] py-8 px-4 mb-6">
         <div className="max-w-6xl mx-auto text-center">
@@ -254,11 +155,11 @@ const ProjectPage = () => {
           <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
               <School className="w-5 h-5 text-white" />
-              <span className="text-white text-sm font-medium">12 Schools Helped</span>
+              <span className="text-white text-sm font-medium">{projects.length} Schools</span>
             </div>
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
               <Heart className="w-5 h-5 text-white" />
-              <span className="text-white text-sm font-medium">4,200+ Donations</span>
+              <span className="text-white text-sm font-medium">Active Projects</span>
             </div>
           </div>
         </div>
