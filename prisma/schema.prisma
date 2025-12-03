@@ -20,7 +20,7 @@ model User {
   email        String         @unique
   address      String
   password     String
-  contact      Int
+  contact      String
   img          String
   role         Role           @default(USER)
   transactions Transaction[]

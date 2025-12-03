@@ -15,7 +15,6 @@ export async function POST(request) {
   const { fullname, email, address, password, contact, img, role } =
     await request.json();
 
-  const convertedContact = parseInt(contact);
   console.log(fullname, email, address, password, contact, img, role);
 
   const user = await db.user.create({
@@ -24,7 +23,7 @@ export async function POST(request) {
       email,
       address,
       password,
-      contact,
+      contact: String(contact),
       img,
       role,
     },
