@@ -1,43 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
-import { Leaf, Recycle, Droplets, X, Package, CheckCircle2, MapPin, Calendar, Clock } from "lucide-react";
+import { Leaf, Recycle, Droplets, X, Package, CheckCircle2, MapPin, Calendar, Clock, Upload, Plus, Loader2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Home() {
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [selectedStation, setSelectedStation] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
 
-  const stations = [
-    {
-      id: 1,
-      name: "EcoCenter Main Hub",
-      location: "123 Green Street, Downtown",
-      hours: "8:00 AM - 6:00 PM",
-    },
-    {
-      id: 2,
-      name: "RecyclePoint Mall",
-      location: "SM City Cebu, Ground Floor",
-      hours: "10:00 AM - 9:00 PM",
-    },
-    {
-      id: 3,
-      name: "GreenDrop Station",
-      location: "IT Park, Lahug",
-      hours: "9:00 AM - 7:00 PM",
-    },
-    {
-      id: 4,
-      name: "EcoHub Express",
-      location: "Ayala Center Cebu",
-      hours: "10:00 AM - 8:00 PM",
-    },
-  ];
+  // Fetch products from database
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("/api/product");
+        const data = await response.json();
+        if (data.status === 200 && data.product) {
+          setProducts(data.product);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const openRequestModal = (product) => {
     setSelectedProduct(product);
@@ -58,17 +56,103 @@ export default function Home() {
     setSelectedStation(null);
     setSelectedDate("");
     setSelectedTime("");
+    setUploadedFiles([]);
   };
 
-  const handleFinalConfirm = () => {
-    // Here you would typically make an API call to submit the request
-    console.log("Request submitted for:", selectedProduct?.name);
-    console.log("Station:", selectedStation?.name);
-    console.log("Date:", selectedDate);
-    console.log("Time:", selectedTime);
-    closeConfirmModal();
-    closeRequestModal();
-    // You could also show a success toast/notification here
+  const handleFileUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      const newFiles = files.slice(0, 5 - uploadedFiles.length).map(file => ({
+        file,
+        preview: URL.createObjectURL(file)
+      }));
+      setUploadedFiles(prev => [...prev, ...newFiles].slice(0, 5));
+    }
+    // Reset input so same file can be selected again
+    e.target.value = '';
+  };
+
+  const removeFile = (index) => {
+    setUploadedFiles(prev => {
+      const newFiles = [...prev];
+      URL.revokeObjectURL(newFiles[index].preview);
+      newFiles.splice(index, 1);
+      return newFiles;
+    });
+  };
+
+  const handleFinalConfirm = async () => {
+    if (!user || !selectedProduct) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Upload images to Supabase storage
+      const imageUrls = [];
+      const BUCKET_NAME = "transaction"; // lowercase bucket name
+      
+      for (const fileObj of uploadedFiles) {
+        const file = fileObj.file;
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${user.userID}_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        // Upload file to Supabase storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from(BUCKET_NAME)
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+        
+        if (uploadError) {
+          console.error("Upload error:", uploadError);
+          throw new Error(`Failed to upload image: ${uploadError.message}`);
+        }
+        
+        // Get the public URL for the uploaded file
+        const { data: { publicUrl } } = supabase.storage
+          .from(BUCKET_NAME)
+          .getPublicUrl(fileName);
+        
+        console.log("Image uploaded successfully:", publicUrl);
+        imageUrls.push(publicUrl);
+      }
+      
+      // Ensure we have at least one image uploaded
+      if (imageUrls.length === 0) {
+        throw new Error("No images were uploaded successfully");
+      }
+      
+      // Create transaction in database with image URLs
+      const response = await fetch("/api/transaction", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productID: selectedProduct.productID,
+          userID: user.userID,
+          images: imageUrls, // Array of image URLs from Supabase
+          scheduledDate: selectedDate,
+          scheduledTime: selectedTime,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.status === 201) {
+        console.log("Transaction created successfully:", data.transaction);
+        closeConfirmModal();
+        closeRequestModal();
+        alert("Request submitted successfully! You will be notified once it's reviewed.");
+      } else {
+        console.error("Failed to create transaction:", data.message);
+        alert("Failed to submit request. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting request:", error);
+      alert("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const testimonials = [
@@ -103,57 +187,6 @@ export default function Home() {
     {
       name: "Iphone 14 Pro",
       src: "/images/productPage/iphone14pro.jpg",
-    },
-  ];
-
-  const products = [
-    {
-      name: "Nike T Shirt",
-      exchange: "500 water bottles",
-      image: "/images/productPage/NikeTShirt.jpg",
-      stock: 10,
-    },
-    {
-      name: "Rolex Daytona",
-      exchange: "10,000 water bottles",
-      image: "/images/productPage/rolexdaytona.jpg",
-      stock: 1,
-    },
-    {
-      name: "Jordan Nike Air",
-      exchange: "5000 water bottles",
-      image: "/images/productPage/jordansneakers.jpg",
-      stock: 1,
-    },
-    {
-      name: "Addidas Cap",
-      exchange: "200 water bottles",
-      image: "/images/productPage/addidascap.jpg",
-      stock: 3,
-    },
-    {
-      name: "ROG laptop",
-      exchange: "10,000 water bottles",
-      image: "/images/productPage/roglaptop.jpg",
-      stock: 1,
-    },
-    {
-      name: "Nike bag",
-      exchange: "200 water bottles",
-      image: "/images/productPage/nikebag.jpg",
-      stock: 10,
-    },
-    {
-      name: "Rash guard",
-      exchange: "300 water bottles",
-      image: "/images/productPage/rashguards.jpg",
-      stock: 5,
-    },
-    {
-      name: "Iphone 14 Pro",
-      exchange: "10,000 water bottles",
-      image: "/images/productPage/iphone14pro.jpg",
-      stock: 1,
     },
   ];
 
@@ -194,9 +227,18 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
-            {products.map((product, i) => (
+            {isLoadingProducts ? (
+              <div className="col-span-full flex justify-center items-center py-12">
+                <Loader2 className="w-8 h-8 text-green-400 animate-spin" />
+              </div>
+            ) : products.length === 0 ? (
+              <div className="col-span-full text-center py-12 text-green-400">
+                No products available at the moment.
+              </div>
+            ) : (
+              products.map((product) => (
               <div
-                key={i}
+                key={product.productID}
                 className="group relative flex flex-col justify-between items-center p-4 
                   bg-white rounded-2xl shadow-md hover:shadow-xl 
                   border border-gray-100 hover:border-green-400
@@ -213,18 +255,18 @@ export default function Home() {
                   className="w-full h-28 bg-cover bg-center rounded-xl mb-3 
                     group-hover:scale-105 transition-transform duration-300"
                   style={{
-                    backgroundImage: `url(${product.image})`,
+                    backgroundImage: `url(${product.img})`,
                   }}
                 ></div>
 
                 {/* Product Info */}
                 <div className="text-center w-full">
                   <h3 className="font-noto text-gray-800 font-semibold text-sm mb-1 truncate">
-                    {product.name}
+                    {product.product}
                   </h3>
                   <div className="flex items-center justify-center gap-1 text-green-600 mb-3">
                     <Recycle className="w-3 h-3" />
-                    <p className="text-xs font-medium">{product.exchange}</p>
+                    <p className="text-xs font-medium">{product.materialGoal.toLocaleString()} {product.material}</p>
                   </div>
                   
                   <button 
@@ -239,7 +281,8 @@ export default function Home() {
                   </button>
                 </div>
               </div>
-            ))}
+            ))
+            )}
           </div>
         </div>
 
@@ -298,7 +341,7 @@ export default function Home() {
             <div className="relative">
               <div 
                 className="h-48 bg-cover bg-center"
-                style={{ backgroundImage: `url(${selectedProduct.image})` }}
+                style={{ backgroundImage: `url(${selectedProduct.img})` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0d2818] to-transparent"></div>
               </div>
@@ -315,11 +358,11 @@ export default function Home() {
               {/* Product Name Overlay */}
               <div className="absolute bottom-4 left-4 right-4">
                 <h2 className="font-noto text-white text-2xl font-bold">
-                  {selectedProduct.name}
+                  {selectedProduct.product}
                 </h2>
                 <div className="flex items-center gap-2 text-green-400 mt-1">
                   <Recycle size={16} />
-                  <span className="text-sm font-medium">{selectedProduct.exchange}</span>
+                  <span className="text-sm font-medium">{selectedProduct.materialGoal.toLocaleString()} {selectedProduct.material}</span>
                 </div>
               </div>
             </div>
@@ -376,7 +419,7 @@ export default function Home() {
                     transition-all flex items-center justify-center gap-2"
                 >
                   <Leaf size={18} />
-                  Confirm Request
+                  Proceed
                 </button>
               </div>
             </div>
@@ -420,56 +463,148 @@ export default function Home() {
                 <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-[#1a3d1a]">
                   <div 
                     className="w-full h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${selectedProduct.image})` }}
+                    style={{ backgroundImage: `url(${selectedProduct.img})` }}
                   ></div>
                 </div>
                 <div className="flex-1">
                   <h3 className="font-noto text-white font-semibold text-sm">
-                    {selectedProduct.name}
+                    {selectedProduct.product}
                   </h3>
                   <div className="flex items-center gap-1 text-green-400/70 mt-0.5">
                     <Recycle size={12} />
-                    <span className="text-xs">{selectedProduct.exchange}</span>
+                    <span className="text-xs">{selectedProduct.materialGoal.toLocaleString()} {selectedProduct.material}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Station Selection */}
+              {/* File Upload Section */}
               <div className="mb-5">
                 <label className="flex items-center gap-2 text-white font-semibold text-sm mb-3">
-                  <MapPin size={16} className="text-green-400" />
-                  Select Collection Station
+                  <Upload size={16} className="text-green-400" />
+                  Upload Proof of Bottles ({uploadedFiles.length}/5)
                 </label>
-                <div className="space-y-2">
-                  {stations.map((station) => (
-                    <div
-                      key={station.id}
-                      onClick={() => setSelectedStation(station)}
-                      className={`p-3 rounded-xl border cursor-pointer transition-all duration-200
-                        ${selectedStation?.id === station.id 
-                          ? "bg-[#1a3d1a] border-green-500" 
-                          : "bg-[#0a1f0a] border-[#1a3d1a] hover:border-green-500/50"
-                        }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="text-white font-semibold text-sm">{station.name}</h4>
-                          <p className="text-green-400/70 text-xs mt-1">{station.location}</p>
-                          <p className="text-green-500/50 text-xs mt-0.5">🕐 {station.hours}</p>
-                        </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center
-                          ${selectedStation?.id === station.id 
-                            ? "border-green-500 bg-green-500" 
-                            : "border-green-500/50"
-                          }`}>
-                          {selectedStation?.id === station.id && (
-                            <CheckCircle2 size={12} className="text-white" />
-                          )}
-                        </div>
+                
+                {/* Upload Button - Only show when no files uploaded */}
+                {uploadedFiles.length === 0 && (
+                  <div 
+                    className="relative p-4 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200
+                      bg-[#0a1f0a] border-[#1a3d1a] hover:border-green-500/50"
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleFileUpload}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-10 h-10 rounded-full bg-[#1a3d1a] flex items-center justify-center">
+                        <Upload size={20} className="text-green-400" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-white font-semibold text-sm">Click to upload images</p>
+                        <p className="text-green-400/70 text-xs mt-1">PNG, JPG up to 10MB (max 5 images)</p>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
+
+                {/* Image Previews - Facebook Style Grid */}
+                {uploadedFiles.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {uploadedFiles.slice(0, 3).map((fileObj, index) => (
+                      <div 
+                        key={index} 
+                        className="relative aspect-square rounded-xl overflow-hidden border-2 border-[#1a3d1a] group"
+                      >
+                        <img 
+                          src={fileObj.preview} 
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          onClick={() => removeFile(index)}
+                          className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full 
+                            opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                        >
+                          <X size={14} className="text-white" />
+                        </button>
+                      </div>
+                    ))}
+                    
+                    {/* Show remaining images or + button */}
+                    {uploadedFiles.length > 3 ? (
+                      <div className="col-span-3 grid grid-cols-3 gap-2 mt-0">
+                        {uploadedFiles.slice(3, 5).map((fileObj, index) => (
+                          <div 
+                            key={index + 3} 
+                            className="relative aspect-square rounded-xl overflow-hidden border-2 border-[#1a3d1a] group"
+                          >
+                            <img 
+                              src={fileObj.preview} 
+                              alt={`Preview ${index + 4}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              onClick={() => removeFile(index + 3)}
+                              className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full 
+                                opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                            >
+                              <X size={14} className="text-white" />
+                            </button>
+                          </div>
+                        ))}
+                        
+                        {/* Add More Button */}
+                        {uploadedFiles.length < 5 && (
+                          <div className="relative aspect-square rounded-xl border-2 border-dashed border-[#1a3d1a] 
+                            hover:border-green-500/50 bg-[#0a1f0a] cursor-pointer transition-all
+                            flex items-center justify-center">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={handleFileUpload}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            />
+                            <div className="flex flex-col items-center gap-1">
+                              <Plus size={24} className="text-green-400" />
+                              <span className="text-green-400/70 text-xs">Add</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : uploadedFiles.length < 5 && uploadedFiles.length > 0 && (
+                      /* Add More Button when less than 3 images */
+                      <div className="relative aspect-square rounded-xl border-2 border-dashed border-[#1a3d1a] 
+                        hover:border-green-500/50 bg-[#0a1f0a] cursor-pointer transition-all
+                        flex items-center justify-center">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleFileUpload}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <div className="flex flex-col items-center gap-1">
+                          <Plus size={24} className="text-green-400" />
+                          <span className="text-green-400/70 text-xs">Add</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* When to Visit Section */}
+              <div className="mb-3">
+                <h4 className="text-white font-semibold text-sm flex items-center gap-2">
+                  <MapPin size={16} className="text-green-400" />
+                  When would you like to visit?
+                </h4>
+                <p className="text-green-400/70 text-xs mt-1">
+                  Select your preferred date and time to drop off your bottles
+                </p>
               </div>
 
               {/* Date and Time Selection */}
@@ -511,7 +646,7 @@ export default function Home() {
               {/* Notice */}
               <div className="bg-[#132d13] rounded-xl p-3 mb-6 border border-[#1a3d1a]">
                 <p className="text-white text-xs text-center">
-                  📦 Please bring your bottles to the selected station at your scheduled time for verification.
+                   Please upload a clear photo of your collected bottles for verification.
                 </p>
               </div>
 
@@ -519,23 +654,34 @@ export default function Home() {
               <div className="flex gap-3">
                 <button
                   onClick={closeConfirmModal}
+                  disabled={isSubmitting}
                   className="flex-1 py-3 px-4 bg-[#132d13] hover:bg-[#1a3d1a]
-                    rounded-xl text-green-400 font-semibold transition-colors border border-[#1a3d1a]"
+                    rounded-xl text-green-400 font-semibold transition-colors border border-[#1a3d1a]
+                    disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Go Back
                 </button>
                 <button
                   onClick={handleFinalConfirm}
-                  disabled={!selectedStation || !selectedDate || !selectedTime}
+                  disabled={uploadedFiles.length === 0 || !selectedDate || !selectedTime || isSubmitting}
                   className={`flex-1 py-3 px-4 rounded-xl font-semibold shadow-md
                     transition-all flex items-center justify-center gap-2
-                    ${selectedStation && selectedDate && selectedTime
+                    ${uploadedFiles.length > 0 && selectedDate && selectedTime && !isSubmitting
                       ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] hover:from-[#1a4d1a] hover:to-[#0d2d0d] text-white hover:shadow-lg"
                       : "bg-[#1a3d1a]/50 text-green-500/50 cursor-not-allowed"
                     }`}
                 >
-                  <CheckCircle2 size={18} />
-                  Confirm
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 size={18} />
+                      Confirm Request
+                    </>
+                  )}
                 </button>
               </div>
             </div>
