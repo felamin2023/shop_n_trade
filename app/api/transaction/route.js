@@ -29,22 +29,21 @@ export async function GET(request) {
             contact: true,
             img: true,
             role: true,
-          }
+          },
         },
       },
       orderBy: {
-<<<<<<< HEAD
-        createdAt: 'desc',
-=======
-        transacID: "desc",
->>>>>>> 0c3920e92162f8fce0edf59110d95265bfad1461
+        createdAt: "desc",
       },
     });
 
     return NextResponse.json({ status: 200, transactions });
   } catch (error) {
     console.error("Database query failed:", error.message);
-    return NextResponse.json({ status: 500, message: error.message || "Internal Server Error" });
+    return NextResponse.json({
+      status: 500,
+      message: error.message || "Internal Server Error",
+    });
   }
 }
 
