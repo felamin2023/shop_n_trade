@@ -20,17 +20,31 @@ export async function GET(request) {
       where: whereClause,
       include: {
         product: true,
-        user: true,
+        user: {
+          select: {
+            userID: true,
+            fullname: true,
+            email: true,
+            address: true,
+            contact: true,
+            img: true,
+            role: true,
+          }
+        },
       },
       orderBy: {
+<<<<<<< HEAD
+        createdAt: 'desc',
+=======
         transacID: "desc",
+>>>>>>> 0c3920e92162f8fce0edf59110d95265bfad1461
       },
     });
 
     return NextResponse.json({ status: 200, transactions });
   } catch (error) {
-    console.error("Database query failed", error);
-    return NextResponse.json({ status: 500, message: "Internal Server Error" });
+    console.error("Database query failed:", error.message);
+    return NextResponse.json({ status: 500, message: error.message || "Internal Server Error" });
   }
 }
 

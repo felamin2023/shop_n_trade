@@ -360,21 +360,7 @@ const ProjectPage = () => {
                       ${getUrgencyColor(data.urgency)}`}>
                       {data.urgency === "high" && "🔴 Urgent"}
                       {data.urgency === "medium" && "🟡 Moderate"}
-                      {data.urgency === "low" && "🟢 Low Priority"}
                     </div>
-
-                    {/* Support Button */}
-                    <button 
-                      onClick={() => openSupportModal(data)}
-                      className="px-5 py-2.5 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
-                        hover:from-[#1a4d1a] hover:to-[#0d2d0d]
-                        rounded-xl text-white text-sm font-semibold
-                        transform transition-all duration-200 hover:scale-105
-                        shadow-md hover:shadow-lg flex items-center gap-2"
-                    >
-                      <Users size={16} />
-                      Support
-                    </button>
                   </div>
                 </div>
               ))}
