@@ -18,142 +18,94 @@ import {
   Hash,
   Phone,
   User,
-  MessageSquare
+  MessageSquare,
+  XCircle,
+  Loader2
 } from "lucide-react";
-import { useState } from "react";
-
-const requestListPending = [
-  {
-    id: "REQ-001",
-    product: "Nike T Shirt",
-    tradeItem: "500 water bottles",
-    status: "Pending",
-    date: "Dec 1, 2025",
-    image: "/images/productPage/NikeTShirt.jpg",
-  },
-  {
-    id: "REQ-002",
-    product: "Rolex Daytona",
-    tradeItem: "10,000 water bottles",
-    status: "Pending",
-    date: "Nov 28, 2025",
-    image: "/images/productPage/rolexdaytona.jpg",
-  },
-  {
-    id: "REQ-003",
-    product: "Jordan Nike Air",
-    tradeItem: "5,000 water bottles",
-    status: "Pending",
-    date: "Nov 25, 2025",
-    image: "/images/productPage/jordansneakers.jpg",
-  },
-  {
-    id: "REQ-004",
-    product: "Addidas Cap",
-    tradeItem: "200 water bottles",
-    status: "Pending",
-    date: "Nov 20, 2025",
-    image: "/images/productPage/addidascap.jpg",
-  },
-];
-
-const requestListAccepted = [
-  {
-    id: "REQ-005",
-    product: "Nike T Shirt",
-    tradeItem: "500 water bottles",
-    status: "Not yet delivered",
-    date: "Nov 15, 2025",
-    image: "/images/productPage/NikeTShirt.jpg",
-    approvedDate: "Nov 16, 2025",
-    estimatedDelivery: "Dec 5, 2025",
-    trackingNumber: "TRK-2025-0892",
-    deliveryAddress: "123 Green Street, Eco City",
-    contactNumber: "+63 912 345 6789",
-    notes: "Please handle with care. Leave at the door if not home.",
-  },
-  {
-    id: "REQ-006",
-    product: "Rolex Daytona",
-    tradeItem: "10,000 water bottles",
-    status: "Delivered",
-    date: "Nov 10, 2025",
-    image: "/images/productPage/rolexdaytona.jpg",
-    approvedDate: "Nov 11, 2025",
-    deliveredDate: "Nov 20, 2025",
-    trackingNumber: "TRK-2025-0756",
-    deliveryAddress: "456 Recycle Avenue, Green Town",
-    contactNumber: "+63 917 654 3210",
-    notes: "Signature required upon delivery.",
-  },
-  {
-    id: "REQ-007",
-    product: "Jordan Nike Air",
-    tradeItem: "5,000 water bottles",
-    status: "Delivered",
-    date: "Nov 5, 2025",
-    image: "/images/productPage/jordansneakers.jpg",
-    approvedDate: "Nov 6, 2025",
-    deliveredDate: "Nov 15, 2025",
-    trackingNumber: "TRK-2025-0621",
-    deliveryAddress: "789 Sustainable Blvd, Earth City",
-    contactNumber: "+63 918 111 2222",
-    notes: "Size US 10. Gift wrapped.",
-  },
-  {
-    id: "REQ-008",
-    product: "Addidas Cap",
-    tradeItem: "200 water bottles",
-    status: "Delivered",
-    date: "Oct 30, 2025",
-    image: "/images/productPage/addidascap.jpg",
-    approvedDate: "Oct 31, 2025",
-    deliveredDate: "Nov 5, 2025",
-    trackingNumber: "TRK-2025-0498",
-    deliveryAddress: "321 Eco Lane, Nature Village",
-    contactNumber: "+63 919 333 4444",
-    notes: "Black color variant.",
-  },
-];
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const RequestPage = () => {
+  const { user } = useAuth();
   const [recordFilter, setRecordFilter] = useState("pending");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [requestToCancel, setRequestToCancel] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const currentList = recordFilter === "pending" ? requestListPending : requestListAccepted;
+  // Fetch transactions from database
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      if (!user?.userID) return;
+      
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/transaction?userID=${user.userID}`);
+        const data = await response.json();
+        
+        if (data.status === 200) {
+          setTransactions(data.transactions);
+        }
+      } catch (error) {
+        console.error("Failed to fetch transactions:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, [user]);
+
+  // Filter transactions by status
+  const pendingTransactions = transactions.filter(t => t.status === "PENDING");
+  const acceptedTransactions = transactions.filter(t => 
+    t.status === "ACCEPTED" || t.status === "DELIVERED" || t.status === "REJECTED"
+  );
+
+  const currentList = recordFilter === "pending" ? pendingTransactions : acceptedTransactions;
   
   const filteredList = currentList.filter(
     (item) =>
-      item.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.tradeItem.toLowerCase().includes(searchQuery.toLowerCase())
+      item.product.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.product.material.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case "Pending":
+      case "PENDING":
         return {
           bg: "bg-amber-100",
           text: "text-amber-700",
           border: "border-amber-200",
           icon: CircleDashed,
+          label: "Pending",
         };
-      case "Not yet delivered":
+      case "ACCEPTED":
         return {
           bg: "bg-blue-100",
           text: "text-blue-700",
           border: "border-blue-200",
           icon: Truck,
+          label: "Accepted",
         };
-      case "Delivered":
+      case "DELIVERED":
         return {
           bg: "bg-emerald-100",
           text: "text-emerald-700",
           border: "border-emerald-200",
           icon: PackageCheck,
+          label: "Delivered",
+        };
+      case "REJECTED":
+        return {
+          bg: "bg-red-100",
+          text: "text-red-700",
+          border: "border-red-200",
+          icon: XCircle,
+          label: "Rejected",
         };
       default:
         return {
@@ -161,6 +113,7 @@ const RequestPage = () => {
           text: "text-gray-700",
           border: "border-gray-200",
           icon: Package,
+          label: status,
         };
     }
   };
@@ -185,16 +138,28 @@ const RequestPage = () => {
     setRequestToCancel(null);
   };
 
-  const handleConfirmCancel = () => {
-    // Here you would typically make an API call to cancel the request
-    console.log("Cancelling request:", requestToCancel?.id);
+  const handleConfirmCancel = async () => {
+    if (!requestToCancel) return;
+    
+    try {
+      // Delete the transaction from the database
+      const response = await fetch(`/api/transaction/${requestToCancel.transacID}`, {
+        method: "DELETE",
+      });
+      
+      if (response.ok) {
+        // Remove from local state
+        setTransactions(prev => prev.filter(t => t.transacID !== requestToCancel.transacID));
+      }
+    } catch (error) {
+      console.error("Failed to cancel request:", error);
+    }
     closeCancelModal();
-    // You could also remove the request from the list or show a success message
   };
 
-  const pendingCount = requestListPending.length;
-  const acceptedCount = requestListAccepted.length;
-  const deliveredCount = requestListAccepted.filter(r => r.status === "Delivered").length;
+  const pendingCount = pendingTransactions.length;
+  const acceptedCount = acceptedTransactions.length;
+  const deliveredCount = transactions.filter(t => t.status === "DELIVERED").length;
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-8">
@@ -312,13 +277,17 @@ const RequestPage = () => {
 
         {/* Request Cards */}
         <div className="space-y-4">
-          {filteredList.map((request, i) => {
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="w-8 h-8 text-green-400 animate-spin" />
+            </div>
+          ) : filteredList.map((request, i) => {
             const statusStyle = getStatusStyle(request.status);
             const StatusIcon = statusStyle.icon;
             
             return (
               <div
-                key={i}
+                key={request.transacID}
                 className="group bg-[#092b09] rounded-2xl shadow-md hover:shadow-xl 
                   border border-[#1a3d1a] hover:border-green-500/50
                   transition-all duration-300 p-4 flex flex-col sm:flex-row items-center gap-4"
@@ -327,27 +296,27 @@ const RequestPage = () => {
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 border-2 border-[#1a3d1a]">
                   <div 
                     className="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-300"
-                    style={{ backgroundImage: `url(${request.image})` }}
+                    style={{ backgroundImage: `url(${request.product.img})` }}
                   ></div>
                 </div>
 
                 {/* Request Details */}
                 <div className="flex-1 text-center sm:text-left">
                   <h3 className="font-noto text-white font-semibold text-lg">
-                    {request.product}
+                    {request.product.product}
                   </h3>
                   <div className="flex items-center justify-center sm:justify-start gap-2 text-green-400/70 mt-1">
                     <Recycle size={14} />
-                    <span className="text-sm">{request.tradeItem}</span>
+                    <span className="text-sm">{request.product.materialGoal} {request.product.material}</span>
                   </div>
-                  <p className="text-green-500/50 text-xs mt-1">Requested on {request.date}</p>
+                  <p className="text-green-500/50 text-xs mt-1">Request ID: {request.transacID.slice(0, 8)}...</p>
                 </div>
 
                 {/* Status Badge */}
                 <div className={`flex items-center gap-2 px-4 py-2 rounded-full border
                   ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}>
                   <StatusIcon size={16} />
-                  <span className="text-sm font-medium">{request.status}</span>
+                  <span className="text-sm font-medium">{statusStyle.label}</span>
                 </div>
 
                 {/* Action Button (only for accepted) */}
@@ -385,7 +354,7 @@ const RequestPage = () => {
         </div>
 
         {/* Empty State */}
-        {filteredList.length === 0 && (
+        {!isLoading && filteredList.length === 0 && (
           <div className="text-center py-12 bg-[#0d2818] rounded-2xl shadow-md border border-[#1a3d1a]">
             <Package size={48} className="mx-auto text-green-500/30 mb-3" />
             <p className="text-green-400 font-medium">No requests found</p>
@@ -430,7 +399,7 @@ const RequestPage = () => {
             <div className="relative">
               <div 
                 className="h-40 bg-cover bg-center rounded-t-3xl"
-                style={{ backgroundImage: `url(${selectedRequest.image})` }}
+                style={{ backgroundImage: `url(${selectedRequest.product.img})` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0d2818] to-transparent rounded-t-3xl"></div>
               </div>
@@ -447,11 +416,11 @@ const RequestPage = () => {
               {/* Product Title Overlay */}
               <div className="absolute bottom-4 left-4 right-4">
                 <h2 className="font-noto text-white text-2xl font-bold">
-                  {selectedRequest.product}
+                  {selectedRequest.product.product}
                 </h2>
                 <div className="flex items-center gap-2 text-green-300/80 mt-1">
                   <Recycle size={14} />
-                  <span className="text-sm">{selectedRequest.tradeItem}</span>
+                  <span className="text-sm">{selectedRequest.product.materialGoal} {selectedRequest.product.material}</span>
                 </div>
               </div>
             </div>
@@ -466,7 +435,7 @@ const RequestPage = () => {
                   <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-6
                     ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}>
                     <StatusIcon size={18} />
-                    <span className="font-semibold">{selectedRequest.status}</span>
+                    <span className="font-semibold">{statusStyle.label}</span>
                   </div>
                 );
               })()}
@@ -479,67 +448,41 @@ const RequestPage = () => {
                     <Hash size={18} className="text-green-400" />
                   </div>
                   <div>
-                    <p className="text-green-500/50 text-xs font-medium">Request ID</p>
-                    <p className="text-white font-semibold">{selectedRequest.id}</p>
+                    <p className="text-green-500/50 text-xs font-medium">Transaction ID</p>
+                    <p className="text-white font-semibold text-sm">{selectedRequest.transacID}</p>
                   </div>
                 </div>
 
-                {/* Tracking Number */}
+                {/* Product ID */}
                 <div className="flex items-center gap-3 p-3 bg-[#1a2d3d] rounded-xl border border-[#2a4d5c]">
                   <div className="p-2 bg-[#2a4d5c] rounded-lg">
                     <Package size={18} className="text-cyan-400" />
                   </div>
                   <div>
-                    <p className="text-cyan-500/50 text-xs font-medium">Tracking Number</p>
-                    <p className="text-white font-semibold">{selectedRequest.trackingNumber}</p>
+                    <p className="text-cyan-500/50 text-xs font-medium">Product ID</p>
+                    <p className="text-white font-semibold text-sm">{selectedRequest.productID}</p>
                   </div>
                 </div>
 
-                {/* Dates */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-3 p-3 bg-[#3d2d0d] rounded-xl border border-[#5c4a1a]">
-                    <div className="p-2 bg-[#5c4a1a] rounded-lg">
-                      <Calendar size={18} className="text-amber-400" />
-                    </div>
-                    <div>
-                      <p className="text-amber-500/50 text-xs font-medium">Requested</p>
-                      <p className="text-white font-semibold text-sm">{selectedRequest.date}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-[#0d3d2d] rounded-xl border border-[#1a5c4a]">
-                    <div className="p-2 bg-[#1a5c4a] rounded-lg">
-                      <CheckCircle2 size={18} className="text-teal-400" />
-                    </div>
-                    <div>
-                      <p className="text-teal-500/50 text-xs font-medium">Approved</p>
-                      <p className="text-white font-semibold text-sm">{selectedRequest.approvedDate}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Delivery Date or Estimated */}
-                <div className="flex items-center gap-3 p-3 bg-[#2d1a3d] rounded-xl border border-[#4a2d5c]">
-                  <div className="p-2 bg-[#4a2d5c] rounded-lg">
-                    <Truck size={18} className="text-purple-400" />
+                {/* Stock Info */}
+                <div className="flex items-center gap-3 p-3 bg-[#3d2d0d] rounded-xl border border-[#5c4a1a]">
+                  <div className="p-2 bg-[#5c4a1a] rounded-lg">
+                    <ShoppingBag size={18} className="text-amber-400" />
                   </div>
                   <div>
-                    <p className="text-purple-500/50 text-xs font-medium">
-                      {selectedRequest.status === "Delivered" ? "Delivered On" : "Estimated Delivery"}
-                    </p>
-                    <p className="text-white font-semibold">
-                      {selectedRequest.deliveredDate || selectedRequest.estimatedDelivery}
-                    </p>
+                    <p className="text-amber-500/50 text-xs font-medium">Stock Available</p>
+                    <p className="text-white font-semibold text-sm">{selectedRequest.product.stock} units</p>
                   </div>
                 </div>
 
-                {/* Delivery Address */}
+                {/* User Address */}
                 <div className="flex items-start gap-3 p-3 bg-[#3d1a1a] rounded-xl border border-[#5c2a2a]">
                   <div className="p-2 bg-[#5c2a2a] rounded-lg">
                     <MapPin size={18} className="text-rose-400" />
                   </div>
                   <div>
                     <p className="text-rose-500/50 text-xs font-medium">Delivery Address</p>
-                    <p className="text-white font-semibold">{selectedRequest.deliveryAddress}</p>
+                    <p className="text-white font-semibold">{selectedRequest.user.address}</p>
                   </div>
                 </div>
 
@@ -550,27 +493,14 @@ const RequestPage = () => {
                   </div>
                   <div>
                     <p className="text-cyan-500/50 text-xs font-medium">Contact Number</p>
-                    <p className="text-white font-semibold">{selectedRequest.contactNumber}</p>
+                    <p className="text-white font-semibold">{selectedRequest.user.contact}</p>
                   </div>
                 </div>
-
-                {/* Notes */}
-                {selectedRequest.notes && (
-                  <div className="flex items-start gap-3 p-3 bg-[#0a1f0a] rounded-xl border border-[#1a3d1a]">
-                    <div className="p-2 bg-[#132d13] rounded-lg">
-                      <MessageSquare size={18} className="text-green-400/60" />
-                    </div>
-                    <div>
-                      <p className="text-green-500/50 text-xs font-medium">Notes</p>
-                      <p className="text-green-300/80">{selectedRequest.notes}</p>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Action Buttons */}
               <div className="flex gap-3 mt-6">
-                {selectedRequest.status !== "Delivered" && (
+                {selectedRequest.status !== "DELIVERED" && (
                   <button className="flex-1 flex items-center justify-center gap-2 py-3
                     bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
                     hover:from-[#1a4d1a] hover:to-[#0d2d0d]
@@ -583,7 +513,7 @@ const RequestPage = () => {
                 )}
                 <button 
                   onClick={closeModal}
-                  className={`${selectedRequest.status !== "Delivered" ? "" : "flex-1"} 
+                  className={`${selectedRequest.status !== "DELIVERED" ? "" : "flex-1"} 
                     flex items-center justify-center gap-2 py-3 px-6
                     bg-[#132d13] hover:bg-[#1a3d1a]
                     rounded-xl text-green-400 font-semibold
@@ -640,20 +570,20 @@ const RequestPage = () => {
                 <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-[#1a3d1a]">
                   <div 
                     className="w-full h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${requestToCancel.image})` }}
+                    style={{ backgroundImage: `url(${requestToCancel.product.img})` }}
                   ></div>
                 </div>
                 
                 {/* Product Info */}
                 <div className="flex-1">
                   <h3 className="font-noto text-white font-semibold">
-                    {requestToCancel.product}
+                    {requestToCancel.product.product}
                   </h3>
                   <div className="flex items-center gap-2 text-green-400/70 mt-1">
                     <Recycle size={12} />
-                    <span className="text-xs">{requestToCancel.tradeItem}</span>
+                    <span className="text-xs">{requestToCancel.product.materialGoal} {requestToCancel.product.material}</span>
                   </div>
-                  <p className="text-green-500/50 text-xs mt-1">ID: {requestToCancel.id}</p>
+                  <p className="text-green-500/50 text-xs mt-1">ID: {requestToCancel.transacID.slice(0, 8)}...</p>
                 </div>
               </div>
 
