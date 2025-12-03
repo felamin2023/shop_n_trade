@@ -19,32 +19,23 @@ export async function GET(request) {
     console.error("Database query failed", error);
     return NextResponse.json({ status: 500, message: "Internal Server Error" });
   }
-
-  return NextResponse.json({ status: 200, transaction });
 }
 
-// import { NextResponse } from "next/server";
-// import db from "@/lib/db";
+export async function PUT(request) {
+  try {
+    const { transacID, status } = await request.json();
 
-// export async function GET(request) {
-//   try {
-//     const transactions = await db.transaction.findMany({
-//       include: {
-//         product: true,
-//         user: true,
-//       },
-//     });
+    const updatedTransaction = await db.transaction.update({
+      where: { transacID },
+      data: { status },
+    });
 
-//     if (!transactions.length) {
-//       return NextResponse.json({
-//         status: 404,
-//         message: "No transactions found.",
-//       });
-//     }
-
-//     return NextResponse.json({ status: 200, transactions });
-//   } catch (error) {
-//     console.error("Database query failed", error);
-//     return NextResponse.json({ status: 500, message: "Internal Server Error" });
-//   }
-// }
+    return NextResponse.json({ status: 200, transaction: updatedTransaction });
+  } catch (error) {
+    console.error("Error updating transaction:", error);
+    return NextResponse.json({
+      status: 500,
+      message: "Failed to update transaction",
+    });
+  }
+}
