@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import {
   Search,
   Package,
@@ -24,6 +25,7 @@ const InventoryPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productData, setProductData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
   const [inputData, setInputData] = useState({
     product: "",
     material: "",
@@ -36,61 +38,41 @@ const InventoryPage = () => {
   const [uploading, setUploading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
-  const [notification, setNotification] = useState({ show: false, type: "", message: "" });
-
-  // Mock data for demo
-  const mockProducts = [
-    {
-      productID: "PDT001ABC",
-      product: "Nike T-Shirt",
-      material: "Water Bottles",
-      materialGoal: 500,
-      stock: 10,
-      img: "/images/productPage/product1.jpg",
-    },
-    {
-      productID: "PDT002DEF",
-      product: "Rolex Daytona",
-      material: "Water Bottles",
-      materialGoal: 10000,
-      stock: 1,
-      img: "/images/productPage/product2.jpg",
-    },
-    {
-      productID: "PDT003GHI",
-      product: "Jordan Nike Air",
-      material: "Water Bottles",
-      materialGoal: 5000,
-      stock: 1,
-      img: "/images/productPage/product3.jpg",
-    },
-    {
-      productID: "PDT004JKL",
-      product: "Adidas Cap",
-      material: "Water Bottles",
-      materialGoal: 200,
-      stock: 3,
-      img: "/images/productPage/product4.jpg",
-    },
-    {
-      productID: "PDT005MNO",
-      product: "Eco Water Bottle",
-      material: "Plastic Caps",
-      materialGoal: 100,
-      stock: 25,
-      img: "/images/productPage/product5.jpg",
-    },
-  ];
+  const [notification, setNotification] = useState({
+    show: false,
+    type: "",
+    message: "",
+  });
 
   // Show notification
   const showNotification = (type, message) => {
     setNotification({ show: true, type, message });
-    setTimeout(() => setNotification({ show: false, type: "", message: "" }), 3000);
+    setTimeout(
+      () => setNotification({ show: false, type: "", message: "" }),
+      3000
+    );
   };
 
-  // Initialize with mock data (no backend needed for UI demo)
+  // Fetch products from database
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/product");
+      const data = await response.json();
+      if (data.status === 200 && data.product) {
+        setProductData(data.product);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      showNotification("error", "Failed to fetch products");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initialize by fetching from database
   useEffect(() => {
-    setProductData(mockProducts);
+    fetchProducts();
   }, []);
 
   // Filter products
@@ -99,6 +81,39 @@ const InventoryPage = () => {
       product.product?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.material?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Upload image to Supabase Storage with product name
+  const uploadImageToSupabase = async (file, productName) => {
+    const fileExt = file.name.split(".").pop();
+    // Clean product name: remove special chars, replace spaces with underscores, lowercase
+    const cleanName = productName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/\s+/g, "_");
+    const fileName = `${cleanName}.${fileExt}`;
+
+    // First, try to delete existing file with same name (for updates)
+    await supabase.storage.from("products").remove([fileName]);
+
+    const { data, error } = await supabase.storage
+      .from("products")
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: true,
+      });
+
+    if (error) {
+      console.error("Upload error details:", error.message || error);
+      throw new Error(error.message || "Failed to upload image");
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from("products")
+      .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
+  };
 
   // Handle file selection
   const handleFileChange = (event) => {
@@ -150,28 +165,61 @@ const InventoryPage = () => {
   // Handle product save
   async function saveProduct(e) {
     e.preventDefault();
-    
-    if (!inputData.product || !inputData.material || !inputData.materialGoal || !inputData.stock) {
+
+    if (
+      !inputData.product ||
+      !inputData.material ||
+      !inputData.materialGoal ||
+      !inputData.stock
+    ) {
       showNotification("error", "Please fill in all fields");
+      return;
+    }
+
+    if (!selectedFile) {
+      showNotification("error", "Please select an image");
       return;
     }
 
     try {
       setUploading(true);
-      let imageUrl = previewURL || "/images/productPage/default.jpg";
+      let imageUrl = "";
 
-      // Mock success for demo (no backend needed)
-      showNotification("success", "Product added successfully!");
-      const newProduct = {
-        productID: `PDT${Date.now()}`,
-        product: inputData.product,
-        material: inputData.material,
-        materialGoal: parseInt(inputData.materialGoal),
-        stock: parseInt(inputData.stock),
-        img: imageUrl,
-      };
-      setProductData([...productData, newProduct]);
-      resetForm();
+      // Upload image to Supabase with product name
+      try {
+        imageUrl = await uploadImageToSupabase(selectedFile, inputData.product);
+      } catch (uploadError) {
+        console.error("Image upload failed:", uploadError);
+        showNotification(
+          "error",
+          `Image upload failed: ${uploadError.message}`
+        );
+        setUploading(false);
+        return;
+      }
+
+      // Send to API
+      const response = await fetch("/api/product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          product: inputData.product,
+          material: inputData.material,
+          materialGoal: parseInt(inputData.materialGoal),
+          stock: parseInt(inputData.stock),
+          img: imageUrl,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === 201) {
+        showNotification("success", "Product added successfully!");
+        fetchProducts(); // Refresh the list
+        resetForm();
+      } else {
+        showNotification("error", "Failed to add product");
+      }
     } catch (error) {
       console.error("Error:", error);
       showNotification("error", "Failed to add product");
@@ -186,25 +234,51 @@ const InventoryPage = () => {
 
     try {
       setUploading(true);
-      let imageUrl = previewURL || inputData.img;
+      let imageUrl = inputData.img; // Keep existing image by default
 
-      // Mock success for demo (no backend needed)
-      showNotification("success", "Product updated successfully!");
-      setProductData(
-        productData.map((p) =>
-          p.productID === selectedProduct.productID
-            ? {
-                ...p,
-                product: inputData.product,
-                material: inputData.material,
-                materialGoal: parseInt(inputData.materialGoal),
-                stock: parseInt(inputData.stock),
-                img: imageUrl,
-              }
-            : p
-        )
+      // Upload new image if a file is selected
+      if (selectedFile) {
+        try {
+          imageUrl = await uploadImageToSupabase(
+            selectedFile,
+            inputData.product
+          );
+        } catch (uploadError) {
+          console.error("Image upload failed:", uploadError);
+          showNotification(
+            "error",
+            `Image upload failed: ${uploadError.message}`
+          );
+          setUploading(false);
+          return;
+        }
+      }
+
+      // Send to API
+      const response = await fetch(
+        `/api/product?productID=${selectedProduct.productID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            product: inputData.product,
+            material: inputData.material,
+            materialGoal: parseInt(inputData.materialGoal),
+            stock: parseInt(inputData.stock),
+            img: imageUrl,
+          }),
+        }
       );
-      resetForm();
+
+      const data = await response.json();
+
+      if (data.status === 200) {
+        showNotification("success", "Product updated successfully!");
+        fetchProducts(); // Refresh the list
+        resetForm();
+      } else {
+        showNotification("error", "Failed to update product");
+      }
     } catch (error) {
       console.error("Error:", error);
       showNotification("error", "Failed to update product");
@@ -217,11 +291,28 @@ const InventoryPage = () => {
   const handleConfirmDelete = async () => {
     if (!productToDelete) return;
 
-    // Mock success for demo (no backend needed)
-    showNotification("success", "Product deleted successfully!");
-    setProductData(productData.filter((p) => p.productID !== productToDelete));
-    setIsDeleteModalOpen(false);
-    setProductToDelete(null);
+    try {
+      const response = await fetch("/api/product", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productID: productToDelete }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === 200) {
+        showNotification("success", "Product deleted successfully!");
+        fetchProducts(); // Refresh the list
+      } else {
+        showNotification("error", "Failed to delete product");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      showNotification("error", "Failed to delete product");
+    } finally {
+      setIsDeleteModalOpen(false);
+      setProductToDelete(null);
+    }
   };
 
   // Stats
@@ -230,7 +321,7 @@ const InventoryPage = () => {
   const lowStockCount = productData.filter((p) => p.stock <= 3).length;
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-28">
       {/* Header */}
       <div className="w-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] py-6 px-4 mb-6">
         <div className="max-w-7xl mx-auto">
@@ -319,83 +410,132 @@ const InventoryPage = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-[#132d13]/80">
-                      <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">Product</th>
-                      <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">Material</th>
-                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">Goal</th>
-                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">Stock</th>
-                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">Actions</th>
+                      <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                        Product
+                      </th>
+                      <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                        Material
+                      </th>
+                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                        Goal
+                      </th>
+                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                        Stock
+                      </th>
+                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredProducts.map((product, i) => (
-                      <tr
-                        key={i}
-                        onClick={() => handleRowClick(product)}
-                        className="border-t border-[#1a3d1a] hover:bg-[#132d13]/50 transition-colors cursor-pointer"
-                      >
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-xl bg-[#0a1f0a] overflow-hidden">
-                              {product.img ? (
-                                <img src={product.img} alt={product.product} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <Package size={20} className="text-green-600" />
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-white font-medium">{product.product}</p>
-                              <p className="text-green-400/50 text-xs">ID: {product.productID?.slice(0, 8)}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-2 text-green-300/80">
-                            <Recycle size={14} className="text-green-500/60" />
-                            {product.material}
-                          </div>
-                        </td>
-                        <td className="py-4 px-6 text-center">
-                          <span className="text-white font-semibold">{product.materialGoal?.toLocaleString()}</span>
-                        </td>
-                        <td className="py-4 px-6 text-center">
-                          <span className={`px-3 py-1 rounded-full text-sm font-semibold
-                            ${product.stock > 5 ? "bg-green-600/20 text-green-400" : 
-                              product.stock > 0 ? "bg-yellow-500/20 text-yellow-400" : "bg-red-500/20 text-red-400"}`}>
-                            {product.stock}
-                          </span>
-                        </td>
-                        <td className="py-4 px-6">
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRowClick(product);
-                              }}
-                              className="p-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors"
-                            >
-                              <Edit size={16} />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setProductToDelete(product.productID);
-                                setIsDeleteModalOpen(true);
-                              }}
-                              className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                    {loading ? (
+                      <tr>
+                        <td colSpan="5" className="py-12">
+                          <div className="flex flex-col items-center justify-center">
+                            <div className="w-10 h-10 border-4 border-green-900 border-t-green-400 rounded-full animate-spin mb-3"></div>
+                            <p className="text-green-400/50">
+                              Loading products...
+                            </p>
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      filteredProducts.map((product, i) => (
+                        <tr
+                          key={i}
+                          onClick={() => handleRowClick(product)}
+                          className="border-t border-[#1a3d1a] hover:bg-[#132d13]/50 transition-colors cursor-pointer"
+                        >
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded-xl bg-[#0a1f0a] overflow-hidden">
+                                {product.img ? (
+                                  <img
+                                    src={product.img}
+                                    alt={product.product}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Package
+                                      size={20}
+                                      className="text-green-600"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-white font-medium">
+                                  {product.product}
+                                </p>
+                                <p className="text-green-400/50 text-xs">
+                                  ID: {product.productID?.slice(0, 8)}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-2 text-green-300/80">
+                              <Recycle
+                                size={14}
+                                className="text-green-500/60"
+                              />
+                              {product.material}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-center">
+                            <span className="text-white font-semibold">
+                              {product.materialGoal?.toLocaleString()}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-center">
+                            <span
+                              className={`px-3 py-1 rounded-full text-sm font-semibold
+                            ${
+                              product.stock > 5
+                                ? "bg-green-600/20 text-green-400"
+                                : product.stock > 0
+                                ? "bg-yellow-500/20 text-yellow-400"
+                                : "bg-red-500/20 text-red-400"
+                            }`}
+                            >
+                              {product.stock}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRowClick(product);
+                                }}
+                                className="p-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors"
+                              >
+                                <Edit size={16} />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setProductToDelete(product.productID);
+                                  setIsDeleteModalOpen(true);
+                                }}
+                                className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
-                {filteredProducts.length === 0 && (
+                {!loading && filteredProducts.length === 0 && (
                   <div className="text-center py-12">
-                    <Package size={48} className="mx-auto text-[#1a3d1a] mb-3" />
+                    <Package
+                      size={48}
+                      className="mx-auto text-[#1a3d1a] mb-3"
+                    />
                     <p className="text-green-400/50">No products found</p>
                   </div>
                 )}
@@ -430,21 +570,35 @@ const InventoryPage = () => {
                 )}
               </div>
 
-              <form onSubmit={formMode === "add" ? saveProduct : updateProduct} className="space-y-4">
+              <form
+                onSubmit={formMode === "add" ? saveProduct : updateProduct}
+                className="space-y-4"
+              >
                 {/* Image Upload */}
                 <div className="relative">
                   <div className="h-40 bg-[#0a1f0a] rounded-xl overflow-hidden flex items-center justify-center border-2 border-dashed border-[#1a3d1a]">
                     {previewURL ? (
-                      <img src={previewURL} alt="Preview" className="w-full h-full object-cover" />
+                      <img
+                        src={previewURL}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <div className="text-center">
-                        <ImageIcon size={32} className="mx-auto text-green-600 mb-2" />
-                        <p className="text-green-400/50 text-sm">No image selected</p>
+                        <ImageIcon
+                          size={32}
+                          className="mx-auto text-green-600 mb-2"
+                        />
+                        <p className="text-green-400/50 text-sm">
+                          No image selected
+                        </p>
                       </div>
                     )}
                   </div>
-                  <label className="absolute bottom-3 right-3 p-2 bg-green-600 hover:bg-green-700 
-                    rounded-lg cursor-pointer transition-colors">
+                  <label
+                    className="absolute bottom-3 right-3 p-2 bg-green-600 hover:bg-green-700 
+                    rounded-lg cursor-pointer transition-colors"
+                  >
                     <Upload size={16} className="text-white" />
                     <input
                       type="file"
@@ -457,7 +611,9 @@ const InventoryPage = () => {
 
                 {/* Product Name */}
                 <div>
-                  <label className="block text-green-400/60 text-sm mb-2">Product Name</label>
+                  <label className="block text-green-400/60 text-sm mb-2">
+                    Product Name
+                  </label>
                   <input
                     type="text"
                     name="product"
@@ -472,7 +628,9 @@ const InventoryPage = () => {
 
                 {/* Material */}
                 <div>
-                  <label className="block text-green-400/60 text-sm mb-2">Material Type</label>
+                  <label className="block text-green-400/60 text-sm mb-2">
+                    Material Type
+                  </label>
                   <input
                     type="text"
                     name="material"
@@ -488,7 +646,9 @@ const InventoryPage = () => {
                 {/* Material Goal & Stock */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-green-400/60 text-sm mb-2">Material Goal</label>
+                    <label className="block text-green-400/60 text-sm mb-2">
+                      Material Goal
+                    </label>
                     <input
                       type="number"
                       name="materialGoal"
@@ -501,7 +661,9 @@ const InventoryPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-green-400/60 text-sm mb-2">Stock</label>
+                    <label className="block text-green-400/60 text-sm mb-2">
+                      Stock
+                    </label>
                     <input
                       type="number"
                       name="stock"
@@ -521,9 +683,10 @@ const InventoryPage = () => {
                   disabled={uploading}
                   className={`w-full py-3 rounded-xl text-white font-semibold 
                     flex items-center justify-center gap-2 transition-all
-                    ${formMode === "add" 
-                      ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] hover:from-[#1a4d1a] hover:to-[#0d2d0d]" 
-                      : "bg-gradient-to-r from-[#1a4d1a] to-[#0d3d0d] hover:from-[#1a5c1a] hover:to-[#0d2d0d]"
+                    ${
+                      formMode === "add"
+                        ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] hover:from-[#1a4d1a] hover:to-[#0d2d0d]"
+                        : "bg-gradient-to-r from-[#1a4d1a] to-[#0d3d0d] hover:from-[#1a5c1a] hover:to-[#0d2d0d]"
                     }
                     ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
@@ -552,11 +715,11 @@ const InventoryPage = () => {
 
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
           onClick={() => setIsDeleteModalOpen(false)}
         >
-          <div 
+          <div
             className="bg-[#0d2818] rounded-2xl shadow-2xl w-full max-w-sm border border-[#1a3d1a]"
             onClick={(e) => e.stopPropagation()}
           >
@@ -564,8 +727,13 @@ const InventoryPage = () => {
               <div className="w-16 h-16 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center">
                 <AlertCircle size={32} className="text-red-400" />
               </div>
-              <h3 className="text-white text-lg font-semibold mb-2">Delete Product</h3>
-              <p className="text-green-400/60 mb-6">Are you sure you want to delete this product? This action cannot be undone.</p>
+              <h3 className="text-white text-lg font-semibold mb-2">
+                Delete Product
+              </h3>
+              <p className="text-green-400/60 mb-6">
+                Are you sure you want to delete this product? This action cannot
+                be undone.
+              </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsDeleteModalOpen(false)}
@@ -587,10 +755,18 @@ const InventoryPage = () => {
 
       {/* Notification */}
       {notification.show && (
-        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg
+        <div
+          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg
           flex items-center gap-2 animate-bounce
-          ${notification.type === "success" ? "bg-emerald-500" : "bg-red-500"} text-white`}>
-          {notification.type === "success" ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+          ${
+            notification.type === "success" ? "bg-emerald-500" : "bg-red-500"
+          } text-white`}
+        >
+          {notification.type === "success" ? (
+            <CheckCircle2 size={20} />
+          ) : (
+            <AlertCircle size={20} />
+          )}
           {notification.message}
         </div>
       )}
