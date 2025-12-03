@@ -10,10 +10,12 @@ export const AnimatedTestimonials = ({ testimonials, autoplay = false }) => {
   const [isClient, setIsClient] = useState(false);
 
   const handleNext = () => {
+    if (testimonials.length === 0) return;
     setActive((prev) => (prev + 1) % testimonials.length);
   };
 
   const handlePrev = () => {
+    if (testimonials.length === 0) return;
     setActive((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
@@ -26,11 +28,11 @@ export const AnimatedTestimonials = ({ testimonials, autoplay = false }) => {
   }, []);
 
   useEffect(() => {
-    if (autoplay) {
+    if (autoplay && testimonials.length > 0) {
       const interval = setInterval(handleNext, 5000);
       return () => clearInterval(interval);
     }
-  }, [autoplay]);
+  }, [autoplay, testimonials.length]);
 
   useEffect(() => {
     // Generate random rotations on client side only to avoid hydration mismatch
@@ -38,6 +40,15 @@ export const AnimatedTestimonials = ({ testimonials, autoplay = false }) => {
   }, [testimonials]);
 
   if (!isClient) {
+    return (
+      <div className="w-full h-80 flex items-center justify-center">
+        <div className="animate-pulse bg-emerald-100 rounded-3xl w-full h-full"></div>
+      </div>
+    );
+  }
+
+  // Handle empty testimonials
+  if (testimonials.length === 0) {
     return (
       <div className="w-full h-80 flex items-center justify-center">
         <div className="animate-pulse bg-emerald-100 rounded-3xl w-full h-full"></div>
@@ -53,7 +64,7 @@ export const AnimatedTestimonials = ({ testimonials, autoplay = false }) => {
             <AnimatePresence>
               {testimonials.map((testimonial, index) => (
                 <motion.div
-                  key={testimonial.src}
+                  key={`${index}-${testimonial.name}`}
                   initial={{
                     opacity: 0,
                     scale: 0.9,
@@ -100,16 +111,16 @@ export const AnimatedTestimonials = ({ testimonials, autoplay = false }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={handlePrev}
-            className="h-9 w-9 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 
-              hover:from-emerald-600 hover:to-teal-600 flex items-center justify-center 
+            className="h-9 w-9 rounded-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
+              hover:from-[#1a4d1a] hover:to-[#0d2d0d] flex items-center justify-center 
               group/button shadow-md transition-all duration-200 hover:scale-110"
           >
             <IconArrowLeft className="h-5 w-5 text-white group-hover/button:rotate-12 transition-transform duration-300" />
           </button>
           <button
             onClick={handleNext}
-            className="h-9 w-9 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 
-              hover:from-emerald-600 hover:to-teal-600 flex items-center justify-center 
+            className="h-9 w-9 rounded-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
+              hover:from-[#1a4d1a] hover:to-[#0d2d0d] flex items-center justify-center 
               group/button shadow-md transition-all duration-200 hover:scale-110"
           >
             <IconArrowRight className="h-5 w-5 text-white group-hover/button:-rotate-12 transition-transform duration-300" />

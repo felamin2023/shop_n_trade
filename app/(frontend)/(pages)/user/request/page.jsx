@@ -20,7 +20,9 @@ import {
   User,
   MessageSquare,
   XCircle,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -35,6 +37,8 @@ const RequestPage = () => {
   const [requestToCancel, setRequestToCancel] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
 
   // Fetch transactions from database
   useEffect(() => {
@@ -72,6 +76,29 @@ const RequestPage = () => {
       item.product.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.product.material.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredList.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedList = filteredList.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filter or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [recordFilter, searchQuery]);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -162,7 +189,7 @@ const RequestPage = () => {
   const deliveredCount = transactions.filter(t => t.status === "DELIVERED").length;
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-24">
       {/* Hero Section */}
       <div className="w-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] py-8 px-4 mb-6">
         <div className="max-w-5xl mx-auto text-center">
@@ -275,13 +302,14 @@ const RequestPage = () => {
           <div className="h-1 w-8 bg-gradient-to-r from-[#0d3d0d] to-green-500 rounded-full"></div>
         </div>
 
-        {/* Request Cards */}
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="w-8 h-8 text-green-400 animate-spin" />
-            </div>
-          ) : filteredList.map((request, i) => {
+        {/* Request Cards - Fixed height container for consistent pagination position */}
+        <div className="min-h-[880px]">
+          <div className="space-y-4">
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="w-8 h-8 text-green-400 animate-spin" />
+              </div>
+            ) : paginatedList.map((request, i) => {
             const statusStyle = getStatusStyle(request.status);
             const StatusIcon = statusStyle.icon;
             
@@ -351,7 +379,50 @@ const RequestPage = () => {
               </div>
             );
           })}
+          </div>
         </div>
+
+        {/* Pagination Controls - Always visible when there are multiple pages */}
+        {!isLoading && filteredList.length > 0 && (
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage === 1 || totalPages <= 1}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm
+                transition-all duration-300 border
+                ${currentPage === 1 || totalPages <= 1
+                  ? "bg-[#0d2818] border-[#1a3d1a] text-green-500/30 cursor-not-allowed"
+                  : "bg-[#0d2818] border-[#1a3d1a] text-green-400 hover:bg-[#132d13] hover:border-green-500/50"
+                }`}
+            >
+              <ChevronLeft size={18} />
+              Previous
+            </button>
+            
+            <div className="flex items-center gap-2 px-4 py-2 bg-[#132d13] rounded-xl border border-[#1a3d1a]">
+              <span className="text-green-400 font-medium text-sm">
+                Page {currentPage} of {totalPages || 1}
+              </span>
+              <span className="text-green-500/50 text-xs">
+                ({filteredList.length} items)
+              </span>
+            </div>
+            
+            <button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages || totalPages <= 1}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm
+                transition-all duration-300 border
+                ${currentPage === totalPages || totalPages <= 1
+                  ? "bg-[#0d2818] border-[#1a3d1a] text-green-500/30 cursor-not-allowed"
+                  : "bg-[#0d2818] border-[#1a3d1a] text-green-400 hover:bg-[#132d13] hover:border-green-500/50"
+                }`}
+            >
+              Next
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        )}
 
         {/* Empty State */}
         {!isLoading && filteredList.length === 0 && (

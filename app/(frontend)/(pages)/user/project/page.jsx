@@ -234,7 +234,7 @@ const ProjectPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-24">
       {/* Hero Section */}
       <div className="w-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] py-8 px-4 mb-6">
         <div className="max-w-6xl mx-auto text-center">

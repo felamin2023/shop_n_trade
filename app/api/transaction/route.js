@@ -40,9 +40,9 @@ export async function POST(request) {
     const { productID, userID, images, scheduledDate, scheduledTime } = body;
 
     if (!productID || !userID) {
-      return NextResponse.json({ 
-        status: 400, 
-        message: "Product ID and User ID are required" 
+      return NextResponse.json({
+        status: 400,
+        message: "Product ID and User ID are required"
       });
     }
 
