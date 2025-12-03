@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Search,
   FolderKanban,
@@ -23,6 +24,9 @@ import {
 } from "lucide-react";
 
 const ProjectPage = () => {
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("edit");
+
   const [allDataProject, setAllDataProject] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -37,72 +41,38 @@ const ProjectPage = () => {
   const [updateData, setUpdateData] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
-  const [notification, setNotification] = useState({ show: false, type: "", message: "" });
-
-  // Mock data for demo
-  const mockProjects = [
-    {
-      projectID: "PRJ001ABC",
-      school: "Bug-ot Elementary School",
-      location: "Bug-ot Lower",
-      itemgoal: 200,
-      status: "PENDING",
-      progress: 65,
-      donated: 130,
-    },
-    {
-      projectID: "PRJ002DEF",
-      school: "Bankal Elementary School",
-      location: "Pool Bankal Lapu-Lapu City",
-      itemgoal: 1500,
-      status: "DONE",
-      progress: 100,
-      donated: 1500,
-    },
-    {
-      projectID: "PRJ003GHI",
-      school: "Greenhills Elementary School",
-      location: "Greenhills",
-      itemgoal: 300,
-      status: "PENDING",
-      progress: 40,
-      donated: 120,
-    },
-    {
-      projectID: "PRJ004JKL",
-      school: "Argao National High School",
-      location: "Argao",
-      itemgoal: 700,
-      status: "DONE",
-      progress: 100,
-      donated: 700,
-    },
-    {
-      projectID: "PRJ005MNO",
-      school: "CTU Argao Campus",
-      location: "Argao Kintanar",
-      itemgoal: 500,
-      status: "PENDING",
-      progress: 20,
-      donated: 100,
-    },
-  ];
+  const [notification, setNotification] = useState({
+    show: false,
+    type: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Show notification
   const showNotification = (type, message) => {
     setNotification({ show: true, type, message });
-    setTimeout(() => setNotification({ show: false, type: "", message: "" }), 3000);
+    setTimeout(
+      () => setNotification({ show: false, type: "", message: "" }),
+      3000
+    );
   };
 
   // Fetch projects
   async function fetchAllDataProject() {
     try {
-      const res = await fetch("http://localhost:3000/api/project");
+      setLoading(true);
+      const res = await fetch("/api/project");
       const data = await res.json();
-      setAllDataProject(data.project || mockProjects);
+      if (data.status === 200 && data.project) {
+        setAllDataProject(data.project);
+      }
     } catch (error) {
-      console.log(error);
-      setAllDataProject(mockProjects);
+      console.error("Error fetching projects:", error);
+      showNotification("error", "Failed to fetch projects");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -110,20 +80,36 @@ const ProjectPage = () => {
     fetchAllDataProject();
   }, []);
 
+  // Handle edit query parameter from home page
+  useEffect(() => {
+    if (editId && allDataProject.length > 0) {
+      const projectToEdit = allDataProject.find((p) => p.projectID === editId);
+      if (projectToEdit) {
+        handleRowClick(projectToEdit);
+      }
+    }
+  }, [editId, allDataProject]);
+
   // Filter projects
   const filteredProjects = allDataProject.filter((project) => {
     const matchesSearch =
       project.school?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.location?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = statusFilter === "All" || project.status === statusFilter;
+    const matchesFilter =
+      statusFilter === "All" || project.status === statusFilter;
     return matchesSearch && matchesFilter;
   });
 
   // Stats
   const totalProjects = allDataProject.length;
-  const pendingCount = allDataProject.filter((p) => p.status === "PENDING").length;
+  const pendingCount = allDataProject.filter(
+    (p) => p.status === "PENDING"
+  ).length;
   const doneCount = allDataProject.filter((p) => p.status === "DONE").length;
-  const totalChairs = allDataProject.reduce((acc, p) => acc + (p.itemgoal || 0), 0);
+  const totalChairs = allDataProject.reduce(
+    (acc, p) => acc + (p.itemgoal || 0),
+    0
+  );
 
   // Handle row click for editing
   const handleRowClick = (project) => {
@@ -163,14 +149,15 @@ const ProjectPage = () => {
   // Save project
   async function saveProject(e) {
     e.preventDefault();
-    
+
     if (!inputData.school || !inputData.location || !inputData.itemgoal) {
       showNotification("error", "Please fill in all fields");
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:3000/api/project", {
+      setSaving(true);
+      const res = await fetch("/api/project", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -181,7 +168,9 @@ const ProjectPage = () => {
         }),
       });
 
-      if (res.ok) {
+      const data = await res.json();
+
+      if (data.status === 201) {
         showNotification("success", "Project added successfully!");
         fetchAllDataProject();
         resetForm();
@@ -189,32 +178,25 @@ const ProjectPage = () => {
         showNotification("error", "Failed to add project");
       }
     } catch (error) {
-      console.log("Error:", error);
-      // Mock success for demo
-      showNotification("success", "Project added successfully!");
-      const newProject = {
-        projectID: `PRJ${Date.now()}`,
-        ...inputData,
-        itemgoal: parseInt(inputData.itemgoal, 10),
-        progress: 0,
-        donated: 0,
-      };
-      setAllDataProject([...allDataProject, newProject]);
-      resetForm();
+      console.error("Error:", error);
+      showNotification("error", "Failed to add project");
+    } finally {
+      setSaving(false);
     }
   }
 
   // Update project
   async function updateProject(e) {
     e.preventDefault();
-    
+
     if (!updateData || !updateData.projectID) {
       showNotification("error", "No project selected for update");
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:3000/api/project", {
+      setSaving(true);
+      const res = await fetch("/api/project", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -226,7 +208,9 @@ const ProjectPage = () => {
         }),
       });
 
-      if (res.ok) {
+      const data = await res.json();
+
+      if (data.status === 200) {
         showNotification("success", "Project updated successfully!");
         fetchAllDataProject();
         resetForm();
@@ -234,17 +218,10 @@ const ProjectPage = () => {
         showNotification("error", "Failed to update project");
       }
     } catch (error) {
-      console.log("Error:", error);
-      // Mock success for demo
-      showNotification("success", "Project updated successfully!");
-      setAllDataProject(
-        allDataProject.map((p) =>
-          p.projectID === updateData.projectID
-            ? { ...p, ...inputData, itemgoal: parseInt(inputData.itemgoal, 10) }
-            : p
-        )
-      );
-      resetForm();
+      console.error("Error:", error);
+      showNotification("error", "Failed to update project");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -253,22 +230,26 @@ const ProjectPage = () => {
     if (!projectToDelete) return;
 
     try {
-      const res = await fetch("http://localhost:3000/api/project", {
+      setDeleting(true);
+      const res = await fetch("/api/project", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectID: projectToDelete }),
       });
 
-      if (res.ok) {
+      const data = await res.json();
+
+      if (data.status === 200) {
         showNotification("success", "Project deleted successfully!");
         fetchAllDataProject();
+      } else {
+        showNotification("error", "Failed to delete project");
       }
     } catch (error) {
-      console.log("Error:", error);
-      // Mock success for demo
-      showNotification("success", "Project deleted successfully!");
-      setAllDataProject(allDataProject.filter((p) => p.projectID !== projectToDelete));
+      console.error("Error:", error);
+      showNotification("error", "Failed to delete project");
     } finally {
+      setDeleting(false);
       setIsDeleteModalOpen(false);
       setProjectToDelete(null);
     }
@@ -286,7 +267,7 @@ const ProjectPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207] pb-28">
       {/* Header */}
       <div className="w-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] py-6 px-4 mb-6">
         <div className="max-w-7xl mx-auto">
@@ -348,7 +329,9 @@ const ProjectPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white/80 text-sm">Total Chairs Goal</p>
-                <p className="text-white text-3xl font-bold">{totalChairs.toLocaleString()}</p>
+                <p className="text-white text-3xl font-bold">
+                  {totalChairs.toLocaleString()}
+                </p>
               </div>
               <div className="p-3 bg-white/20 rounded-xl">
                 <Armchair className="w-8 h-8 text-white" />
@@ -387,11 +370,18 @@ const ProjectPage = () => {
                   >
                     <Filter size={16} />
                     {statusFilter}
-                    <ChevronDown size={16} className={`transition-transform ${isFilterOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform ${
+                        isFilterOpen ? "rotate-180" : ""
+                      }`}
+                    />
                   </button>
                   {isFilterOpen && (
-                    <div className="absolute top-full mt-2 right-0 w-36 bg-[#0d2818] rounded-xl 
-                      border border-[#1a3d1a] shadow-xl z-20 overflow-hidden">
+                    <div
+                      className="absolute top-full mt-2 right-0 w-36 bg-[#0d2818] rounded-xl 
+                      border border-[#1a3d1a] shadow-xl z-20 overflow-hidden"
+                    >
                       {["All", "PENDING", "DONE"].map((filter) => (
                         <button
                           key={filter}
@@ -400,7 +390,11 @@ const ProjectPage = () => {
                             setIsFilterOpen(false);
                           }}
                           className={`w-full px-4 py-2.5 text-left text-sm hover:bg-[#132d13] transition-colors
-                            ${statusFilter === filter ? "bg-green-600 text-white" : "text-green-300/80"}`}
+                            ${
+                              statusFilter === filter
+                                ? "bg-green-600 text-white"
+                                : "text-green-300/80"
+                            }`}
                         >
                           {filter}
                         </button>
@@ -417,101 +411,128 @@ const ProjectPage = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-[#132d13]/80">
-                      <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">School</th>
-                      <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">Location</th>
-                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">Chairs</th>
-                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">Progress</th>
-                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">Status</th>
-                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">Actions</th>
+                      <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                        School
+                      </th>
+                      <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                        Location
+                      </th>
+                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                        Chairs
+                      </th>
+                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                        Status
+                      </th>
+                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredProjects.map((project, i) => (
-                      <tr
-                        key={i}
-                        onClick={() => handleRowClick(project)}
-                        className="border-t border-[#1a3d1a] hover:bg-[#132d13]/50 transition-colors cursor-pointer"
-                      >
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-[#1a5c1a]/30 rounded-lg">
-                              <School size={18} className="text-green-400" />
-                            </div>
-                            <div>
-                              <p className="text-white font-medium">{project.school}</p>
-                              <p className="text-green-400/50 text-xs">ID: {project.projectID?.slice(0, 8)}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-2 text-green-300/80">
-                            <MapPin size={14} className="text-green-500/60" />
-                            {project.location}
-                          </div>
-                        </td>
-                        <td className="py-4 px-6 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <Armchair size={14} className="text-green-400" />
-                            <span className="text-white font-semibold">{project.itemgoal}</span>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6">
-                          <div className="w-full max-w-[100px] mx-auto">
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="text-green-400/50">{project.progress || 0}%</span>
-                            </div>
-                            <div className="h-2 bg-[#0a1f0a] rounded-full overflow-hidden">
-                              <div
-                                className={`h-full rounded-full ${
-                                  project.status === "DONE" 
-                                    ? "bg-green-500" 
-                                    : "bg-gradient-to-r from-green-600 to-green-400"
-                                }`}
-                                style={{ width: `${project.progress || 0}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6 text-center">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(project.status)}`}>
-                            {project.status === "DONE" && <CheckCircle2 size={12} className="inline mr-1" />}
-                            {project.status === "PENDING" && <Clock size={12} className="inline mr-1" />}
-                            {project.status}
-                          </span>
-                        </td>
-                        <td className="py-4 px-6">
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRowClick(project);
-                              }}
-                              className="p-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors"
-                            >
-                              <Edit size={16} />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setProjectToDelete(project.projectID);
-                                setIsDeleteModalOpen(true);
-                              }}
-                              className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                    {loading ? (
+                      <tr>
+                        <td colSpan="5" className="text-center py-16">
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                            <p className="text-green-400/60">
+                              Loading projects...
+                            </p>
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    ) : filteredProjects.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="text-center py-16">
+                          <div className="flex flex-col items-center gap-3">
+                            <FolderKanban className="w-12 h-12 text-green-500/30" />
+                            <p className="text-green-400/60">
+                              No projects found
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredProjects.map((project, i) => (
+                        <tr
+                          key={i}
+                          onClick={() => handleRowClick(project)}
+                          className="border-t border-[#1a3d1a] hover:bg-[#132d13]/50 transition-colors cursor-pointer"
+                        >
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-[#1a5c1a]/30 rounded-lg">
+                                <School size={18} className="text-green-400" />
+                              </div>
+                              <div>
+                                <p className="text-white font-medium">
+                                  {project.school}
+                                </p>
+                                <p className="text-green-400/50 text-xs">
+                                  ID: {project.projectID?.slice(0, 8)}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-2 text-green-300/80">
+                              <MapPin size={14} className="text-green-500/60" />
+                              {project.location}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <Armchair size={14} className="text-green-400" />
+                              <span className="text-white font-semibold">
+                                {project.itemgoal}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-center">
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(
+                                project.status
+                              )}`}
+                            >
+                              {project.status === "DONE" && (
+                                <CheckCircle2
+                                  size={12}
+                                  className="inline mr-1"
+                                />
+                              )}
+                              {project.status === "PENDING" && (
+                                <Clock size={12} className="inline mr-1" />
+                              )}
+                              {project.status}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRowClick(project);
+                                }}
+                                className="p-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors"
+                              >
+                                <Edit size={16} />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setProjectToDelete(project.projectID);
+                                  setIsDeleteModalOpen(true);
+                                }}
+                                className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
-                {filteredProjects.length === 0 && (
-                  <div className="text-center py-12">
-                    <FolderKanban size={48} className="mx-auto text-[#1a3d1a] mb-3" />
-                    <p className="text-green-400/50">No projects found</p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -543,12 +564,20 @@ const ProjectPage = () => {
                 )}
               </div>
 
-              <form onSubmit={formMode === "add" ? saveProject : updateProject} className="space-y-4">
+              <form
+                onSubmit={formMode === "add" ? saveProject : updateProject}
+                className="space-y-4"
+              >
                 {/* School Name */}
                 <div>
-                  <label className="block text-green-400/60 text-sm mb-2">School Name</label>
+                  <label className="block text-green-400/60 text-sm mb-2">
+                    School Name
+                  </label>
                   <div className="relative">
-                    <School size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
+                    <School
+                      size={18}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50"
+                    />
                     <input
                       type="text"
                       name="school"
@@ -564,9 +593,14 @@ const ProjectPage = () => {
 
                 {/* Location */}
                 <div>
-                  <label className="block text-green-400/60 text-sm mb-2">Location</label>
+                  <label className="block text-green-400/60 text-sm mb-2">
+                    Location
+                  </label>
                   <div className="relative">
-                    <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
+                    <MapPin
+                      size={18}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50"
+                    />
                     <input
                       type="text"
                       name="location"
@@ -582,9 +616,14 @@ const ProjectPage = () => {
 
                 {/* Chairs Needed */}
                 <div>
-                  <label className="block text-green-400/60 text-sm mb-2">Chairs Needed</label>
+                  <label className="block text-green-400/60 text-sm mb-2">
+                    Chairs Needed
+                  </label>
                   <div className="relative">
-                    <Armchair size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
+                    <Armchair
+                      size={18}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50"
+                    />
                     <input
                       type="number"
                       name="itemgoal"
@@ -601,7 +640,9 @@ const ProjectPage = () => {
                 {/* Status (for edit mode) */}
                 {formMode === "edit" && (
                   <div>
-                    <label className="block text-green-400/60 text-sm mb-2">Status</label>
+                    <label className="block text-green-400/60 text-sm mb-2">
+                      Status
+                    </label>
                     <select
                       name="status"
                       value={inputData.status}
@@ -619,14 +660,22 @@ const ProjectPage = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
+                  disabled={saving}
                   className={`w-full py-3 rounded-xl text-white font-semibold 
                     flex items-center justify-center gap-2 transition-all
-                    ${formMode === "add" 
-                      ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] hover:from-[#1a4d1a] hover:to-[#0d2d0d]" 
-                      : "bg-gradient-to-r from-[#1a4d1a] to-[#0d3d0d] hover:from-[#1a5c1a] hover:to-[#0d2d0d]"
-                    }`}
+                    ${
+                      formMode === "add"
+                        ? "bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] hover:from-[#1a4d1a] hover:to-[#0d2d0d]"
+                        : "bg-gradient-to-r from-[#1a4d1a] to-[#0d3d0d] hover:from-[#1a5c1a] hover:to-[#0d2d0d]"
+                    }
+                    ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  {formMode === "add" ? (
+                  {saving ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Processing...
+                    </>
+                  ) : formMode === "add" ? (
                     <>
                       <Plus size={18} />
                       Add Project
@@ -647,7 +696,8 @@ const ProjectPage = () => {
                   <span className="font-semibold text-sm">Quick Tip</span>
                 </div>
                 <p className="text-green-400/50 text-sm">
-                  Click on any project row to edit it. Changes will be reflected immediately after saving.
+                  Click on any project row to edit it. Changes will be reflected
+                  immediately after saving.
                 </p>
               </div>
             </div>
@@ -657,11 +707,11 @@ const ProjectPage = () => {
 
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
           onClick={() => setIsDeleteModalOpen(false)}
         >
-          <div 
+          <div
             className="bg-[#0d2818] rounded-2xl shadow-2xl w-full max-w-sm border border-[#1a3d1a]"
             onClick={(e) => e.stopPropagation()}
           >
@@ -669,20 +719,34 @@ const ProjectPage = () => {
               <div className="w-16 h-16 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center">
                 <AlertCircle size={32} className="text-red-400" />
               </div>
-              <h3 className="text-white text-lg font-semibold mb-2">Delete Project</h3>
-              <p className="text-green-400/60 mb-6">Are you sure you want to delete this project? This action cannot be undone.</p>
+              <h3 className="text-white text-lg font-semibold mb-2">
+                Delete Project
+              </h3>
+              <p className="text-green-400/60 mb-6">
+                Are you sure you want to delete this project? This action cannot
+                be undone.
+              </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsDeleteModalOpen(false)}
-                  className="flex-1 py-2.5 bg-[#132d13] hover:bg-[#1a3d1a] text-white rounded-xl font-medium transition-colors"
+                  disabled={deleting}
+                  className="flex-1 py-2.5 bg-[#132d13] hover:bg-[#1a3d1a] text-white rounded-xl font-medium transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmDelete}
-                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors"
+                  disabled={deleting}
+                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Delete
+                  {deleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
                 </button>
               </div>
             </div>
@@ -692,10 +756,18 @@ const ProjectPage = () => {
 
       {/* Notification */}
       {notification.show && (
-        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg
+        <div
+          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg
           flex items-center gap-2 animate-bounce
-          ${notification.type === "success" ? "bg-emerald-500" : "bg-red-500"} text-white`}>
-          {notification.type === "success" ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+          ${
+            notification.type === "success" ? "bg-emerald-500" : "bg-red-500"
+          } text-white`}
+        >
+          {notification.type === "success" ? (
+            <CheckCircle2 size={20} />
+          ) : (
+            <AlertCircle size={20} />
+          )}
           {notification.message}
         </div>
       )}

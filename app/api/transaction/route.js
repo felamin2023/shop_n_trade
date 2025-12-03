@@ -33,7 +33,11 @@ export async function GET(request) {
         },
       },
       orderBy: {
+<<<<<<< HEAD
         createdAt: 'desc',
+=======
+        transacID: "desc",
+>>>>>>> 0c3920e92162f8fce0edf59110d95265bfad1461
       },
     });
 
@@ -52,7 +56,7 @@ export async function POST(request) {
     if (!productID || !userID) {
       return NextResponse.json({
         status: 400,
-        message: "Product ID and User ID are required"
+        message: "Product ID and User ID are required",
       });
     }
 
@@ -75,5 +79,61 @@ export async function POST(request) {
   } catch (error) {
     console.error("Failed to create transaction", error);
     return NextResponse.json({ status: 500, message: "Internal Server Error" });
+  }
+}
+
+export async function PUT(request) {
+  try {
+    const { transacID, status } = await request.json();
+
+    // Get the current transaction to check its status and get productID
+    const currentTransaction = await db.transaction.findUnique({
+      where: { transacID },
+      include: { product: true },
+    });
+
+    if (!currentTransaction) {
+      return NextResponse.json({
+        status: 404,
+        message: "Transaction not found",
+      });
+    }
+
+    const previousStatus = currentTransaction.status;
+    const productID = currentTransaction.productID;
+
+    // Update the transaction status
+    const updatedTransaction = await db.transaction.update({
+      where: { transacID },
+      data: { status },
+    });
+
+    // Handle stock changes based on status transition
+    // ACCEPTED: Decrease stock by 1 (product is reserved)
+    if (status === "ACCEPTED" && previousStatus === "PENDING") {
+      await db.product.update({
+        where: { productID },
+        data: { stock: { decrement: 1 } },
+      });
+    }
+
+    // CANCELED: Restore stock by 1 (only if it was previously ACCEPTED)
+    if (status === "CANCELED" && previousStatus === "ACCEPTED") {
+      await db.product.update({
+        where: { productID },
+        data: { stock: { increment: 1 } },
+      });
+    }
+
+    // DELIVERED: No stock change needed (already decremented when ACCEPTED)
+    // REJECTED: No stock change needed (was never accepted, so no stock was reserved)
+
+    return NextResponse.json({ status: 200, transaction: updatedTransaction });
+  } catch (error) {
+    console.error("Error updating transaction:", error);
+    return NextResponse.json({
+      status: 500,
+      message: "Failed to update transaction",
+    });
   }
 }

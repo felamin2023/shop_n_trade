@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import {
   Search,
@@ -20,6 +21,9 @@ import {
 } from "lucide-react";
 
 const InventoryPage = () => {
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("edit");
+
   // State management
   const [formMode, setFormMode] = useState("add"); // 'add' or 'edit'
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -38,6 +42,7 @@ const InventoryPage = () => {
   const [uploading, setUploading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [notification, setNotification] = useState({
     show: false,
     type: "",
@@ -74,6 +79,16 @@ const InventoryPage = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  // Handle edit query parameter from home page
+  useEffect(() => {
+    if (editId && productData.length > 0) {
+      const productToEdit = productData.find((p) => p.productID === editId);
+      if (productToEdit) {
+        handleRowClick(productToEdit);
+      }
+    }
+  }, [editId, productData]);
 
   // Filter products
   const filteredProducts = productData.filter(
@@ -292,6 +307,7 @@ const InventoryPage = () => {
     if (!productToDelete) return;
 
     try {
+      setDeleting(true);
       const response = await fetch("/api/product", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -310,6 +326,7 @@ const InventoryPage = () => {
       console.error("Error:", error);
       showNotification("error", "Failed to delete product");
     } finally {
+      setDeleting(false);
       setIsDeleteModalOpen(false);
       setProductToDelete(null);
     }
@@ -737,15 +754,24 @@ const InventoryPage = () => {
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsDeleteModalOpen(false)}
-                  className="flex-1 py-2.5 bg-[#132d13] hover:bg-[#1a3d1a] text-white rounded-xl font-medium transition-colors"
+                  disabled={deleting}
+                  className="flex-1 py-2.5 bg-[#132d13] hover:bg-[#1a3d1a] text-white rounded-xl font-medium transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmDelete}
-                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors"
+                  disabled={deleting}
+                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Delete
+                  {deleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
                 </button>
               </div>
             </div>
