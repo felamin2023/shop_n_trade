@@ -85,7 +85,7 @@ const Navbar = () => {
         pathname !== "/admin/signin" && (
           <div className="fixed bottom-0 left-0 right-0 z-50">
             {/* Bottom Navigation Container */}
-            <div className="bg-[#0d2818]/95 backdrop-blur-xl border-t border-[#1a3d1a] shadow-2xl">
+            <div className="bg-[#fff]/95 backdrop-blur-xl border-t border-[#1a3d1a] shadow-2xl">
               {/* Decorative top line */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent rounded-full"></div>
 
