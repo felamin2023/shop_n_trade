@@ -121,6 +121,8 @@ const RequestPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [requestToCancel, setRequestToCancel] = useState(null);
 
   const currentList = recordFilter === "pending" ? requestListPending : requestListAccepted;
   
@@ -171,6 +173,23 @@ const RequestPage = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedRequest(null);
+  };
+
+  const openCancelModal = (request) => {
+    setRequestToCancel(request);
+    setIsCancelModalOpen(true);
+  };
+
+  const closeCancelModal = () => {
+    setIsCancelModalOpen(false);
+    setRequestToCancel(null);
+  };
+
+  const handleConfirmCancel = () => {
+    // Here you would typically make an API call to cancel the request
+    console.log("Cancelling request:", requestToCancel?.id);
+    closeCancelModal();
+    // You could also remove the request from the list or show a success message
   };
 
   const pendingCount = requestListPending.length;
@@ -300,7 +319,7 @@ const RequestPage = () => {
             return (
               <div
                 key={i}
-                className="group bg-[#0d2818] rounded-2xl shadow-md hover:shadow-xl 
+                className="group bg-[#092b09] rounded-2xl shadow-md hover:shadow-xl 
                   border border-[#1a3d1a] hover:border-green-500/50
                   transition-all duration-300 p-4 flex flex-col sm:flex-row items-center gap-4"
               >
@@ -349,7 +368,9 @@ const RequestPage = () => {
 
                 {/* Cancel Button (only for pending) */}
                 {recordFilter === "pending" && (
-                  <button className="flex items-center gap-2 px-5 py-2.5 
+                  <button 
+                    onClick={() => openCancelModal(request)}
+                    className="flex items-center gap-2 px-5 py-2.5 
                     bg-[#0d2818] border-2 border-red-500/50 
                     hover:bg-red-500 hover:border-red-500 hover:text-white
                     rounded-xl text-red-400 text-sm font-semibold
@@ -569,6 +590,91 @@ const RequestPage = () => {
                     transform transition-all duration-200 border border-[#1a3d1a]`}
                 >
                   Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {isCancelModalOpen && requestToCancel && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={closeCancelModal}
+        >
+          <div 
+            className="bg-[#0d2818] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-[#1a3d1a]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="relative p-6 pb-0">
+              {/* Close Button */}
+              <button
+                onClick={closeCancelModal}
+                className="absolute top-4 right-4 p-2 bg-[#132d13] rounded-full
+                  hover:bg-[#1a3d1a] transition-colors border border-[#1a3d1a]"
+              >
+                <X size={18} className="text-green-400" />
+              </button>
+
+              {/* Warning Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="p-4 bg-red-500/10 rounded-full border border-red-500/30">
+                  <X size={40} className="text-red-500" />
+                </div>
+              </div>
+
+              <h2 className="font-noto text-white text-xl font-bold text-center">
+                Cancel Request?
+              </h2>
+              <p className="text-green-400/70 text-sm text-center mt-2">
+                Are you sure you want to cancel this request? This action cannot be undone.
+              </p>
+            </div>
+
+            {/* Request Details */}
+            <div className="p-6">
+              <div className="flex items-center gap-4 p-4 bg-[#132d13] rounded-xl border border-[#1a3d1a] mb-6">
+                {/* Product Image */}
+                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-[#1a3d1a]">
+                  <div 
+                    className="w-full h-full bg-cover bg-center"
+                    style={{ backgroundImage: `url(${requestToCancel.image})` }}
+                  ></div>
+                </div>
+                
+                {/* Product Info */}
+                <div className="flex-1">
+                  <h3 className="font-noto text-white font-semibold">
+                    {requestToCancel.product}
+                  </h3>
+                  <div className="flex items-center gap-2 text-green-400/70 mt-1">
+                    <Recycle size={12} />
+                    <span className="text-xs">{requestToCancel.tradeItem}</span>
+                  </div>
+                  <p className="text-green-500/50 text-xs mt-1">ID: {requestToCancel.id}</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={closeCancelModal}
+                  className="flex-1 py-3 px-4 bg-[#132d13] hover:bg-[#1a3d1a]
+                    rounded-xl text-green-400 font-semibold transition-colors border border-[#1a3d1a]"
+                >
+                  Keep Request
+                </button>
+                <button
+                  onClick={handleConfirmCancel}
+                  className="flex-1 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 
+                    hover:from-red-700 hover:to-red-800
+                    rounded-xl text-white font-semibold shadow-md hover:shadow-lg
+                    transition-all flex items-center justify-center gap-2"
+                >
+                  <X size={18} />
+                  Yes, Cancel
                 </button>
               </div>
             </div>
