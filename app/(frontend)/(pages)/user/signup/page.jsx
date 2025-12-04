@@ -34,17 +34,68 @@ const SignupPage = () => {
   const [navigatingTo, setNavigatingTo] = useState(""); // "signin" after signup success or manual click
   const [notification, setNotification] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
 
   // Validation functions
   const validateFullName = (name) => {
+    if (!name.trim()) return "Full name is required";
+    if (name.trim().length < 2)
+      return "Full name must be at least 2 characters";
     const nameRegex = /^[a-zA-Z\s]+$/;
-    return nameRegex.test(name);
+    if (!nameRegex.test(name)) return "Full name must contain only letters";
+    return "";
+  };
+
+  const validateEmail = (email) => {
+    if (!email.trim()) return "Email is required";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return "Please enter a valid email address";
+    return "";
+  };
+
+  const validateAddress = (address) => {
+    if (!address.trim()) return "Address is required";
+    if (address.trim().length < 5) return "Please enter a complete address";
+    return "";
   };
 
   const validateContact = (contact) => {
-    const contactRegex = /^\d{11}$/;
-    return contactRegex.test(contact);
+    if (!contact) return "Contact number is required";
+    if (contact.length !== 11) return "Contact must be exactly 11 digits";
+    if (!contact.startsWith("09")) return "Contact must start with 09";
+    return "";
+  };
+
+  const validatePassword = (password) => {
+    if (!password) return "Password is required";
+    if (password.length < 6) return "Password must be at least 6 characters";
+    if (!/[A-Z]/.test(password))
+      return "Password must contain at least one uppercase letter";
+    if (!/[a-z]/.test(password))
+      return "Password must contain at least one lowercase letter";
+    if (!/[0-9]/.test(password))
+      return "Password must contain at least one number";
+    return "";
+  };
+
+  // Get password strength
+  const getPasswordStrength = (password) => {
+    if (!password) return { strength: 0, label: "", color: "" };
+    let strength = 0;
+    if (password.length >= 6) strength++;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    if (strength <= 2)
+      return { strength: 1, label: "Weak", color: "bg-red-500" };
+    if (strength <= 4)
+      return { strength: 2, label: "Medium", color: "bg-yellow-500" };
+    return { strength: 3, label: "Strong", color: "bg-green-500" };
   };
 
   // Function to handle input changes with validation
@@ -56,11 +107,25 @@ const SignupPage = () => {
 
     // Validate fullname - only letters and spaces
     if (name === "fullname") {
-      if (value && !validateFullName(value)) {
-        setErrors((prev) => ({
-          ...prev,
-          fullname: "Full name must contain only letters",
-        }));
+      const error = validateFullName(value);
+      if (value && error && error !== "Full name is required") {
+        setErrors((prev) => ({ ...prev, fullname: error }));
+      }
+    }
+
+    // Validate email
+    if (name === "email") {
+      const error = validateEmail(value);
+      if (value && error && error !== "Email is required") {
+        setErrors((prev) => ({ ...prev, email: error }));
+      }
+    }
+
+    // Validate address
+    if (name === "address") {
+      const error = validateAddress(value);
+      if (value && error && error !== "Address is required") {
+        setErrors((prev) => ({ ...prev, address: error }));
       }
     }
 
@@ -72,13 +137,28 @@ const SignupPage = () => {
         ...prevData,
         [name]: numericValue,
       }));
-      if (numericValue && numericValue.length !== 11) {
-        setErrors((prev) => ({
-          ...prev,
-          contact: "Contact must be exactly 11 digits",
-        }));
+      const error = validateContact(numericValue);
+      if (numericValue && error && error !== "Contact number is required") {
+        setErrors((prev) => ({ ...prev, contact: error }));
       }
       return;
+    }
+
+    // Validate password
+    if (name === "password") {
+      const error = validatePassword(value);
+      if (value && error && error !== "Password is required") {
+        setErrors((prev) => ({ ...prev, password: error }));
+      }
+      // Check if confirm password matches when password changes
+      if (confirmPassword && value !== confirmPassword) {
+        setErrors((prev) => ({
+          ...prev,
+          confirmPassword: "Passwords do not match",
+        }));
+      } else if (confirmPassword) {
+        setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+      }
     }
 
     setUserData((prevData) => ({
@@ -87,22 +167,53 @@ const SignupPage = () => {
     }));
   };
 
+  // Handle confirm password change
+  const handleConfirmPasswordChange = (e) => {
+    const value = e.target.value;
+    setConfirmPassword(value);
+    setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+
+    if (value && value !== userData.password) {
+      setErrors((prev) => ({
+        ...prev,
+        confirmPassword: "Passwords do not match",
+      }));
+    }
+  };
+
   async function registerUser(e) {
     e.preventDefault();
 
     // Final validation before submit
     const newErrors = {};
 
-    if (!validateFullName(userData.fullname)) {
-      newErrors.fullname = "Full name must contain only letters";
-    }
+    const fullnameError = validateFullName(userData.fullname);
+    if (fullnameError) newErrors.fullname = fullnameError;
 
-    if (!validateContact(userData.contact)) {
-      newErrors.contact = "Contact must be exactly 11 digits";
+    const emailError = validateEmail(userData.email);
+    if (emailError) newErrors.email = emailError;
+
+    const addressError = validateAddress(userData.address);
+    if (addressError) newErrors.address = addressError;
+
+    const contactError = validateContact(userData.contact);
+    if (contactError) newErrors.contact = contactError;
+
+    const passwordError = validatePassword(userData.password);
+    if (passwordError) newErrors.password = passwordError;
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password";
+    } else if (confirmPassword !== userData.password) {
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      setNotification({
+        message: "Please fix the errors in the form",
+        type: "error",
+      });
       return;
     }
 
@@ -142,6 +253,7 @@ const SignupPage = () => {
           img: "hehe",
           role: "USER",
         });
+        setConfirmPassword("");
         setNotification({
           message: "Account created successfully! Redirecting to sign in...",
           type: "success",
@@ -327,12 +439,16 @@ const SignupPage = () => {
                     value={userData.email}
                     onChange={handleChange}
                     required
-                    className="w-full bg-[#0a1f0a] text-white placeholder-green-600/40 
-                      pl-12 pr-4 py-3 rounded-xl border-2 border-[#1a3d1a] 
+                    className={`w-full bg-[#0a1f0a] text-white placeholder-green-600/40 
+                      pl-12 pr-4 py-3 rounded-xl border-2 
+                      ${errors.email ? "border-red-500" : "border-[#1a3d1a]"}
                       focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20
-                      transition-all duration-300"
+                      transition-all duration-300`}
                   />
                 </div>
+                {errors.email && (
+                  <p className="text-red-400 text-xs mt-1">{errors.email}</p>
+                )}
               </div>
 
               {/* Address Input */}
@@ -352,12 +468,16 @@ const SignupPage = () => {
                     value={userData.address}
                     onChange={handleChange}
                     required
-                    className="w-full bg-[#0a1f0a] text-white placeholder-green-600/40 
-                      pl-12 pr-4 py-3 rounded-xl border-2 border-[#1a3d1a] 
+                    className={`w-full bg-[#0a1f0a] text-white placeholder-green-600/40 
+                      pl-12 pr-4 py-3 rounded-xl border-2 
+                      ${errors.address ? "border-red-500" : "border-[#1a3d1a]"}
                       focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20
-                      transition-all duration-300"
+                      transition-all duration-300`}
                   />
                 </div>
+                {errors.address && (
+                  <p className="text-red-400 text-xs mt-1">{errors.address}</p>
+                )}
               </div>
 
               {/* Contact Input */}
@@ -406,10 +526,11 @@ const SignupPage = () => {
                     value={userData.password}
                     onChange={handleChange}
                     required
-                    className="w-full bg-[#0a1f0a] text-white placeholder-green-600/40 
-                      pl-12 pr-12 py-3 rounded-xl border-2 border-[#1a3d1a] 
+                    className={`w-full bg-[#0a1f0a] text-white placeholder-green-600/40 
+                      pl-12 pr-12 py-3 rounded-xl border-2 
+                      ${errors.password ? "border-red-500" : "border-[#1a3d1a]"}
                       focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20
-                      transition-all duration-300"
+                      transition-all duration-300`}
                   />
                   <button
                     type="button"
@@ -419,6 +540,94 @@ const SignupPage = () => {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
+                {/* Password Strength Indicator */}
+                {userData.password && (
+                  <div className="mt-2">
+                    <div className="flex gap-1 mb-1">
+                      {[1, 2, 3].map((level) => (
+                        <div
+                          key={level}
+                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                            getPasswordStrength(userData.password).strength >=
+                            level
+                              ? getPasswordStrength(userData.password).color
+                              : "bg-gray-600"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <p
+                      className={`text-xs ${
+                        getPasswordStrength(userData.password).strength === 1
+                          ? "text-red-400"
+                          : getPasswordStrength(userData.password).strength ===
+                            2
+                          ? "text-yellow-400"
+                          : "text-green-400"
+                      }`}
+                    >
+                      Password strength:{" "}
+                      {getPasswordStrength(userData.password).label}
+                    </p>
+                  </div>
+                )}
+                {errors.password && (
+                  <p className="text-red-400 text-xs mt-1">{errors.password}</p>
+                )}
+              </div>
+
+              {/* Confirm Password Input */}
+              <div className="space-y-1">
+                <label className="block text-green-400/80 text-sm font-medium">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <Lock
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50"
+                  />
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={handleConfirmPasswordChange}
+                    required
+                    className={`w-full bg-[#0a1f0a] text-white placeholder-green-600/40 
+                      pl-12 pr-12 py-3 rounded-xl border-2 
+                      ${
+                        errors.confirmPassword
+                          ? "border-red-500"
+                          : confirmPassword &&
+                            confirmPassword === userData.password
+                          ? "border-green-500"
+                          : "border-[#1a3d1a]"
+                      }
+                      focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20
+                      transition-all duration-300`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500/50 hover:text-green-400 transition-colors"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
+                {confirmPassword && confirmPassword === userData.password && (
+                  <p className="text-green-400 text-xs mt-1 flex items-center gap-1">
+                    ✓ Passwords match
+                  </p>
+                )}
+                {errors.confirmPassword && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {errors.confirmPassword}
+                  </p>
+                )}
               </div>
 
               {/* Submit Button */}
