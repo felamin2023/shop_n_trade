@@ -203,15 +203,25 @@ const ProjectPage = () => {
           <div className="relative w-full sm:w-auto">
             <input
               type="text"
-              placeholder="Search schools..."
+              placeholder="Search schools or location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full sm:w-72 bg-[#0d2818] text-white placeholder-green-500/50 
-                px-5 py-2.5 pl-11 rounded-full border border-[#1a3d1a] 
+                px-5 py-2.5 pl-11 pr-10 rounded-full border border-[#1a3d1a] 
                 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
                 shadow-md transition-all duration-300"
             />
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500/50" />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 
+                  bg-green-500/20 hover:bg-green-500/40 rounded-full 
+                  flex items-center justify-center transition-colors"
+              >
+                <X className="w-3 h-3 text-green-400" />
+              </button>
+            )}
           </div>
         </div>
 

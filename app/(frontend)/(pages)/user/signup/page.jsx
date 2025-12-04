@@ -30,6 +30,8 @@ const SignupPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [navigatingTo, setNavigatingTo] = useState(""); // "signin" after signup success or manual click
   const [notification, setNotification] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -145,10 +147,14 @@ const SignupPage = () => {
           type: "success",
         });
 
-        // Redirect to sign in after 1.5 seconds
+        // Redirect to sign in after 1.5 seconds with loading screen
         setTimeout(() => {
-          router.push("/user/signin");
-        }, 1500);
+          setNavigatingTo("signin-success");
+          setIsNavigating(true);
+          setTimeout(() => {
+            router.push("/user/signin");
+          }, 800);
+        }, 1000);
       } else {
         setNotification({
           message: data.message || "Failed to create account.",
@@ -161,6 +167,73 @@ const SignupPage = () => {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  // Handler for navigating to sign in
+  const handleNavigateToSignin = () => {
+    setNavigatingTo("signin");
+    setIsNavigating(true);
+    setTimeout(() => {
+      router.push("/user/signin");
+    }, 800);
+  };
+
+  // Loading screen for navigation
+  if (isNavigating) {
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207]">
+        <div className="flex flex-col items-center gap-6">
+          {/* Animated Logo Container */}
+          <div className="relative">
+            <div className="w-28 h-28 bg-[#f5f5f0] rounded-3xl flex items-center justify-center shadow-2xl animate-pulse">
+              <img
+                src="/images/signin_upPage/shopNtradelogo.png"
+                alt="Shop & Trade"
+                className="w-20 h-20"
+              />
+            </div>
+            {/* Floating particles */}
+            <div className="absolute -top-2 -left-2 w-4 h-4 bg-green-500/60 rounded-full animate-bounce"></div>
+            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400/60 rounded-full animate-bounce delay-100"></div>
+            <div className="absolute top-1/2 -right-3 w-2 h-2 bg-green-300/60 rounded-full animate-bounce delay-200"></div>
+          </div>
+
+          {/* Animated Spinner */}
+          <div className="relative w-16 h-16">
+            <div className="absolute inset-0 border-4 border-[#1a3d1a]/30 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-transparent border-t-green-500 rounded-full animate-spin"></div>
+            <div
+              className="absolute inset-2 border-4 border-transparent border-b-green-400/50 rounded-full animate-spin"
+              style={{
+                animationDirection: "reverse",
+                animationDuration: "1.5s",
+              }}
+            ></div>
+          </div>
+
+          {/* Dynamic Text */}
+          <div className="text-center">
+            <p className="text-green-400 text-lg font-semibold mb-1">
+              {navigatingTo === "signin-success"
+                ? "Account Created! 🎉"
+                : "Taking you to Sign In..."}
+            </p>
+            <p className="text-green-400/60 text-sm">
+              {navigatingTo === "signin-success"
+                ? "Redirecting to Sign In"
+                : "Welcome back!"}
+            </p>
+          </div>
+
+          {/* Progress dots */}
+          <div className="flex gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-150"></div>
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse delay-300"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -376,12 +449,12 @@ const SignupPage = () => {
             <div className="mt-6 pt-6 border-t border-[#1a3d1a] text-center">
               <p className="text-green-400/60 text-sm">
                 Already have an account?{" "}
-                <a
-                  href="/user/signin"
+                <button
+                  onClick={handleNavigateToSignin}
                   className="text-green-400 font-semibold hover:text-green-300 transition-colors"
                 >
                   Sign In
-                </a>
+                </button>
               </p>
             </div>
           </div>

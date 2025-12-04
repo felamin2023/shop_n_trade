@@ -374,16 +374,29 @@ const ProfilePage = () => {
             {/* Avatar */}
             <div className="absolute -top-16 left-1/2 -translate-x-1/2 sm:left-8 sm:translate-x-0">
               <div className="relative">
-                {profilePicture || user?.img ? (
+                {profilePicture ||
+                (user?.img && user.img !== "hehe" && user.img !== "") ? (
                   <img
                     src={profilePicture || user.img}
                     alt="Profile Picture"
                     className="w-32 h-32 rounded-full object-cover border-4 border-[#0d2818] shadow-lg"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://ui-avatars.com/api/?name=" +
+                        encodeURIComponent(user?.fullname || "User") +
+                        "&background=1a5c1a&color=fff&size=128";
+                    }}
                   />
                 ) : (
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#1a5c1a] to-[#0d3d0d] border-4 border-[#0d2818] shadow-lg flex items-center justify-center">
-                    <User size={48} className="text-green-300/60" />
-                  </div>
+                  <img
+                    src={
+                      "https://ui-avatars.com/api/?name=" +
+                      encodeURIComponent(user?.fullname || "User") +
+                      "&background=1a5c1a&color=fff&size=128"
+                    }
+                    alt="Default Profile"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-[#0d2818] shadow-lg"
+                  />
                 )}
                 {/* Edit Profile Picture Button - Always visible */}
                 <button
