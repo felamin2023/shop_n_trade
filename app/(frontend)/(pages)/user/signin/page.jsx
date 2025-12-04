@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  Leaf,
+  Recycle,
+  Gift,
+  Heart,
+} from "lucide-react";
 import Notification from "@/components/Notification";
 import { useAuth } from "@/context/AuthContext";
 
@@ -32,8 +41,8 @@ const SigninPage = () => {
 
       if (response.ok) {
         setNotification({ message: "Login successful!", type: "success" });
-        login(data.user); // Use auth context login
-        setIsNavigating(true); // Show loading screen
+        login(data.user);
+        setIsNavigating(true);
 
         setTimeout(() => {
           if (data.user.role === "ADMIN") {
@@ -63,30 +72,32 @@ const SigninPage = () => {
     return (
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207]">
         <div className="flex flex-col items-center gap-6">
-          {/* Logo */}
-          <img
-            src="/images/signin_upPage/shopNtradelogo.png"
-            alt="Shop & Trade"
-            className="w-24 h-24 animate-pulse"
-          />
-          
-          {/* Spinner */}
-          <div className="relative w-12 h-12">
-            <div className="absolute inset-0 border-4 border-green-900 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-transparent border-t-green-400 border-r-green-400 rounded-full animate-spin"></div>
+          <div className="relative">
+            <div className="w-24 h-24 bg-[#f5f5f0] rounded-2xl flex items-center justify-center shadow-2xl">
+              <img
+                src="/images/signin_upPage/shopNtradelogo.png"
+                alt="Shop & Trade"
+                className="w-16 h-16 animate-pulse"
+              />
+            </div>
+            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+              <Leaf size={16} className="text-white" />
+            </div>
           </div>
-          
-          <p className="text-green-400 text-sm">Redirecting...</p>
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 border-4 border-[#1a3d1a] rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-transparent border-t-green-500 border-r-green-500 rounded-full animate-spin"></div>
+          </div>
+          <p className="text-green-400 text-sm font-medium">
+            Welcome back! Redirecting...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div
-      className="h-screen w-full flex justify-center items-center px-8     
-      bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207]"
-    >
+    <div className="min-h-screen w-full flex bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207]">
       {notification && (
         <Notification
           message={notification.message}
@@ -95,104 +106,213 @@ const SigninPage = () => {
         />
       )}
 
-      <div className="flex w-[80%] max-w-[1200px] justify-between items-center gap-10">
-
-        <div className="flex flex-col justify-center items-center">
-          <img
-            height={350}
-            width={350}
-            src="/images/signin_upPage/shopNtradelogo.png"
-            alt="Shop & Trade Logo"
-            className="drop-shadow-xl"
-          />
+      {/* Left Side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-center items-center p-12 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20 w-32 h-32 border border-green-500 rounded-full"></div>
+          <div className="absolute top-40 right-32 w-48 h-48 border border-green-500 rounded-full"></div>
+          <div className="absolute bottom-32 left-32 w-24 h-24 border border-green-500 rounded-full"></div>
+          <div className="absolute bottom-20 right-20 w-40 h-40 border border-green-500 rounded-full"></div>
         </div>
 
-        <div className="flex flex-col justify-between items-center 
-            bg-[#0d2818]/80 backdrop-blur-md shadow-lg border border-[#1a3d1a]
-            h-[65%] w-[45%] min-w-[380px] rounded-2xl px-10 py-6">
-
-          <h1 className="text-[32px] font-noto font-bold text-white drop-shadow-sm">
-            Sign In
-          </h1>
-
-          <form
-            onSubmit={handleSignIn}
-            className="flex flex-col justify-center gap-4 items-center w-full mt-4"
-          >
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="bg-[#0a1f0a] w-full placeholder-[#f5f5f0]/70 py-2 px-5 rounded-lg 
-              text-white border border-[#1a3d1a] focus:ring-2 focus:ring-green-500 outline-none"
-            />
-
-            <div className="w-full relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="bg-[#0a1f0a] w-full placeholder-[#f5f5f0]/70 py-2 px-5 pr-10 rounded-lg 
-                text-white border border-[#1a3d1a] focus:ring-2 focus:ring-green-500 outline-none"
+        <div className="relative z-10 text-center">
+          {/* Logo */}
+          <div className="mb-8">
+            <div className="w-32 h-32 mx-auto bg-[#f5f5f0] rounded-3xl flex items-center justify-center shadow-2xl mb-6 transform hover:scale-105 transition-transform duration-300">
+              <img
+                src="/images/signin_upPage/shopNtradelogo.png"
+                alt="Shop & Trade Logo"
+                className="w-24 h-24"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#1a5c1a] hover:text-[#2a7c2a]"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+            </div>
+            <h1 className="font-noto text-white text-4xl font-bold mb-2">
+              Shop & Trade
+            </h1>
+            <p className="text-green-400 text-lg">Recycle. Reward. Repeat.</p>
+          </div>
+
+          {/* Features */}
+          <div className="space-y-4 mt-12">
+            <div className="flex items-center gap-4 bg-[#132d13]/50 rounded-xl px-6 py-4 backdrop-blur-sm border border-[#1a3d1a]">
+              <div className="p-2 bg-[#f5f5f0] rounded-lg">
+                <Recycle size={20} className="text-[#0d3d0d]" />
+              </div>
+              <div className="text-left">
+                <p className="text-white font-medium">Trade Recyclables</p>
+                <p className="text-green-400/60 text-sm">
+                  Turn bottles into rewards
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 bg-[#132d13]/50 rounded-xl px-6 py-4 backdrop-blur-sm border border-[#1a3d1a]">
+              <div className="p-2 bg-[#f5f5f0] rounded-lg">
+                <Gift size={20} className="text-[#0d3d0d]" />
+              </div>
+              <div className="text-left">
+                <p className="text-white font-medium">Earn Rewards</p>
+                <p className="text-green-400/60 text-sm">
+                  Get amazing products
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 bg-[#132d13]/50 rounded-xl px-6 py-4 backdrop-blur-sm border border-[#1a3d1a]">
+              <div className="p-2 bg-[#f5f5f0] rounded-lg">
+                <Heart size={20} className="text-[#0d3d0d]" />
+              </div>
+              <div className="text-left">
+                <p className="text-white font-medium">Support Schools</p>
+                <p className="text-green-400/60 text-sm">
+                  Help charity projects
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side - Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center mb-8">
+            <div className="w-20 h-20 mx-auto bg-[#f5f5f0] rounded-2xl flex items-center justify-center shadow-xl mb-4">
+              <img
+                src="/images/signin_upPage/shopNtradelogo.png"
+                alt="Shop & Trade Logo"
+                className="w-14 h-14"
+              />
+            </div>
+            <h1 className="font-noto text-white text-2xl font-bold">
+              Shop & Trade
+            </h1>
+            <p className="text-green-400 text-sm">Recycle. Reward. Repeat.</p>
+          </div>
+
+          {/* Login Card */}
+          <div className="bg-[#0d2818] rounded-3xl shadow-2xl border border-[#1a3d1a] p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-[#1a5c1a] to-[#0d3d0d] rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                <Leaf size={32} className="text-white" />
+              </div>
+              <h2 className="font-noto text-white text-2xl font-bold">
+                Welcome Back
+              </h2>
+              <p className="text-green-400/60 text-sm mt-2">
+                Sign in to continue your eco journey
+              </p>
             </div>
 
-            <p className="text-[#f5f5f0]/80 text-[14px]">
-              Don't have an account?{" "}
-              <a href="/user/signup" className="text-[#f5f5f0] font-medium hover:underline hover:text-white">
-                Sign up
-              </a>
-            </p>
+            {/* Form */}
+            <form onSubmit={handleSignIn} className="space-y-5">
+              {/* Email Input */}
+              <div className="space-y-2">
+                <label className="block text-green-400/80 text-sm font-medium">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50"
+                  />
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full bg-[#0a1f0a] text-white placeholder-green-600/40 
+                      pl-12 pr-4 py-3.5 rounded-xl border-2 border-[#1a3d1a] 
+                      focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20
+                      transition-all duration-300"
+                  />
+                </div>
+              </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] text-white py-2 w-[60%] rounded-lg hover:from-[#1a4d1a] hover:to-[#0d2d0d] transition flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
+              {/* Password Input */}
+              <div className="space-y-2">
+                <label className="block text-green-400/80 text-sm font-medium">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50"
+                  />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full bg-[#0a1f0a] text-white placeholder-green-600/40 
+                      pl-12 pr-12 py-3.5 rounded-xl border-2 border-[#1a3d1a] 
+                      focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20
+                      transition-all duration-300"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500/50 hover:text-green-400 transition-colors"
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  <span>Signing In...</span>
-                </>
-              ) : (
-                "Sign In"
-              )}
-            </button>
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
 
-            <p className="text-[#f5f5f0]/70 text-[12px] mt-2 hover:underline cursor-pointer hover:text-white">
-              Forgot password?
-            </p>
-          </form>
+              {/* Forgot Password */}
+              <div className="text-right">
+                <button
+                  type="button"
+                  className="text-green-400/60 text-sm hover:text-green-400 transition-colors"
+                >
+                  Forgot password?
+                </button>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-4 bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] 
+                  hover:from-[#1a4d1a] hover:to-[#0d2d0d]
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  rounded-xl text-white font-semibold text-lg shadow-lg hover:shadow-xl
+                  transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Signing In...
+                  </>
+                ) : (
+                  <>
+                    <Leaf size={20} />
+                    Sign In
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Sign Up Link */}
+            <div className="mt-8 pt-6 border-t border-[#1a3d1a] text-center">
+              <p className="text-green-400/60 text-sm">
+                Don't have an account?{" "}
+                <a
+                  href="/user/signup"
+                  className="text-green-400 font-semibold hover:text-green-300 transition-colors"
+                >
+                  Sign Up
+                </a>
+              </p>
+            </div>
+          </div>
+
+          {/* Bottom Text */}
+          <p className="text-center text-green-400/40 text-sm mt-6">
+            © 2024 Shop & Trade. Save the planet, one bottle at a time. 🌍
+          </p>
         </div>
       </div>
     </div>

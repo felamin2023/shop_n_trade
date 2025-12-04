@@ -107,7 +107,11 @@ const ProfilePage = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear password error when user types
-    if (name === "currentPassword" || name === "password" || name === "confirmPassword") {
+    if (
+      name === "currentPassword" ||
+      name === "password" ||
+      name === "confirmPassword"
+    ) {
       setPasswordError("");
     }
   };
@@ -149,7 +153,7 @@ const ProfilePage = () => {
 
   const handleUpdatePassword = async () => {
     setPasswordError("");
-    
+
     // Validation
     if (!formData.currentPassword) {
       setPasswordError("Please enter your current password");
@@ -343,9 +347,20 @@ const ProfilePage = () => {
           {/* Cover Image */}
           <div className="h-32 bg-gradient-to-r from-[#1a5c1a] via-[#1a4d1a] to-[#0d3d0d] relative">
             <div className="absolute inset-0 opacity-30">
-              <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <svg
+                className="w-full h-full"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+              >
                 <defs>
-                  <pattern id="leaves" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <pattern
+                    id="leaves"
+                    x="0"
+                    y="0"
+                    width="20"
+                    height="20"
+                    patternUnits="userSpaceOnUse"
+                  >
                     <circle cx="10" cy="10" r="2" fill="white" opacity="0.3" />
                   </pattern>
                 </defs>
@@ -359,7 +374,7 @@ const ProfilePage = () => {
             {/* Avatar */}
             <div className="absolute -top-16 left-1/2 -translate-x-1/2 sm:left-8 sm:translate-x-0">
               <div className="relative">
-                {(profilePicture || user?.img) ? (
+                {profilePicture || user?.img ? (
                   <img
                     src={profilePicture || user.img}
                     alt="Profile Picture"
@@ -371,7 +386,7 @@ const ProfilePage = () => {
                   </div>
                 )}
                 {/* Edit Profile Picture Button - Always visible */}
-                <button 
+                <button
                   onClick={handleProfilePictureClick}
                   disabled={uploadingImage}
                   className="absolute bottom-0 right-0 p-2 bg-green-600 hover:bg-green-700 
@@ -420,7 +435,10 @@ const ProfilePage = () => {
                     <button
                       onClick={() => {
                         setIsEditingName(false);
-                        setFormData(prev => ({ ...prev, fullName: user.fullname || "" }));
+                        setFormData((prev) => ({
+                          ...prev,
+                          fullName: user.fullname || "",
+                        }));
                       }}
                       className="p-1.5 bg-[#132d13] hover:bg-[#1a3d1a] rounded-lg text-green-400 transition-colors"
                     >
@@ -451,31 +469,6 @@ const ProfilePage = () => {
                     {userStats.ecoRank}
                   </span>
                 </div>
-              </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-[#1a3d1a]">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 text-green-400 mb-1">
-                  <Recycle size={16} />
-                </div>
-                <p className="text-2xl font-bold text-white">{userStats.bottlesDonated.toLocaleString()}</p>
-                <p className="text-green-400/50 text-xs">Bottles Donated</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 text-green-400 mb-1">
-                  <Heart size={16} />
-                </div>
-                <p className="text-2xl font-bold text-white">{userStats.projectsSupported}</p>
-                <p className="text-green-400/50 text-xs">Projects Supported</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 text-green-400 mb-1">
-                  <TreePine size={16} />
-                </div>
-                <p className="text-2xl font-bold text-white">{userStats.treesPlanted}</p>
-                <p className="text-green-400/50 text-xs">Trees Planted</p>
               </div>
             </div>
           </div>
@@ -518,7 +511,10 @@ const ProfilePage = () => {
                   Contact Number
                 </label>
                 <div className="relative">
-                  <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
+                  <Phone
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50"
+                  />
                   <input
                     type="text"
                     name="contact"
@@ -526,9 +522,10 @@ const ProfilePage = () => {
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     className={`w-full pl-11 pr-4 py-3 rounded-xl border-2 
-                      ${isEditing 
-                        ? "border-[#1a3d1a] focus:border-green-500 bg-[#0a1f0a]" 
-                        : "border-[#132d13] bg-[#132d13]"
+                      ${
+                        isEditing
+                          ? "border-[#1a3d1a] focus:border-green-500 bg-[#0a1f0a]"
+                          : "border-[#132d13] bg-[#132d13]"
                       }
                       text-white focus:outline-none transition-colors`}
                   />
@@ -541,7 +538,10 @@ const ProfilePage = () => {
                   Address
                 </label>
                 <div className="relative">
-                  <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
+                  <MapPin
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50"
+                  />
                   <input
                     type="text"
                     name="address"
@@ -549,9 +549,10 @@ const ProfilePage = () => {
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     className={`w-full pl-11 pr-4 py-3 rounded-xl border-2 
-                      ${isEditing 
-                        ? "border-[#1a3d1a] focus:border-green-500 bg-[#0a1f0a]" 
-                        : "border-[#132d13] bg-[#132d13]"
+                      ${
+                        isEditing
+                          ? "border-[#1a3d1a] focus:border-green-500 bg-[#0a1f0a]"
+                          : "border-[#132d13] bg-[#132d13]"
                       }
                       text-white focus:outline-none transition-colors`}
                   />
@@ -562,12 +563,14 @@ const ProfilePage = () => {
             {/* Member Since */}
             <div className="mt-6 p-4 bg-[#132d13]/50 rounded-xl border border-[#1a3d1a]">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#1a5c1a]/30 rounded-lg">
-                  <Calendar size={20} className="text-green-400" />
+                <div className="p-2 bg-[#f5f5f0] rounded-lg">
+                  <Calendar size={20} className="text-[#0d3d0d]" />
                 </div>
                 <div>
                   <p className="text-green-400/50 text-sm">Member Since</p>
-                  <p className="text-white font-semibold">{userStats.memberSince}</p>
+                  <p className="text-white font-semibold">
+                    {userStats.memberSince}
+                  </p>
                 </div>
               </div>
             </div>
@@ -588,7 +591,10 @@ const ProfilePage = () => {
                   Current Password
                 </label>
                 <div className="relative">
-                  <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
+                  <Lock
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50"
+                  />
                   <input
                     type={showCurrentPassword ? "text" : "password"}
                     name="currentPassword"
@@ -604,7 +610,11 @@ const ProfilePage = () => {
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500/50 hover:text-green-400"
                   >
-                    {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showCurrentPassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -615,7 +625,10 @@ const ProfilePage = () => {
                   New Password
                 </label>
                 <div className="relative">
-                  <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
+                  <Lock
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50"
+                  />
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
@@ -642,7 +655,10 @@ const ProfilePage = () => {
                   Confirm New Password
                 </label>
                 <div className="relative">
-                  <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50" />
+                  <Lock
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500/50"
+                  />
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
@@ -658,7 +674,11 @@ const ProfilePage = () => {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500/50 hover:text-green-400"
                   >
-                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showConfirmPassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -724,7 +744,10 @@ const ProfilePage = () => {
           <div className="flex items-center gap-3 px-6 py-3 bg-red-600 text-white rounded-full shadow-lg border border-red-500">
             <AlertCircle size={20} />
             <span className="font-medium">{imageError}</span>
-            <button onClick={() => setImageError("")} className="ml-2 hover:text-red-200">
+            <button
+              onClick={() => setImageError("")}
+              className="ml-2 hover:text-red-200"
+            >
               <X size={18} />
             </button>
           </div>

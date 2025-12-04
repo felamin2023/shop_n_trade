@@ -388,12 +388,13 @@ const AdminHomepage = () => {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#0a1f0a] via-[#0d2818] to-[#071207]">
       {/* Header */}
+      {/* Header */}
       <div className="w-full bg-gradient-to-r from-[#1a5c1a] to-[#0d3d0d] py-6 px-4 mb-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-xl">
-                <LayoutDashboard className="w-8 h-8 text-white" />
+              <div className="p-2 bg-[#f5f5f0] rounded-xl">
+                <LayoutDashboard className="w-8 h-8 text-[#0d3d0d]" />
               </div>
               <div>
                 <h1 className="font-noto text-white text-2xl md:text-3xl font-bold">
@@ -405,9 +406,9 @@ const AdminHomepage = () => {
               </div>
             </div>
             <div className="hidden md:flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-                <Recycle className="w-5 h-5 text-white" />
-                <span className="text-white text-sm font-medium">
+              <div className="flex items-center gap-2 bg-[#f5f5f0] backdrop-blur-sm rounded-full px-4 py-2">
+                <Recycle className="w-5 h-5 text-[#0d3d0d]" />
+                <span className="text-[#0d3d0d] text-sm font-medium">
                   {totalBottles.toLocaleString()} Total Bottles
                 </span>
               </div>
@@ -442,8 +443,8 @@ const AdminHomepage = () => {
                     {tab.count}
                   </p>
                 </div>
-                <div className="p-3 bg-white/20 rounded-xl">
-                  <tab.icon className="w-8 h-8 text-white" />
+                <div className="p-3 bg-[#f5f5f0] rounded-xl">
+                  <tab.icon className="w-8 h-8 text-[#0d3d0d]" />
                 </div>
               </div>
               {dashboardFilter === tab.id && (
@@ -559,20 +560,20 @@ const AdminHomepage = () => {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-[#132d13]/80">
-                    <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                  <tr className="bg-[#f5f5f0]">
+                    <th className="text-left py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       User
                     </th>
-                    <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <th className="text-left py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Contact
                     </th>
-                    <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <th className="text-left py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Email
                     </th>
-                    <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <th className="text-left py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Address
                     </th>
-                    <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Actions
                     </th>
                   </tr>
@@ -668,20 +669,20 @@ const AdminHomepage = () => {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-[#132d13]/80">
-                    <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                  <tr className="bg-[#f5f5f0]">
+                    <th className="text-left py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       School
                     </th>
-                    <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <th className="text-left py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Location
                     </th>
-                    <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Chairs Needed
                     </th>
-                    <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Status
                     </th>
-                    <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Actions
                     </th>
                   </tr>
@@ -799,20 +800,20 @@ const AdminHomepage = () => {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-[#132d13]/80">
-                    <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                  <tr className="bg-[#f5f5f0]">
+                    <th className="text-left py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Product
                     </th>
-                    <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <th className="text-left py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Material
                     </th>
-                    <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Material Goal
                     </th>
-                    <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Stock
                     </th>
-                    <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                       Actions
                     </th>
                   </tr>

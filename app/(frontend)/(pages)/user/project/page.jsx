@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
-import { 
-  Search, 
-  MapPin, 
-  Heart, 
-  TreePine, 
-  School, 
+import {
+  Search,
+  MapPin,
+  Heart,
+  TreePine,
+  School,
   Target,
   Armchair,
   TrendingUp,
@@ -80,7 +80,12 @@ const ProjectPage = () => {
     schoolname: project.school,
     location: project.location,
     chairsneeded: project.itemgoal,
-    urgency: project.itemgoal > 1000 ? "high" : project.itemgoal > 500 ? "medium" : "low",
+    urgency:
+      project.itemgoal > 1000
+        ? "high"
+        : project.itemgoal > 500
+        ? "medium"
+        : "low",
     description: `Project to provide ${project.itemgoal} chairs for ${project.school}.`,
     targetDate: "2026",
     status: project.status,
@@ -147,19 +152,23 @@ const ProjectPage = () => {
             <School className="w-8 h-8 text-green-300" />
           </div>
           <p className="text-green-200 text-lg max-w-2xl mx-auto">
-            Support schools in need by donating recyclables. Every bottle counts towards 
-            building a better future for students! 📚
+            Support schools in need by donating recyclables. Every bottle counts
+            towards building a better future for students! 📚
           </p>
-          
+
           {/* Stats */}
           <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-              <School className="w-5 h-5 text-white" />
-              <span className="text-white text-sm font-medium">{projects.length} Schools</span>
+            <div className="flex items-center gap-2 bg-[#f5f5f0] backdrop-blur-sm rounded-full px-4 py-2">
+              <School className="w-5 h-5 text-[#0d3d0d]" />
+              <span className="text-[#0d3d0d] text-sm font-medium">
+                {projects.length} Schools
+              </span>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-              <Heart className="w-5 h-5 text-white" />
-              <span className="text-white text-sm font-medium">Active Projects</span>
+            <div className="flex items-center gap-2 bg-[#f5f5f0] backdrop-blur-sm rounded-full px-4 py-2">
+              <Heart className="w-5 h-5 text-[#0d3d0d]" />
+              <span className="text-[#0d3d0d] text-sm font-medium">
+                Active Projects
+              </span>
             </div>
           </div>
         </div>
@@ -255,12 +264,16 @@ const ProjectPage = () => {
                           />
                         </div>
                       </div>
-                      
+
                       {/* Progress Badge */}
-                      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm 
-                        rounded-full px-3 py-1 shadow-md flex items-center gap-1.5 border border-gray-200">
+                      <div
+                        className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm 
+                        rounded-full px-3 py-1 shadow-md flex items-center gap-1.5 border border-gray-200"
+                      >
                         <TrendingUp size={14} className="text-green-600" />
-                        <span className="text-gray-800 text-xs font-bold">{progress}%</span>
+                        <span className="text-gray-800 text-xs font-bold">
+                          {progress}%
+                        </span>
                       </div>
                     </div>
 
@@ -301,7 +314,9 @@ const ProjectPage = () => {
             {filteredPosts.length === 0 && (
               <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100">
                 <Search size={48} className="mx-auto text-gray-400 mb-3" />
-                <p className="text-gray-600">No projects found matching "{searchQuery}"</p>
+                <p className="text-gray-600">
+                  No projects found matching "{searchQuery}"
+                </p>
               </div>
             )}
           </>
@@ -329,11 +344,13 @@ const ProjectPage = () => {
                 >
                   <div className="flex items-start gap-4">
                     {/* School Icon */}
-                    <div className="bg-gradient-to-br from-green-100 to-green-50 
-                      p-3 rounded-xl border border-green-200">
+                    <div
+                      className="bg-gradient-to-br from-green-100 to-green-50 
+                      p-3 rounded-xl border border-green-200"
+                    >
                       <School size={24} className="text-green-600" />
                     </div>
-                    
+
                     <div>
                       <h3 className="font-noto text-gray-800 font-semibold text-lg">
                         {data.schoolname}
@@ -350,14 +367,18 @@ const ProjectPage = () => {
                     <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-xl border border-green-200">
                       <Armchair size={18} className="text-green-600" />
                       <div>
-                        <p className="text-gray-800 font-bold">{data.chairsneeded.toLocaleString()}</p>
+                        <p className="text-gray-800 font-bold">
+                          {data.chairsneeded.toLocaleString()}
+                        </p>
                         <p className="text-gray-500 text-xs">chairs needed</p>
                       </div>
                     </div>
 
                     {/* Urgency Badge */}
-                    <div className={`px-3 py-1.5 rounded-full text-xs font-semibold border
-                      ${getUrgencyColor(data.urgency)}`}>
+                    <div
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border
+                      ${getUrgencyColor(data.urgency)}`}
+                    >
                       {data.urgency === "high" && "🔴 Urgent"}
                       {data.urgency === "medium" && "🟡 Moderate"}
                     </div>
@@ -369,7 +390,9 @@ const ProjectPage = () => {
             {filteredPlans.length === 0 && (
               <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-100">
                 <Search size={48} className="mx-auto text-gray-400 mb-3" />
-                <p className="text-gray-600">No plans found matching "{searchQuery}"</p>
+                <p className="text-gray-600">
+                  No plans found matching "{searchQuery}"
+                </p>
               </div>
             )}
 
@@ -384,8 +407,9 @@ const ProjectPage = () => {
                     How Your Donation Helps 💚
                   </h4>
                   <p className="text-green-200 text-sm leading-relaxed">
-                    Every 100 plastic bottles collected can be recycled into materials for 1 school chair. 
-                    By donating your recyclables, you're not just helping the environment—you're giving 
+                    Every 100 plastic bottles collected can be recycled into
+                    materials for 1 school chair. By donating your recyclables,
+                    you're not just helping the environment—you're giving
                     students a comfortable place to learn and grow!
                   </p>
                 </div>
@@ -397,11 +421,11 @@ const ProjectPage = () => {
 
       {/* Support Modal */}
       {isSupportModalOpen && selectedPlan && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={closeSupportModal}
         >
-          <div 
+          <div
             className="bg-[#0d2818] rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-[#1a3d1a]"
             onClick={(e) => e.stopPropagation()}
           >
@@ -439,8 +463,10 @@ const ProjectPage = () => {
             {/* Modal Body */}
             <div className="p-6">
               {/* Urgency Badge */}
-              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-4
-                ${getUrgencyColor(selectedPlan.urgency)}`}>
+              <div
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-4
+                ${getUrgencyColor(selectedPlan.urgency)}`}
+              >
                 {selectedPlan.urgency === "high" && "🔴 Urgent Priority"}
                 {selectedPlan.urgency === "medium" && "🟡 Moderate Priority"}
                 {selectedPlan.urgency === "low" && "🟢 Low Priority"}
@@ -459,7 +485,9 @@ const ProjectPage = () => {
                   </div>
                   <div>
                     <p className="text-green-500/50 text-xs">Chairs Needed</p>
-                    <p className="text-white font-bold">{selectedPlan.chairsneeded.toLocaleString()}</p>
+                    <p className="text-white font-bold">
+                      {selectedPlan.chairsneeded.toLocaleString()}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-[#1a2d3d] rounded-xl border border-[#2a4d5c]">
@@ -469,7 +497,9 @@ const ProjectPage = () => {
                   <div>
                     <p className="text-cyan-500/50 text-xs">Bottles Needed</p>
                     <p className="text-white font-bold">
-                      {(selectedPlan.chairsneeded * selectedPlan.bottlesPerChair).toLocaleString()}
+                      {(
+                        selectedPlan.chairsneeded * selectedPlan.bottlesPerChair
+                      ).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -479,7 +509,9 @@ const ProjectPage = () => {
                   </div>
                   <div>
                     <p className="text-purple-500/50 text-xs">Target Date</p>
-                    <p className="text-white font-bold text-sm">{selectedPlan.targetDate}</p>
+                    <p className="text-white font-bold text-sm">
+                      {selectedPlan.targetDate}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-[#3d2d0d] rounded-xl border border-[#5c4a1a]">
@@ -488,7 +520,9 @@ const ProjectPage = () => {
                   </div>
                   <div>
                     <p className="text-amber-500/50 text-xs">Per Chair</p>
-                    <p className="text-white font-bold text-sm">{selectedPlan.bottlesPerChair} bottles</p>
+                    <p className="text-white font-bold text-sm">
+                      {selectedPlan.bottlesPerChair} bottles
+                    </p>
                   </div>
                 </div>
               </div>
@@ -506,7 +540,9 @@ const ProjectPage = () => {
                         {selectedPlan.contactPerson.charAt(0)}
                       </span>
                     </div>
-                    <span className="text-sm font-medium">{selectedPlan.contactPerson}</span>
+                    <span className="text-sm font-medium">
+                      {selectedPlan.contactPerson}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-green-400/60 text-sm">
                     <Mail size={14} />
@@ -527,16 +563,30 @@ const ProjectPage = () => {
                 </div>
                 <ul className="text-green-300/80 text-sm space-y-2">
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0 text-green-500" />
-                    <span>Collect plastic bottles and bring them to our collection center</span>
+                    <CheckCircle2
+                      size={16}
+                      className="mt-0.5 flex-shrink-0 text-green-500"
+                    />
+                    <span>
+                      Collect plastic bottles and bring them to our collection
+                      center
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0 text-green-500" />
+                    <CheckCircle2
+                      size={16}
+                      className="mt-0.5 flex-shrink-0 text-green-500"
+                    />
                     <span>Spread the word to friends and family</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0 text-green-500" />
-                    <span>Volunteer at school events and collection drives</span>
+                    <CheckCircle2
+                      size={16}
+                      className="mt-0.5 flex-shrink-0 text-green-500"
+                    />
+                    <span>
+                      Volunteer at school events and collection drives
+                    </span>
                   </li>
                 </ul>
               </div>
