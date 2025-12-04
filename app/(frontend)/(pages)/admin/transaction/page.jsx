@@ -189,8 +189,8 @@ const TransactionPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-xl">
-                <Receipt className="w-8 h-8 text-white" />
+              <div className="p-2 bg-[#f5f5f0] rounded-xl">
+                <Receipt className="w-8 h-8 text-[#0d3d0d]" />
               </div>
               <div>
                 <h1 className="font-noto text-white text-2xl md:text-3xl font-bold">
@@ -216,8 +216,8 @@ const TransactionPage = () => {
                   {totalTransactions}
                 </p>
               </div>
-              <div className="p-3 bg-white/20 rounded-xl">
-                <Receipt className="w-8 h-8 text-white" />
+              <div className="p-3 bg-[#f5f5f0] rounded-xl">
+                <Receipt className="w-8 h-8 text-[#0d3d0d]" />
               </div>
             </div>
           </div>
@@ -227,8 +227,8 @@ const TransactionPage = () => {
                 <p className="text-white/80 text-sm">Pending</p>
                 <p className="text-white text-3xl font-bold">{pendingCount}</p>
               </div>
-              <div className="p-3 bg-white/20 rounded-xl">
-                <Clock className="w-8 h-8 text-white" />
+              <div className="p-3 bg-[#f5f5f0] rounded-xl">
+                <Clock className="w-8 h-8 text-[#0d3d0d]" />
               </div>
             </div>
           </div>
@@ -238,8 +238,8 @@ const TransactionPage = () => {
                 <p className="text-white/80 text-sm">Accepted</p>
                 <p className="text-white text-3xl font-bold">{acceptedCount}</p>
               </div>
-              <div className="p-3 bg-white/20 rounded-xl">
-                <CheckCircle2 className="w-8 h-8 text-white" />
+              <div className="p-3 bg-[#f5f5f0] rounded-xl">
+                <CheckCircle2 className="w-8 h-8 text-[#0d3d0d]" />
               </div>
             </div>
           </div>
@@ -251,8 +251,8 @@ const TransactionPage = () => {
                   {totalBottles.toLocaleString()}
                 </p>
               </div>
-              <div className="p-3 bg-white/20 rounded-xl">
-                <Recycle className="w-8 h-8 text-white" />
+              <div className="p-3 bg-[#f5f5f0] rounded-xl">
+                <Recycle className="w-8 h-8 text-[#0d3d0d]" />
               </div>
             </div>
           </div>
@@ -332,23 +332,23 @@ const TransactionPage = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-[#132d13]/80">
-                  <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                <tr className="bg-[#f5f5f0]">
+                  <th className="text-left py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                     User
                   </th>
-                  <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                  <th className="text-left py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                     Product
                   </th>
-                  <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                  <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                     Proof
                   </th>
-                  <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                  <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                     Material Goal
                   </th>
-                  <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                  <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                     Status
                   </th>
-                  <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                  <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                     Actions
                   </th>
                 </tr>

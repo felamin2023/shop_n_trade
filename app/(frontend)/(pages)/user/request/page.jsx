@@ -1,10 +1,10 @@
 "use client";
-import { 
-  Search, 
-  Clock, 
-  CheckCircle2, 
-  Package, 
-  Truck, 
+import {
+  Search,
+  Clock,
+  CheckCircle2,
+  Package,
+  Truck,
   Eye,
   Recycle,
   ShoppingBag,
@@ -54,12 +54,12 @@ const RequestPage = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       if (!user?.userID) return;
-      
+
       setIsLoading(true);
       try {
         const response = await fetch(`/api/transaction?userID=${user.userID}`);
         const data = await response.json();
-        
+
         if (data.status === 200) {
           setTransactions(data.transactions);
         }
@@ -74,13 +74,16 @@ const RequestPage = () => {
   }, [user]);
 
   // Filter transactions by status
-  const filteredByStatus = statusFilter === "ALL" 
-    ? transactions 
-    : transactions.filter(t => t.status === statusFilter);
-  
+  const filteredByStatus =
+    statusFilter === "ALL"
+      ? transactions
+      : transactions.filter((t) => t.status === statusFilter);
+
   const filteredList = filteredByStatus.filter(
     (item) =>
-      item.product?.product?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.product?.product
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
       item.product?.material?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -97,13 +100,13 @@ const RequestPage = () => {
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {
-      setCurrentPage(prev => prev + 1);
+      setCurrentPage((prev) => prev + 1);
     }
   };
 
   const goToPrevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(prev => prev - 1);
+      setCurrentPage((prev) => prev - 1);
     }
   };
 
@@ -174,16 +177,21 @@ const RequestPage = () => {
 
   const handleConfirmCancel = async () => {
     if (!requestToCancel) return;
-    
+
     try {
       // Delete the transaction from the database
-      const response = await fetch(`/api/transaction/${requestToCancel.transacID}`, {
-        method: "DELETE",
-      });
-      
+      const response = await fetch(
+        `/api/transaction/${requestToCancel.transacID}`,
+        {
+          method: "DELETE",
+        }
+      );
+
       if (response.ok) {
         // Remove from local state
-        setTransactions(prev => prev.filter(t => t.transacID !== requestToCancel.transacID));
+        setTransactions((prev) =>
+          prev.filter((t) => t.transacID !== requestToCancel.transacID)
+        );
       }
     } catch (error) {
       console.error("Failed to cancel request:", error);
@@ -191,13 +199,24 @@ const RequestPage = () => {
     closeCancelModal();
   };
 
-  const pendingCount = transactions.filter(t => t.status === "PENDING").length;
-  const acceptedCount = transactions.filter(t => t.status === "ACCEPTED").length;
-  const deliveredCount = transactions.filter(t => t.status === "DELIVERED").length;
-  const rejectedCount = transactions.filter(t => t.status === "REJECTED").length;
+  const pendingCount = transactions.filter(
+    (t) => t.status === "PENDING"
+  ).length;
+  const acceptedCount = transactions.filter(
+    (t) => t.status === "ACCEPTED"
+  ).length;
+  const deliveredCount = transactions.filter(
+    (t) => t.status === "DELIVERED"
+  ).length;
+  const rejectedCount = transactions.filter(
+    (t) => t.status === "REJECTED"
+  ).length;
 
   const getSelectedStatusOption = () => {
-    return statusOptions.find(opt => opt.value === statusFilter) || statusOptions[0];
+    return (
+      statusOptions.find((opt) => opt.value === statusFilter) ||
+      statusOptions[0]
+    );
   };
 
   return (
@@ -213,26 +232,35 @@ const RequestPage = () => {
             <Package className="w-8 h-8 text-green-300" />
           </div>
           <p className="text-green-200 text-lg max-w-2xl mx-auto">
-            Track your trade requests and delivery status. Exchange recyclables for amazing rewards! 🎁
+            Track your trade requests and delivery status. Exchange recyclables
+            for amazing rewards! 🎁
           </p>
 
           {/* Stats */}
           <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-              <Clock className="w-5 h-5 text-white" />
-              <span className="text-white text-sm font-medium">{pendingCount} Pending</span>
+            <div className="flex items-center gap-2 bg-[#f5f5f0] backdrop-blur-sm rounded-full px-4 py-2">
+              <Clock className="w-5 h-5 text-[#0d3d0d]" />
+              <span className="text-[#0d3d0d] text-sm font-medium">
+                {pendingCount} Pending
+              </span>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-              <CheckCircle2 className="w-5 h-5 text-white" />
-              <span className="text-white text-sm font-medium">{acceptedCount} Accepted</span>
+            <div className="flex items-center gap-2 bg-[#f5f5f0] backdrop-blur-sm rounded-full px-4 py-2">
+              <CheckCircle2 className="w-5 h-5 text-[#0d3d0d]" />
+              <span className="text-[#0d3d0d] text-sm font-medium">
+                {acceptedCount} Accepted
+              </span>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-              <Truck className="w-5 h-5 text-white" />
-              <span className="text-white text-sm font-medium">{deliveredCount} Delivered</span>
+            <div className="flex items-center gap-2 bg-[#f5f5f0] backdrop-blur-sm rounded-full px-4 py-2">
+              <Truck className="w-5 h-5 text-[#0d3d0d]" />
+              <span className="text-[#0d3d0d] text-sm font-medium">
+                {deliveredCount} Delivered
+              </span>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-              <XCircle className="w-5 h-5 text-white" />
-              <span className="text-white text-sm font-medium">{rejectedCount} Rejected</span>
+            <div className="flex items-center gap-2 bg-[#f5f5f0] backdrop-blur-sm rounded-full px-4 py-2">
+              <XCircle className="w-5 h-5 text-[#0d3d0d]" />
+              <span className="text-[#0d3d0d] text-sm font-medium">
+                {rejectedCount} Rejected
+              </span>
             </div>
           </div>
         </div>
@@ -257,9 +285,11 @@ const RequestPage = () => {
                     <span className="text-white font-medium text-sm flex-1 text-left">
                       {selected.label}
                     </span>
-                    <ChevronDown 
-                      size={18} 
-                      className={`text-green-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                    <ChevronDown
+                      size={18}
+                      className={`text-green-400 transition-transform ${
+                        isDropdownOpen ? "rotate-180" : ""
+                      }`}
                     />
                   </>
                 );
@@ -268,8 +298,10 @@ const RequestPage = () => {
 
             {/* Dropdown Menu */}
             {isDropdownOpen && (
-              <div className="absolute top-full left-0 mt-2 w-full bg-[#0d2818] rounded-xl border border-[#1a3d1a] 
-                shadow-xl z-50 overflow-hidden">
+              <div
+                className="absolute top-full left-0 mt-2 w-full bg-[#0d2818] rounded-xl border border-[#1a3d1a] 
+                shadow-xl z-50 overflow-hidden"
+              >
                 {statusOptions.map((option) => {
                   const Icon = option.icon;
                   return (
@@ -280,13 +312,16 @@ const RequestPage = () => {
                         setIsDropdownOpen(false);
                       }}
                       className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors
-                        ${statusFilter === option.value 
-                          ? 'bg-[#1a3d1a] text-white' 
-                          : 'text-green-400/80 hover:bg-[#132d13]'
+                        ${
+                          statusFilter === option.value
+                            ? "bg-[#1a3d1a] text-white"
+                            : "text-green-400/80 hover:bg-[#132d13]"
                         }`}
                     >
                       <Icon size={16} />
-                      <span className="text-sm font-medium">{option.label}</span>
+                      <span className="text-sm font-medium">
+                        {option.label}
+                      </span>
                     </button>
                   );
                 })}
@@ -317,7 +352,8 @@ const RequestPage = () => {
             <Package size={20} className="text-green-400" />
             Transaction History
             <span className="text-green-400/60 text-sm font-normal ml-2">
-              ({filteredList.length} {filteredList.length === 1 ? 'request' : 'requests'})
+              ({filteredList.length}{" "}
+              {filteredList.length === 1 ? "request" : "requests"})
             </span>
           </h2>
           <div className="h-1 w-8 bg-gradient-to-r from-[#0d3d0d] to-green-500 rounded-full"></div>
@@ -358,13 +394,15 @@ const RequestPage = () => {
               <div className="flex flex-col items-center justify-center py-16 text-green-400/60">
                 <Package size={48} className="mb-4 opacity-50" />
                 <p className="text-lg font-medium">No requests found</p>
-                <p className="text-sm mt-1">Try adjusting your filters or search query</p>
+                <p className="text-sm mt-1">
+                  Try adjusting your filters or search query
+                </p>
               </div>
             ) : (
               paginatedList.map((request) => {
                 const statusStyle = getStatusStyle(request.status);
                 const StatusIcon = statusStyle.icon;
-                
+
                 return (
                   <div
                     key={request.transacID}
@@ -373,9 +411,11 @@ const RequestPage = () => {
                   >
                     {/* Product */}
                     <div className="col-span-4 flex items-center gap-3">
-                      <div 
+                      <div
                         className="w-12 h-12 rounded-lg bg-cover bg-center border border-[#1a3d1a] flex-shrink-0"
-                        style={{ backgroundImage: `url(${request.product?.img})` }}
+                        style={{
+                          backgroundImage: `url(${request.product?.img})`,
+                        }}
                       />
                       <div className="min-w-0">
                         <p className="text-white font-medium text-sm truncate">
@@ -391,21 +431,31 @@ const RequestPage = () => {
                     <div className="col-span-2">
                       <div className="flex items-center gap-1 text-green-400">
                         <Recycle size={14} />
-                        <span className="text-sm">{request.product?.materialGoal?.toLocaleString()}</span>
+                        <span className="text-sm">
+                          {request.product?.materialGoal?.toLocaleString()}
+                        </span>
                       </div>
-                      <p className="text-green-400/60 text-xs">{request.product?.material}</p>
+                      <p className="text-green-400/60 text-xs">
+                        {request.product?.material}
+                      </p>
                     </div>
 
                     {/* Schedule */}
                     <div className="col-span-2">
-                      <p className="text-white text-sm">{request.scheduledDate || 'Not set'}</p>
-                      <p className="text-green-400/60 text-xs">{request.scheduledTime || ''}</p>
+                      <p className="text-white text-sm">
+                        {request.scheduledDate || "Not set"}
+                      </p>
+                      <p className="text-green-400/60 text-xs">
+                        {request.scheduledTime || ""}
+                      </p>
                     </div>
 
                     {/* Status */}
                     <div className="col-span-2">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
-                        ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border} border`}>
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
+                        ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border} border`}
+                      >
                         <StatusIcon size={12} />
                         {statusStyle.label}
                       </span>
@@ -447,15 +497,16 @@ const RequestPage = () => {
               disabled={currentPage === 1 || totalPages <= 1}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm
                 transition-all duration-300 border
-                ${currentPage === 1 || totalPages <= 1
-                  ? "bg-[#0d2818] border-[#1a3d1a] text-green-500/30 cursor-not-allowed"
-                  : "bg-[#0d2818] border-[#1a3d1a] text-green-400 hover:bg-[#132d13] hover:border-green-500/50"
+                ${
+                  currentPage === 1 || totalPages <= 1
+                    ? "bg-[#0d2818] border-[#1a3d1a] text-green-500/30 cursor-not-allowed"
+                    : "bg-[#0d2818] border-[#1a3d1a] text-green-400 hover:bg-[#132d13] hover:border-green-500/50"
                 }`}
             >
               <ChevronLeft size={18} />
               Previous
             </button>
-            
+
             <div className="flex items-center gap-2 px-4 py-2 bg-[#132d13] rounded-xl border border-[#1a3d1a]">
               <span className="text-green-400 font-medium text-sm">
                 Page {currentPage} of {totalPages || 1}
@@ -464,15 +515,16 @@ const RequestPage = () => {
                 ({filteredList.length} items)
               </span>
             </div>
-            
+
             <button
               onClick={goToNextPage}
               disabled={currentPage === totalPages || totalPages <= 1}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm
                 transition-all duration-300 border
-                ${currentPage === totalPages || totalPages <= 1
-                  ? "bg-[#0d2818] border-[#1a3d1a] text-green-500/30 cursor-not-allowed"
-                  : "bg-[#0d2818] border-[#1a3d1a] text-green-400 hover:bg-[#132d13] hover:border-green-500/50"
+                ${
+                  currentPage === totalPages || totalPages <= 1
+                    ? "bg-[#0d2818] border-[#1a3d1a] text-green-500/30 cursor-not-allowed"
+                    : "bg-[#0d2818] border-[#1a3d1a] text-green-400 hover:bg-[#132d13] hover:border-green-500/50"
                 }`}
             >
               Next
@@ -492,9 +544,10 @@ const RequestPage = () => {
                 How Trading Works 🔄
               </h4>
               <p className="text-green-200 text-sm leading-relaxed">
-                Once your request is approved, collect the required bottles and bring them to our 
-                collection center. After verification, your reward will be prepared for delivery 
-                or pickup. Thank you for helping the environment!
+                Once your request is approved, collect the required bottles and
+                bring them to our collection center. After verification, your
+                reward will be prepared for delivery or pickup. Thank you for
+                helping the environment!
               </p>
             </div>
           </div>
@@ -503,24 +556,26 @@ const RequestPage = () => {
 
       {/* Modal/Dialog for View Details */}
       {isModalOpen && selectedRequest && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={closeModal}
         >
-          <div 
+          <div
             className="bg-[#0d2818] rounded-2xl shadow-2xl w-full max-w-md max-h-[70vh] overflow-y-auto
               transform transition-all duration-300 animate-in fade-in zoom-in-95 border border-[#1a3d1a]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header - Compact */}
             <div className="relative">
-              <div 
+              <div
                 className="h-24 bg-cover bg-center rounded-t-2xl"
-                style={{ backgroundImage: `url(${selectedRequest.product?.img})` }}
+                style={{
+                  backgroundImage: `url(${selectedRequest.product?.img})`,
+                }}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0d2818] to-transparent rounded-t-2xl"></div>
               </div>
-              
+
               {/* Close Button */}
               <button
                 onClick={closeModal}
@@ -537,7 +592,10 @@ const RequestPage = () => {
                 </h2>
                 <div className="flex items-center gap-2 text-green-300/80">
                   <Recycle size={12} />
-                  <span className="text-xs">{selectedRequest.product?.materialGoal} {selectedRequest.product?.material}</span>
+                  <span className="text-xs">
+                    {selectedRequest.product?.materialGoal}{" "}
+                    {selectedRequest.product?.material}
+                  </span>
                 </div>
               </div>
             </div>
@@ -549,10 +607,14 @@ const RequestPage = () => {
                 const statusStyle = getStatusStyle(selectedRequest.status);
                 const StatusIcon = statusStyle.icon;
                 return (
-                  <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border mb-3
-                    ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}>
+                  <div
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border mb-3
+                    ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}
+                  >
                     <StatusIcon size={14} />
-                    <span className="font-semibold text-sm">{statusStyle.label}</span>
+                    <span className="font-semibold text-sm">
+                      {statusStyle.label}
+                    </span>
                   </div>
                 );
               })()}
@@ -565,14 +627,21 @@ const RequestPage = () => {
                     <Hash size={14} className="text-green-400 flex-shrink-0" />
                     <div className="min-w-0">
                       <p className="text-green-500/50 text-[10px]">ID</p>
-                      <p className="text-white text-xs truncate">{selectedRequest.transacID?.slice(0, 8)}...</p>
+                      <p className="text-white text-xs truncate">
+                        {selectedRequest.transacID?.slice(0, 8)}...
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 p-2 bg-[#1a2d3d] rounded-lg border border-[#2a4d5c]">
-                    <Calendar size={14} className="text-cyan-400 flex-shrink-0" />
+                    <Calendar
+                      size={14}
+                      className="text-cyan-400 flex-shrink-0"
+                    />
                     <div className="min-w-0">
                       <p className="text-cyan-500/50 text-[10px]">Schedule</p>
-                      <p className="text-white text-xs truncate">{selectedRequest.scheduledDate || 'Not set'}</p>
+                      <p className="text-white text-xs truncate">
+                        {selectedRequest.scheduledDate || "Not set"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -580,21 +649,34 @@ const RequestPage = () => {
                 {/* Row 2: Created & Stock */}
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex items-center gap-2 p-2 bg-[#2d1a3d] rounded-lg border border-[#4a2a5c]">
-                    <Clock size={14} className="text-purple-400 flex-shrink-0" />
+                    <Clock
+                      size={14}
+                      className="text-purple-400 flex-shrink-0"
+                    />
                     <div className="min-w-0">
                       <p className="text-purple-500/50 text-[10px]">Created</p>
                       <p className="text-white text-xs truncate">
-                        {selectedRequest.createdAt 
-                          ? new Date(selectedRequest.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                          : 'N/A'}
+                        {selectedRequest.createdAt
+                          ? new Date(
+                              selectedRequest.createdAt
+                            ).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                            })
+                          : "N/A"}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 p-2 bg-[#3d2d0d] rounded-lg border border-[#5c4a1a]">
-                    <ShoppingBag size={14} className="text-amber-400 flex-shrink-0" />
+                    <ShoppingBag
+                      size={14}
+                      className="text-amber-400 flex-shrink-0"
+                    />
                     <div className="min-w-0">
                       <p className="text-amber-500/50 text-[10px]">Stock</p>
-                      <p className="text-white text-xs">{selectedRequest.product?.stock} units</p>
+                      <p className="text-white text-xs">
+                        {selectedRequest.product?.stock} units
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -604,7 +686,9 @@ const RequestPage = () => {
                   <MapPin size={14} className="text-rose-400 flex-shrink-0" />
                   <div className="min-w-0 flex-1">
                     <p className="text-rose-500/50 text-[10px]">Address</p>
-                    <p className="text-white text-xs truncate">{selectedRequest.user?.address || user?.address || 'N/A'}</p>
+                    <p className="text-white text-xs truncate">
+                      {selectedRequest.user?.address || user?.address || "N/A"}
+                    </p>
                   </div>
                 </div>
 
@@ -613,30 +697,35 @@ const RequestPage = () => {
                   <Phone size={14} className="text-cyan-400 flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="text-cyan-500/50 text-[10px]">Contact</p>
-                    <p className="text-white text-xs">{selectedRequest.user?.contact || user?.contact || 'N/A'}</p>
+                    <p className="text-white text-xs">
+                      {selectedRequest.user?.contact || user?.contact || "N/A"}
+                    </p>
                   </div>
                 </div>
 
                 {/* Uploaded Images - Compact */}
-                {selectedRequest.images && selectedRequest.images.length > 0 && (
-                  <div className="p-2 bg-[#132d13] rounded-lg border border-[#1a3d1a]">
-                    <p className="text-green-500/50 text-[10px] mb-2">Proof ({selectedRequest.images.length} images)</p>
-                    <div className="grid grid-cols-4 gap-1">
-                      {selectedRequest.images.slice(0, 4).map((img, idx) => (
-                        <div 
-                          key={idx}
-                          className="aspect-square rounded bg-cover bg-center border border-[#1a3d1a]"
-                          style={{ backgroundImage: `url(${img})` }}
-                        />
-                      ))}
+                {selectedRequest.images &&
+                  selectedRequest.images.length > 0 && (
+                    <div className="p-2 bg-[#132d13] rounded-lg border border-[#1a3d1a]">
+                      <p className="text-green-500/50 text-[10px] mb-2">
+                        Proof ({selectedRequest.images.length} images)
+                      </p>
+                      <div className="grid grid-cols-4 gap-1">
+                        {selectedRequest.images.slice(0, 4).map((img, idx) => (
+                          <div
+                            key={idx}
+                            className="aspect-square rounded bg-cover bg-center border border-[#1a3d1a]"
+                            style={{ backgroundImage: `url(${img})` }}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
 
               {/* Action Buttons - Compact */}
               <div className="flex gap-2 mt-4">
-                <button 
+                <button
                   onClick={closeModal}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 px-4
                     bg-[#132d13] hover:bg-[#1a3d1a]
@@ -653,11 +742,11 @@ const RequestPage = () => {
 
       {/* Cancel Confirmation Modal */}
       {isCancelModalOpen && requestToCancel && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={closeCancelModal}
         >
-          <div 
+          <div
             className="bg-[#0d2818] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-[#1a3d1a]"
             onClick={(e) => e.stopPropagation()}
           >
@@ -683,7 +772,8 @@ const RequestPage = () => {
                 Cancel Request?
               </h2>
               <p className="text-green-400/70 text-sm text-center mt-2">
-                Are you sure you want to cancel this request? This action cannot be undone.
+                Are you sure you want to cancel this request? This action cannot
+                be undone.
               </p>
             </div>
 
@@ -692,12 +782,14 @@ const RequestPage = () => {
               <div className="flex items-center gap-4 p-4 bg-[#132d13] rounded-xl border border-[#1a3d1a] mb-6">
                 {/* Product Image */}
                 <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-[#1a3d1a]">
-                  <div 
+                  <div
                     className="w-full h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${requestToCancel.product?.img})` }}
+                    style={{
+                      backgroundImage: `url(${requestToCancel.product?.img})`,
+                    }}
                   ></div>
                 </div>
-                
+
                 {/* Product Info */}
                 <div className="flex-1">
                   <h3 className="font-noto text-white font-semibold">
@@ -705,9 +797,14 @@ const RequestPage = () => {
                   </h3>
                   <div className="flex items-center gap-2 text-green-400/70 mt-1">
                     <Recycle size={12} />
-                    <span className="text-xs">{requestToCancel.product?.materialGoal} {requestToCancel.product?.material}</span>
+                    <span className="text-xs">
+                      {requestToCancel.product?.materialGoal}{" "}
+                      {requestToCancel.product?.material}
+                    </span>
                   </div>
-                  <p className="text-green-500/50 text-xs mt-1">ID: {requestToCancel.transacID?.slice(0, 8)}...</p>
+                  <p className="text-green-500/50 text-xs mt-1">
+                    ID: {requestToCancel.transacID?.slice(0, 8)}...
+                  </p>
                 </div>
               </div>
 

@@ -344,8 +344,8 @@ const InventoryPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-xl">
-                <Package className="w-8 h-8 text-white" />
+              <div className="p-2 bg-[#f5f5f0] rounded-xl">
+                <Package className="w-8 h-8 text-[#0d3d0d]" />
               </div>
               <div>
                 <h1 className="font-noto text-white text-2xl md:text-3xl font-bold">
@@ -369,8 +369,8 @@ const InventoryPage = () => {
                 <p className="text-white/80 text-sm">Total Products</p>
                 <p className="text-white text-3xl font-bold">{totalProducts}</p>
               </div>
-              <div className="p-3 bg-white/20 rounded-xl">
-                <Boxes className="w-8 h-8 text-white" />
+              <div className="p-3 bg-[#f5f5f0] rounded-xl">
+                <Boxes className="w-8 h-8 text-[#0d3d0d]" />
               </div>
             </div>
           </div>
@@ -380,8 +380,8 @@ const InventoryPage = () => {
                 <p className="text-white/80 text-sm">Total Stock</p>
                 <p className="text-white text-3xl font-bold">{totalStock}</p>
               </div>
-              <div className="p-3 bg-white/20 rounded-xl">
-                <Package className="w-8 h-8 text-white" />
+              <div className="p-3 bg-[#f5f5f0] rounded-xl">
+                <Package className="w-8 h-8 text-[#0d3d0d]" />
               </div>
             </div>
           </div>
@@ -391,8 +391,8 @@ const InventoryPage = () => {
                 <p className="text-white/80 text-sm">Low Stock Alert</p>
                 <p className="text-white text-3xl font-bold">{lowStockCount}</p>
               </div>
-              <div className="p-3 bg-white/20 rounded-xl">
-                <AlertCircle className="w-8 h-8 text-white" />
+              <div className="p-3 bg-[#f5f5f0] rounded-xl">
+                <AlertCircle className="w-8 h-8 text-[#0d3d0d]" />
               </div>
             </div>
           </div>
@@ -426,20 +426,20 @@ const InventoryPage = () => {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-[#132d13]/80">
-                      <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                    <tr className="bg-[#f5f5f0]">
+                      <th className="text-left py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                         Product
                       </th>
-                      <th className="text-left py-4 px-6 text-green-300/70 font-semibold text-sm">
+                      <th className="text-left py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                         Material
                       </th>
-                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                      <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                         Goal
                       </th>
-                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                      <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                         Stock
                       </th>
-                      <th className="text-center py-4 px-6 text-green-300/70 font-semibold text-sm">
+                      <th className="text-center py-4 px-6 text-[#0d3d0d] font-semibold text-sm">
                         Actions
                       </th>
                     </tr>
